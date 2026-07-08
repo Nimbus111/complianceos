@@ -57,45 +57,39 @@ export default function OnboardingPage() {
   }
 
   const handleComplete = async () => {
-    setLoading(true)
-    setError('')
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/login'); return }
+  setLoading(true)
+  setError('')
 
-    const { data: org, error: orgError } = await supabase
-      .from('organizations')
-      .insert({
-        name: facilityName,
-        org_type: 'facility',
-        subscription_tier: 'free',
-        facility_state: facilityState,
-        facility_type_name: facilityType,
-        modality_names: selectedModalities,
-        rso_name: rsoName,
-        rso_email: rsoEmail,
-        rso_phone: rsoPhone,
+  try {
+    const response = await fetch('/api/onboarding', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        facilityName,
+        facilityType,
+        facilityState,
+        selectedModalities,
+        rsoName,
+        rsoEmail,
+        rsoPhone,
       })
-      .select()
-      .single()
+    })
 
-    if (orgError) { setError(orgError.message); setLoading(false); return }
+    const result = await response.json()
 
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .upsert({ id: user.id, org_id: org.id, display_name: rsoName, onboarding_completed: true })
-
-    if (profileError) { setError(profileError.message); setLoading(false); return }
-
-    const { error: memberError } = await supabase
-      .from('memberships')
-      .insert({ user_id: user.id, org_id: org.id, role: 'Admin' })
-
-    if (memberError) { setError(memberError.message); setLoading(false); return }
+    if (!response.ok) {
+      setError(result.error || 'Something went wrong')
+      setLoading(false)
+      return
+    }
 
     router.push('/dashboard')
     router.refresh()
+  } catch (e: any) {
+    setError(e.message)
+    setLoading(false)
   }
+}
 
   const inputStyle = { width: '100%', height: '42px', border: '1px solid #c2ddf0', borderRadius: '8px', padding: '0 12px', fontSize: '14px', color: '#0d2d5e', background: '#fff', outline: 'none', boxSizing: 'border-box' as const }
   const labelStyle = { display: 'block', fontSize: '11px', fontWeight: '500' as const, color: '#a8a39c', marginBottom: '6px', textTransform: 'uppercase' as const, letterSpacing: '0.07em' }
