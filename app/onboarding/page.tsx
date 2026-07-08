@@ -57,42 +57,38 @@ export default function OnboardingPage() {
   }
 
   const handleComplete = async () => {
-  setLoading(true)
-  setError('')
-
-  try {
-    const response = await fetch('/api/onboarding', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        facilityName,
-        facilityType,
-        facilityState,
-        selectedModalities,
-        rsoName,
-        rsoEmail,
-        rsoPhone,
+    setLoading(true)
+    setError('')
+    try {
+      const res = await fetch('/api/onboarding', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          facilityName,
+          facilityType,
+          facilityState,
+          selectedModalities,
+          rsoName,
+          rsoEmail,
+          rsoPhone,
+        })
       })
-    })
-
-    const result = await response.json()
-
-    if (!response.ok) {
-      setError(result.error || 'Something went wrong')
+      const result = await res.json()
+      if (!res.ok) {
+        setError(result.error || 'Something went wrong')
+        setLoading(false)
+        return
+      }
+      router.push('/dashboard')
+      router.refresh()
+    } catch (e: any) {
+      setError(e.message)
       setLoading(false)
-      return
     }
-
-    router.push('/dashboard')
-    router.refresh()
-  } catch (e: any) {
-    setError(e.message)
-    setLoading(false)
   }
-}
 
-  const inputStyle = { width: '100%', height: '42px', border: '1px solid #c2ddf0', borderRadius: '8px', padding: '0 12px', fontSize: '14px', color: '#0d2d5e', background: '#fff', outline: 'none', boxSizing: 'border-box' as const }
-  const labelStyle = { display: 'block', fontSize: '11px', fontWeight: '500' as const, color: '#a8a39c', marginBottom: '6px', textTransform: 'uppercase' as const, letterSpacing: '0.07em' }
+  const inp = { width: '100%', height: '42px', border: '1px solid #c2ddf0', borderRadius: '8px', padding: '0 12px', fontSize: '14px', color: '#0d2d5e', background: '#fff', outline: 'none', boxSizing: 'border-box' as const }
+  const lbl = { display: 'block', fontSize: '11px', fontWeight: '500' as const, color: '#a8a39c', marginBottom: '6px', textTransform: 'uppercase' as const, letterSpacing: '0.07em' }
 
   return (
     <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f4f7fb' }}>
@@ -122,19 +118,19 @@ export default function OnboardingPage() {
           {step === 1 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label style={labelStyle}>Facility name</label>
-                <input style={inputStyle} type="text" placeholder="e.g. Sunrise Dental" value={facilityName} onChange={e => setFacilityName(e.target.value)} />
+                <label style={lbl}>Facility name</label>
+                <input style={inp} type="text" placeholder="e.g. Sunrise Dental" value={facilityName} onChange={e => setFacilityName(e.target.value)} />
               </div>
               <div>
-                <label style={labelStyle}>Facility type</label>
-                <select style={inputStyle} value={facilityType} onChange={e => setFacilityType(e.target.value)}>
+                <label style={lbl}>Facility type</label>
+                <select style={inp} value={facilityType} onChange={e => setFacilityType(e.target.value)}>
                   <option value="">Select type</option>
                   {FACILITY_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
               <div>
-                <label style={labelStyle}>State</label>
-                <select style={inputStyle} value={facilityState} onChange={e => setFacilityState(e.target.value)}>
+                <label style={lbl}>State</label>
+                <select style={inp} value={facilityState} onChange={e => setFacilityState(e.target.value)}>
                   <option value="">Select state</option>
                   {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
@@ -155,25 +151,14 @@ export default function OnboardingPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
                 {modalities.map(m => (
                   <label key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', border: `1px solid ${selectedModalities.includes(m.modality_name) ? '#0d2d5e' : '#c2ddf0'}`, borderRadius: '8px', cursor: 'pointer', background: selectedModalities.includes(m.modality_name) ? '#e8f3fb' : '#fff' }}>
-                    <input
-                      type="checkbox"
-                      checked={selectedModalities.includes(m.modality_name)}
-                      onChange={() => toggleModality(m.modality_name)}
-                      style={{ width: '16px', height: '16px', accentColor: '#0d2d5e' }}
-                    />
+                    <input type="checkbox" checked={selectedModalities.includes(m.modality_name)} onChange={() => toggleModality(m.modality_name)} style={{ width: '16px', height: '16px', accentColor: '#0d2d5e' }} />
                     <span style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e' }}>{m.modality_name}</span>
                   </label>
                 ))}
               </div>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button onClick={() => setStep(1)} style={{ flex: 1, height: '44px', background: '#fff', color: '#0d2d5e', border: '1px solid #c2ddf0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}>Back</button>
-                <button
-                  onClick={() => setStep(3)}
-                  disabled={selectedModalities.length === 0}
-                  style={{ flex: 2, height: '44px', background: selectedModalities.length === 0 ? '#c2ddf0' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: selectedModalities.length === 0 ? 'default' : 'pointer' }}
-                >
-                  Continue
-                </button>
+                <button onClick={() => setStep(3)} disabled={selectedModalities.length === 0} style={{ flex: 2, height: '44px', background: selectedModalities.length === 0 ? '#c2ddf0' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: selectedModalities.length === 0 ? 'default' : 'pointer' }}>Continue</button>
               </div>
             </div>
           )}
@@ -182,26 +167,20 @@ export default function OnboardingPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <p style={{ fontSize: '13px', color: '#827d76', marginTop: '-8px' }}>The Radiation Safety Officer responsible for compliance at this facility.</p>
               <div>
-                <label style={labelStyle}>RSO full name</label>
-                <input style={inputStyle} type="text" placeholder="e.g. Dr. Sarah Johnson" value={rsoName} onChange={e => setRsoName(e.target.value)} />
+                <label style={lbl}>RSO full name</label>
+                <input style={inp} type="text" placeholder="e.g. Dr. Sarah Johnson" value={rsoName} onChange={e => setRsoName(e.target.value)} />
               </div>
               <div>
-                <label style={labelStyle}>RSO email</label>
-                <input style={inputStyle} type="email" placeholder="rso@facility.com" value={rsoEmail} onChange={e => setRsoEmail(e.target.value)} />
+                <label style={lbl}>RSO email</label>
+                <input style={inp} type="email" placeholder="rso@facility.com" value={rsoEmail} onChange={e => setRsoEmail(e.target.value)} />
               </div>
               <div>
-                <label style={labelStyle}>RSO phone</label>
-                <input style={inputStyle} type="tel" placeholder="(555) 555-5555" value={rsoPhone} onChange={e => setRsoPhone(e.target.value)} />
+                <label style={lbl}>RSO phone</label>
+                <input style={inp} type="tel" placeholder="(555) 555-5555" value={rsoPhone} onChange={e => setRsoPhone(e.target.value)} />
               </div>
               <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
                 <button onClick={() => setStep(2)} style={{ flex: 1, height: '44px', background: '#fff', color: '#0d2d5e', border: '1px solid #c2ddf0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}>Back</button>
-                <button
-                  onClick={() => setStep(4)}
-                  disabled={!rsoName || !rsoEmail}
-                  style={{ flex: 2, height: '44px', background: (!rsoName || !rsoEmail) ? '#c2ddf0' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: (!rsoName || !rsoEmail) ? 'default' : 'pointer' }}
-                >
-                  Continue
-                </button>
+                <button onClick={() => setStep(4)} disabled={!rsoName || !rsoEmail} style={{ flex: 2, height: '44px', background: (!rsoName || !rsoEmail) ? '#c2ddf0' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: (!rsoName || !rsoEmail) ? 'default' : 'pointer' }}>Continue</button>
               </div>
             </div>
           )}
@@ -233,11 +212,7 @@ export default function OnboardingPage() {
 
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button onClick={() => setStep(3)} style={{ flex: 1, height: '44px', background: '#fff', color: '#0d2d5e', border: '1px solid #c2ddf0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}>Back</button>
-                <button
-                  onClick={handleComplete}
-                  disabled={loading}
-                  style={{ flex: 2, height: '44px', background: loading ? '#c2ddf0' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: loading ? 'default' : 'pointer' }}
-                >
+                <button onClick={handleComplete} disabled={loading} style={{ flex: 2, height: '44px', background: loading ? '#c2ddf0' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: loading ? 'default' : 'pointer' }}>
                   {loading ? 'Setting up...' : 'Complete setup'}
                 </button>
               </div>
