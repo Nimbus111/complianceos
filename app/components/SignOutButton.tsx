@@ -22,12 +22,8 @@ export default function SignOutButton() {
     </button>
   )
 }
-File 2 — app/dashboard/page.tsx: Right-click app → New Folder → dashboard → New File → page.tsx → paste → Ctrl+S:
-
-tsx
 
 
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import SignOutButton from '../components/SignOutButton'
+
+
 
