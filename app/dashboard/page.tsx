@@ -24,7 +24,7 @@ export default async function DashboardPage() {
     .single()
 
   const features = [
-    { name: 'Compliance calendar', desc: 'Track renewals, inspections, and QA deadlines', border: '#c2ddf0' },
+    { name: 'Compliance calendar', desc: 'Track renewals, inspections, and QA deadlines', border: '#c2ddf0', href: '/dashboard/calendar' },
     { name: 'Document repository', desc: 'Store and organize all compliance documents', border: '#c2ddf0' },
     { name: 'Equipment inventory', desc: 'Track x-ray equipment and PM schedules', border: '#c2ddf0' },
     { name: 'AI assistant', desc: 'Instant answers to state-specific compliance questions', border: '#c4b5fd' },
@@ -71,14 +71,20 @@ export default async function DashboardPage() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
           {features.map(f => (
-            <div key={f.name} style={{ background: '#fff', border: `1px solid ${f.border}`, borderRadius: '12px', padding: '20px' }}>
-              <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>{f.name}</p>
-              <p style={{ fontSize: '12px', color: '#827d76', lineHeight: '1.55', marginBottom: '16px' }}>{f.desc}</p>
-              <span style={{ background: '#f4f7fb', color: '#a8a39c', fontSize: '11px', fontWeight: '500', padding: '3px 10px', borderRadius: '20px', border: '1px solid #e8e6e2' }}>
-                Coming soon
-              </span>
-            </div>
-          ))}
+  <div key={f.name} onClick={() => f.href ? router.push(f.href) : null} style={{ background: '#fff', border: `1px solid ${f.border}`, borderRadius: '12px', padding: '20px', cursor: f.href ? 'pointer' : 'default' }}>
+    <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>{f.name}</p>
+    <p style={{ fontSize: '12px', color: '#827d76', lineHeight: '1.55', marginBottom: '16px' }}>{f.desc}</p>
+    {f.href ? (
+      <span style={{ background: '#e8f3fb', color: '#0d2d5e', fontSize: '11px', fontWeight: '500', padding: '3px 10px', borderRadius: '20px', border: '1px solid #c2ddf0' }}>
+        Open →
+      </span>
+    ) : (
+      <span style={{ background: '#f4f7fb', color: '#a8a39c', fontSize: '11px', fontWeight: '500', padding: '3px 10px', borderRadius: '20px', border: '1px solid #e8e6e2' }}>
+        Coming soon
+      </span>
+    )}
+  </div>
+))}
         </div>
       </div>
     </div>
