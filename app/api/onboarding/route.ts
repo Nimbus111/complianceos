@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdmin } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
@@ -14,7 +15,12 @@ export async function POST(request: Request) {
     const { facilityName, facilityType, facilityState,
             selectedModalities, rsoName, rsoEmail, rsoPhone } = body
 
-    const { data: org, error: orgError } = await supabase
+    const admin = createAdmin(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    const { data: org, error: orgError } = await admin
       .from('organizations')
       .insert({
         name: facilityName,
@@ -32,7 +38,7 @@ export async function POST(request: Request) {
 
     if (orgError) return NextResponse.json({ error: orgError.message }, { status: 400 })
 
-    const { error: profileError } = await supabase
+    const { error: profileError } = await admin
       .from('profiles')
       .upsert({
         id: user.id,
@@ -43,13 +49,14 @@ export async function POST(request: Request) {
 
     if (profileError) return NextResponse.json({ error: profileError.message }, { status: 400 })
 
-    const { error: memberError } = await supabase
+    const { error: memberError } = await admin
       .from('memberships')
       .insert({ user_id: user.id, org_id: org.id, role: 'Admin' })
 
     if (memberError) return NextResponse.json({ error: memberError.message }, { status: 400 })
 
     return NextResponse.json({ success: true })
+
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 })
   }
