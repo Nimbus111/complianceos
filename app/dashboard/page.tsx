@@ -2,6 +2,15 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import SignOutButton from '../components/SignOutButton'
 
+const features = [
+  { name: 'Compliance calendar', desc: 'Track renewals, inspections, and QA deadlines', border: '#c2ddf0', href: '/dashboard/calendar' },
+  { name: 'Document repository', desc: 'Store and organize all compliance documents', border: '#c2ddf0', href: '/dashboard/documents' },
+  { name: 'Equipment inventory', desc: 'Track x-ray equipment and PM schedules', border: '#c2ddf0' },
+  { name: 'AI assistant', desc: 'Instant answers to state-specific compliance questions', border: '#c4b5fd' },
+  { name: 'Keys to Success', desc: 'Step-by-step compliance checklist for your state', border: '#b8e8cc' },
+  { name: 'RSP builder', desc: 'Generate your full Radiation Protection Program', border: '#c2ddf0' },
+]
+
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -22,15 +31,6 @@ export default async function DashboardPage() {
     .select('*')
     .eq('id', profile.org_id)
     .single()
-
-  const features = [
-    { name: 'Compliance calendar', desc: 'Track renewals, inspections, and QA deadlines', border: '#c2ddf0', href: '/dashboard/calendar' },
-    { name: 'Document repository', desc: 'Store and organize all compliance documents', border: '#c2ddf0', hr
-    { name: 'Equipment inventory', desc: 'Track x-ray equipment and PM schedules', border: '#c2ddf0' },
-    { name: 'AI assistant', desc: 'Instant answers to state-specific compliance questions', border: '#c4b5fd' },
-    { name: 'Keys to Success', desc: 'Step-by-step compliance checklist for your state', border: '#b8e8cc' },
-    { name: 'RSP builder', desc: 'Generate your full Radiation Protection Program', border: '#c2ddf0' },
-  ]
 
   return (
     <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f4f7fb' }}>
@@ -60,9 +60,7 @@ export default async function DashboardPage() {
             <span style={{ fontSize: '15px', fontWeight: '500', color: '#1a5fa8' }}>0%</span>
           </div>
           <div>
-            <p style={{ fontSize: '15px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>
-              Compliance score
-            </p>
+            <p style={{ fontSize: '15px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>Compliance score</p>
             <p style={{ fontSize: '13px', color: '#827d76', lineHeight: '1.55' }}>
               Your account is set up. Complete each section to build toward Inspection Ready (90%+).
             </p>
@@ -70,23 +68,23 @@ export default async function DashboardPage() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-         {features.map(f => (
-  f.href ? (
-    <a key={f.name} href={f.href} style={{ textDecoration: 'none' }}>
-      <div style={{ background: '#fff', border: `1px solid ${f.border}`, borderRadius: '12px', padding: '20px', cursor: 'pointer' }}>
-        <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>{f.name}</p>
-        <p style={{ fontSize: '12px', color: '#827d76', lineHeight: '1.55', marginBottom: '16px' }}>{f.desc}</p>
-        <span style={{ background: '#e8f3fb', color: '#0d2d5e', fontSize: '11px', fontWeight: '500', padding: '3px 10px', borderRadius: '20px', border: '1px solid #c2ddf0' }}>Open →</span>
-      </div>
-    </a>
-  ) : (
-    <div key={f.name} style={{ background: '#fff', border: `1px solid ${f.border}`, borderRadius: '12px', padding: '20px' }}>
-      <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>{f.name}</p>
-      <p style={{ fontSize: '12px', color: '#827d76', lineHeight: '1.55', marginBottom: '16px' }}>{f.desc}</p>
-      <span style={{ background: '#f4f7fb', color: '#a8a39c', fontSize: '11px', fontWeight: '500', padding: '3px 10px', borderRadius: '20px', border: '1px solid #e8e6e2' }}>Coming soon</span>
-    </div>
-  )
-))}
+          {features.map(f => (
+            f.href ? (
+              <a key={f.name} href={f.href} style={{ textDecoration: 'none' }}>
+                <div style={{ background: '#fff', border: `1px solid ${f.border}`, borderRadius: '12px', padding: '20px', cursor: 'pointer' }}>
+                  <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>{f.name}</p>
+                  <p style={{ fontSize: '12px', color: '#827d76', lineHeight: '1.55', marginBottom: '16px' }}>{f.desc}</p>
+                  <span style={{ background: '#e8f3fb', color: '#0d2d5e', fontSize: '11px', fontWeight: '500', padding: '3px 10px', borderRadius: '20px', border: '1px solid #c2ddf0' }}>Open →</span>
+                </div>
+              </a>
+            ) : (
+              <div key={f.name} style={{ background: '#fff', border: `1px solid ${f.border}`, borderRadius: '12px', padding: '20px' }}>
+                <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>{f.name}</p>
+                <p style={{ fontSize: '12px', color: '#827d76', lineHeight: '1.55', marginBottom: '16px' }}>{f.desc}</p>
+                <span style={{ background: '#f4f7fb', color: '#a8a39c', fontSize: '11px', fontWeight: '500', padding: '3px 10px', borderRadius: '20px', border: '1px solid #e8e6e2' }}>Coming soon</span>
+              </div>
+            )
+          ))}
         </div>
       </div>
     </div>
