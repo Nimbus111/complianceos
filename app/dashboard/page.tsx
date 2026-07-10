@@ -9,6 +9,7 @@ const features = [
   { name: 'AI assistant', desc: 'Instant answers to state-specific compliance questions', border: '#c4b5fd' },
   { name: 'Keys to Success', desc: 'Step-by-step compliance checklist for your state', border: '#b8e8cc' },
   { name: 'RSP builder', desc: 'Generate your full Radiation Protection Program', border: '#c2ddf0', href: '/dashboard/rsp' },
+]
 
 export default async function DashboardPage() {
   const supabase = await createClient()
