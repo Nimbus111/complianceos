@@ -79,3 +79,4 @@ export async function DELETE(request: Request) {
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 })
   }
+}
