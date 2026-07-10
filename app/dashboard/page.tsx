@@ -25,7 +25,7 @@ export default async function DashboardPage() {
 
   const features = [
     { name: 'Compliance calendar', desc: 'Track renewals, inspections, and QA deadlines', border: '#c2ddf0', href: '/dashboard/calendar' },
-    { name: 'Document repository', desc: 'Store and organize all compliance documents', border: '#c2ddf0' },
+    { name: 'Document repository', desc: 'Store and organize all compliance documents', border: '#c2ddf0', hr
     { name: 'Equipment inventory', desc: 'Track x-ray equipment and PM schedules', border: '#c2ddf0' },
     { name: 'AI assistant', desc: 'Instant answers to state-specific compliance questions', border: '#c4b5fd' },
     { name: 'Keys to Success', desc: 'Step-by-step compliance checklist for your state', border: '#b8e8cc' },
