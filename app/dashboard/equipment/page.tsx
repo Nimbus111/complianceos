@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
+const MACHINE_LIMIT = 3
+
 const STATUSES: Record<string, { label: string; color: string; bg: string; border: string }> = {
   active:               { label: 'Active',               color: '#2d6a4f', bg: '#edfaf3', border: '#b8e8cc' },
   pending_registration: { label: 'Pending registration',  color: '#9a3510', bg: '#fff6e8', border: '#f0d4a0' },
@@ -33,7 +35,6 @@ export default function EquipmentPage() {
   const [aprons, setAprons] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [orgName, setOrgName] = useState('')
-  const [orgId, setOrgId] = useState('')
   const [showEqForm, setShowEqForm] = useState(false)
   const [showApronForm, setShowApronForm] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -64,8 +65,6 @@ export default function EquipmentPage() {
       .from('profiles').select('org_id').eq('id', user.id).single()
     if (!profile?.org_id) { router.push('/onboarding'); return }
 
-    setOrgId(profile.org_id)
-
     const { data: org } = await supabase
       .from('organizations').select('name').eq('id', profile.org_id).single()
     if (org) setOrgName(org.name)
@@ -79,11 +78,13 @@ export default function EquipmentPage() {
       .from('lead_aprons').select('*').eq('org_id', profile.org_id)
       .order('created_at', { ascending: false })
     setAprons(ap || [])
-
     setLoading(false)
   }, [router])
 
   useEffect(() => { fetchAll() }, [fetchAll])
+
+  const activeCount = equipment.filter(e => e.status !== 'retired').length
+  const atLimit = activeCount >= MACHINE_LIMIT
 
   const handleAddEquipment = async () => {
     if (!manufacturer || !model) return
@@ -101,12 +102,19 @@ export default function EquipmentPage() {
         status: eqStatus,
       })
     })
+    const r = await res.json()
+    if (res.status === 403 && r.upgrade_required) {
+      alert('You have reached the 3-machine limit for Professional accounts. Upgrade to Enterprise to add more machines.')
+      setSaving(false)
+      return
+    }
     if (res.ok) {
-      setManufacturer(''); setModel(''); setSerialNumber(''); setRoomLocation('')
-      setFacilityRegNum(''); setMachineRegNum(''); setPurchaseDate(''); setEqStatus('active')
+      setManufacturer(''); setModel(''); setSerialNumber('')
+      setRoomLocation(''); setFacilityRegNum(''); setMachineRegNum('')
+      setPurchaseDate(''); setEqStatus('active')
       setShowEqForm(false); fetchAll()
     } else {
-      const r = await res.json(); alert(r.error || 'Error adding equipment')
+      alert(r.error || 'Error adding equipment')
     }
     setSaving(false)
   }
@@ -168,26 +176,55 @@ export default function EquipmentPage() {
           <p style={{ fontSize: '13px', color: '#827d76' }}>{orgName}</p>
         </div>
 
+        {/* X-ray equipment section header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-          <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e' }}>
-            X-ray equipment <span style={{ color: '#a8a39c', fontWeight: '400' }}>· {equipment.length} unit{equipment.length !== 1 ? 's' : ''}</span>
-          </p>
-          <button onClick={() => { setShowEqForm(!showEqForm); setShowApronForm(false) }}
-            style={{ height: '36px', padding: '0 16px', background: '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '12px', fontWeight: '500', cursor: 'pointer' }}>
-            {showEqForm ? 'Cancel' : '+ Add equipment'}
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e' }}>
+              X-ray equipment
+            </p>
+            <span style={{
+              fontSize: '11px', fontWeight: '500', padding: '2px 10px', borderRadius: '20px',
+              color: atLimit ? '#9a3510' : '#2d6a4f',
+              background: atLimit ? '#fff6e8' : '#edfaf3',
+              border: `1px solid ${atLimit ? '#f0d4a0' : '#b8e8cc'}`
+            }}>
+              {activeCount} / {MACHINE_LIMIT} · Professional
+            </span>
+          </div>
+          {atLimit ? (
+            <a href="/dashboard" style={{ height: '36px', padding: '0 16px', background: '#c44a1a', color: '#fff', borderRadius: '8px', fontSize: '12px', fontWeight: '500', cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+              Upgrade to Enterprise
+            </a>
+          ) : (
+            <button onClick={() => { setShowEqForm(!showEqForm); setShowApronForm(false) }}
+              style={{ height: '36px', padding: '0 16px', background: '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '12px', fontWeight: '500', cursor: 'pointer' }}>
+              {showEqForm ? 'Cancel' : '+ Add equipment'}
+            </button>
+          )}
         </div>
 
-        {showEqForm && (
+        {/* Upgrade banner when at limit */}
+        {atLimit && (
+          <div style={{ background: '#fff6e8', border: '1px solid #f0d4a0', borderRadius: '12px', padding: '16px 20px', marginBottom: '16px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: '13px', fontWeight: '500', color: '#9a3510', marginBottom: '4px' }}>3-machine limit reached</p>
+              <p style={{ fontSize: '12px', color: '#c44a1a', lineHeight: '1.55' }}>
+                Professional accounts support up to 3 x-ray machines at one location. Facilities with 4 or more machines, or multiple locations, require an Enterprise account.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {showEqForm && !atLimit && (
           <div style={{ background: '#fff', border: '1px solid #c2ddf0', borderRadius: '12px', padding: '20px', marginBottom: '16px' }}>
             <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '14px' }}>Add x-ray equipment</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
               <div><label style={lbl}>Manufacturer *</label><input style={inp} type="text" placeholder="e.g. Carestream" value={manufacturer} onChange={e => setManufacturer(e.target.value)} /></div>
               <div><label style={lbl}>Model *</label><input style={inp} type="text" placeholder="e.g. CS 9300" value={model} onChange={e => setModel(e.target.value)} /></div>
-              <div><label style={lbl}>Serial number</label><input style={inp} type="text" placeholder="S/N" value={serialNumber} onChange={e => setSerialNumber(e.target.value)} /></div>
+              <div><label style={lbl}>Serial number</label><input style={inp} type="text" value={serialNumber} onChange={e => setSerialNumber(e.target.value)} /></div>
               <div><label style={lbl}>Room / location</label><input style={inp} type="text" placeholder="e.g. Operatory 2" value={roomLocation} onChange={e => setRoomLocation(e.target.value)} /></div>
-              <div><label style={lbl}>Facility registration #</label><input style={inp} type="text" placeholder="State facility reg. number" value={facilityRegNum} onChange={e => setFacilityRegNum(e.target.value)} /></div>
-              <div><label style={lbl}>Machine registration #</label><input style={inp} type="text" placeholder="State machine reg. number" value={machineRegNum} onChange={e => setMachineRegNum(e.target.value)} /></div>
+              <div><label style={lbl}>Facility registration #</label><input style={inp} type="text" value={facilityRegNum} onChange={e => setFacilityRegNum(e.target.value)} /></div>
+              <div><label style={lbl}>Machine registration #</label><input style={inp} type="text" value={machineRegNum} onChange={e => setMachineRegNum(e.target.value)} /></div>
               <div><label style={lbl}>Purchase date</label><input style={inp} type="date" value={purchaseDate} onChange={e => setPurchaseDate(e.target.value)} /></div>
               <div><label style={lbl}>Status</label>
                 <select style={inp} value={eqStatus} onChange={e => setEqStatus(e.target.value)}>
@@ -234,7 +271,7 @@ export default function EquipmentPage() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <span style={{ fontSize: '11px', color: '#827d76' }}>Facility registration #</span>
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            <span style={{ fontSize: '12px', fontWeight: '500', color: '#0d2d5e', fontVariantNumeric: 'tabular-nums' }}>{eq.facility_registration_number}</span>
+                            <span style={{ fontSize: '12px', fontWeight: '500', color: '#0d2d5e' }}>{eq.facility_registration_number}</span>
                             <button onClick={() => copyToClipboard(eq.facility_registration_number)} style={{ padding: '2px 8px', border: '1px solid #c2ddf0', borderRadius: '4px', background: '#fff', color: '#1a5fa8', fontSize: '10px', cursor: 'pointer' }}>Copy</button>
                           </div>
                         </div>
@@ -243,7 +280,7 @@ export default function EquipmentPage() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <span style={{ fontSize: '11px', color: '#827d76' }}>Machine registration #</span>
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            <span style={{ fontSize: '12px', fontWeight: '500', color: '#0d2d5e', fontVariantNumeric: 'tabular-nums' }}>{eq.machine_registration_number}</span>
+                            <span style={{ fontSize: '12px', fontWeight: '500', color: '#0d2d5e' }}>{eq.machine_registration_number}</span>
                             <button onClick={() => copyToClipboard(eq.machine_registration_number)} style={{ padding: '2px 8px', border: '1px solid #c2ddf0', borderRadius: '4px', background: '#fff', color: '#1a5fa8', fontSize: '10px', cursor: 'pointer' }}>Copy</button>
                           </div>
                         </div>
@@ -259,6 +296,7 @@ export default function EquipmentPage() {
           </div>
         )}
 
+        {/* Lead aprons section */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
           <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e' }}>
             Lead aprons <span style={{ color: '#a8a39c', fontWeight: '400' }}>· {aprons.length} item{aprons.length !== 1 ? 's' : ''}</span>
@@ -280,7 +318,7 @@ export default function EquipmentPage() {
                 </select>
               </div>
               <div><label style={lbl}>ID tag</label><input style={inp} type="text" placeholder="e.g. LA-001" value={apronTag} onChange={e => setApronTag(e.target.value)} /></div>
-              <div><label style={lbl}>Manufacturer</label><input style={inp} type="text" placeholder="e.g. Infab" value={apronMfr} onChange={e => setApronMfr(e.target.value)} /></div>
+              <div><label style={lbl}>Manufacturer</label><input style={inp} type="text" value={apronMfr} onChange={e => setApronMfr(e.target.value)} /></div>
               <div><label style={lbl}>Size</label><input style={inp} type="text" placeholder="e.g. Medium" value={apronSize} onChange={e => setApronSize(e.target.value)} /></div>
               <div><label style={lbl}>Condition</label>
                 <select style={inp} value={apronCondition} onChange={e => setApronCondition(e.target.value)}>

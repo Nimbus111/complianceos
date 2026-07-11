@@ -20,6 +20,21 @@ export async function POST(request: Request) {
     const body = await request.json()
     const admin = getAdmin()
 
+    if (body.resource_type !== 'lead_apron') {
+      const { count } = await admin
+        .from('equipment')
+        .select('*', { count: 'exact', head: true })
+        .eq('org_id', profile.org_id)
+        .neq('status', 'retired')
+
+      if ((count || 0) >= 3) {
+        return NextResponse.json({
+          error: 'Machine limit reached',
+          upgrade_required: true
+        }, { status: 403 })
+      }
+    }
+
     if (body.resource_type === 'lead_apron') {
       const { data, error } = await admin
         .from('lead_aprons')
