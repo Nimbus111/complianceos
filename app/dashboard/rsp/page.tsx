@@ -226,14 +226,34 @@ const handleGenerate = async () => {
       return
     }
 
+    const { default: html2pdf } = await import('html2pdf.js')
+
+    const container = document.createElement('div')
+    container.innerHTML = html
+    container.style.position = 'absolute'
+    container.style.left = '-9999px'
+    document.body.appendChild(container)
+
+    const pdfArrayBuffer = await html2pdf()
+      .set({
+        margin: [10, 10, 10, 10],
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      })
+      .from(container)
+      .outputPdf('arraybuffer')
+
+    document.body.removeChild(container)
+
     const year = new Date().getFullYear()
-    const filename = `Radiation Protection Program — ${facilityName} — ${year}.html`
-    const storagePath = `${profile.org_id}/rsp_${Date.now()}.html`
-    const blob = new Blob([html], { type: 'text/html' })
+    const filename = `Radiation Protection Program — ${facilityName} — ${year}.pdf`
+    const storagePath = `${profile.org_id}/rsp_${Date.now()}.pdf`
+    const pdfBlob = new Blob([pdfArrayBuffer], { type: 'application/pdf' })
 
     const { error: uploadError } = await supabase.storage
       .from('documents')
-      .upload(storagePath, blob, { contentType: 'text/html' })
+      .upload(storagePath, pdfBlob, { contentType: 'application/pdf' })
 
     if (uploadError) {
       alert('Upload error: ' + uploadError.message)
