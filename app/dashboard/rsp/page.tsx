@@ -200,7 +200,7 @@ export default function RSPBuilderPage() {
     })
   }, [router])
 
-const handleGenerate = () => {
+const handleGenerate = async () => {
   setSaving(true)
   try {
     const selectedEq = equipment.filter(e => selectedEquipment.includes(e.id))
@@ -213,20 +213,52 @@ const handleGenerate = () => {
       dosimetry, dosimetryProvider, dosimetryFrequency,
       trainingFrequency, apronInspectionFreq,
     })
+
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { router.push('/login'); return }
+
+    const { data: profile } = await supabase
+      .from('profiles').select('org_id').eq('id', user.id).single()
+    if (!profile?.org_id) {
+      alert('No organization found')
+      setSaving(false)
+      return
+    }
+
+    const year = new Date().getFullYear()
+    const filename = `Radiation Protection Program — ${facilityName} — ${year}.html`
+    const storagePath = `${profile.org_id}/rsp_${Date.now()}.html`
     const blob = new Blob([html], { type: 'text/html' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `Radiation_Protection_Program_${facilityName}_${new Date().getFullYear()}.html`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-    alert('Your Radiation Protection Program has been downloaded. Open the file in your browser to view and print it.')
+
+    const { error: uploadError } = await supabase.storage
+      .from('documents')
+      .upload(storagePath, blob, { contentType: 'text/html' })
+
+    if (uploadError) {
+      alert('Upload error: ' + uploadError.message)
+      setSaving(false)
+      return
+    }
+
+    const res = await fetch('/api/rsp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ storagePath, filename })
+    })
+
+    const result = await res.json()
+    if (res.ok) {
+      router.push('/dashboard/documents')
+      router.refresh()
+    } else {
+      alert(result.error || 'Error saving document')
+      setSaving(false)
+    }
   } catch (e: any) {
     alert('Error: ' + e.message)
+    setSaving(false)
   }
-  setSaving(false)
 }
 
   const inp = { width: '100%', height: '38px', border: '1px solid #c2ddf0', borderRadius: '8px', padding: '0 10px', fontSize: '13px', color: '#0d2d5e', background: '#fff', outline: 'none', boxSizing: 'border-box' as const }
