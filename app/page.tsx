@@ -15,7 +15,17 @@ const US_STATES = [
   'Tennessee','Texas','Utah','Vermont','Virginia','Washington',
   'West Virginia','Wisconsin','Wyoming','District of Columbia'
 ]
+const MODALITY_SEARCH: Record<string, string> = {
+  'CBCT / 3D': 'Cone Beam',
+  'CT Scan': 'Tomography',
+  'Dental Intraoral': 'Intraoral',
+  'Fluoroscopy': 'Fluoroscop',
+  'Mammography': 'Mammograph',
+}
 
+const FACILITY_SEARCH: Record<string, string> = {
+  'Physician Office': 'Medical Clinic',
+}
 export default function HomePage() {
   const [state, setState] = useState('')
   const [modality, setModality] = useState('')
@@ -47,8 +57,14 @@ export default function HomePage() {
     const supabase = createClient()
     let query = supabase.from('regulations').select('*')
     if (state) query = query.eq('state_name', state)
-    if (modality) query = query.eq('modality_name', modality)
-    if (facilityType) query = query.eq('facility_type_name', facilityType)
+if (modality) {
+  const term = MODALITY_SEARCH[modality] || modality
+  query = query.ilike('modality_name', `%${term}%`)
+}
+if (facilityType) {
+  const term = FACILITY_SEARCH[facilityType] || facilityType
+  query = query.ilike('facility_type_name', `%${term}%`)
+}
     const { data } = await query.limit(20)
     setResults(data || [])
     setLoading(false)
