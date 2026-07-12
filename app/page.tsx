@@ -206,12 +206,12 @@ if (facilityType) {
                     </span>
                   )}
                 </div>
-                {reg.plain_language_summary ? (
-                  <p style={{ fontSize: '13px', color: '#1e1c1a', lineHeight: '1.65', marginBottom: reg.legal_citation ? '10px' : '0' }}>
-                    {reg.plain_language_summary}
-                  </p>
-                ) : (
-                  <p style={{ fontSize: '13px', color: '#827d76', lineHeight: '1.65', fontStyle: 'italic' }}>
+                {reg.plain_language_summary && (
+  <p style={{ fontSize: '13px', color: '#1e1c1a', lineHeight: '1.65', marginBottom: '12px' }}>
+    {reg.plain_language_summary}
+  </p>
+
+>
                     Detailed compliance data available — sign up to view full requirements.
                   </p>
                 )}
@@ -222,8 +222,8 @@ if (facilityType) {
             ))}
             <div style={{ background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '12px', padding: '16px', textAlign: 'center', marginTop: '16px' }}>
               <p style={{ fontSize: '13px', color: '#0d2d5e', marginBottom: '10px' }}>
-                Get the full compliance picture — calendar, documents, AI assistant, and RSP builder.
-              </p>
+  You can see what's required. Now manage it — compliance calendar, document repository, RSP builder, AI assistant, and more.
+</p>
               <a href="/signup" style={{ background: '#0d2d5e', color: '#fff', fontSize: '13px', fontWeight: '500', padding: '8px 20px', borderRadius: '8px', textDecoration: 'none', display: 'inline-block' }}>
                 Start free — Medical Facilities
               </a>
