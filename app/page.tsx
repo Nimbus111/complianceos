@@ -28,6 +28,166 @@ const FACILITY_SEARCH: Record<string, string> = {
   'Physician Office': 'Medical Clinic',
 }
 
+const lbl: React.CSSProperties = {
+  fontSize: '10px', fontWeight: '500', color: '#1a5fa8',
+  textTransform: 'uppercase', letterSpacing: '0.09em',
+  marginBottom: '4px', display: 'block',
+}
+
+const val: React.CSSProperties = {
+  fontSize: '13px', color: '#1e1c1a', lineHeight: '1.65', margin: 0,
+}
+
+const valReq: React.CSSProperties = {
+  ...val, fontWeight: '500', color: '#0d2d5e',
+}
+
+function Item({ label, value, required }: { label: string; value: any; required?: boolean }) {
+  if (value === null || value === undefined || value === false || value === '' || value === 'n/a') return null
+  const display = value === true ? 'Required' : String(value)
+  return (
+    <div style={{ marginBottom: '14px' }}>
+      <span style={lbl}>{label}</span>
+      <p style={required || value === true ? valReq : val}>{display}</p>
+    </div>
+  )
+}
+
+function Panel({ title, icon, children }: { title: string; icon: string; children: React.ReactNode }) {
+  return (
+    <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '10px', padding: '18px 20px', flex: 1, minWidth: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', paddingBottom: '10px', borderBottom: '1px solid #eef3fb' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <i className={`ti ti-${icon}`} style={{ fontSize: '16px', color: '#1a5fa8' }} aria-hidden="true"></i>
+          <span style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e' }}>{title}</span>
+        </div>
+        <span style={{ fontSize: '11px', color: '#a8a39c' }}>Regulations table</span>
+      </div>
+      {children}
+    </div>
+  )
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginBottom: '28px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
+        <span style={{ fontSize: '11px', fontWeight: '500', color: '#0d2d5e', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{title}</span>
+        <div style={{ flex: 1, height: '1px', background: '#c2ddf0' }} />
+      </div>
+      <div style={{ display: 'flex', gap: '14px' }}>
+        {children}
+      </div>
+    </div>
+  )
+}
+
+function RegulationResult({ reg }: { reg: any }) {
+  const hasLeftRegistration = reg.facility_registration_req || reg.registration_notes || reg.annual_renewal || reg.state_own_reg_form || reg.form_2579_rules || reg.renewal_timeline
+  const hasRightRegistration = reg.shielding_plan_req || reg.shielding_approval_req || reg.shielding_party || reg.post_install_inspection || reg.shielding_expectations || reg.con_required
+  const hasLeftEquipment = reg.post_install_requirements || reg.qa_testing || reg.service_notes || reg.retain_service_docs || reg.equipment_training_records
+  const hasRightEquipment = reg.operator_credentials || reg.dosimetry_monitoring || reg.dosimetry_notes || reg.lead_aprons_req || reg.lead_apron_inspection || reg.lead_apron_notes
+  const hasLeftSafety = reg.keep_exposure_records || reg.pregnancy_protocols || reg.service_provider_docs
+  const hasRightSafety = reg.notify_state_timeframe || reg.notify_remove_unit || reg.termination_notes
+
+  return (
+    <div style={{ marginBottom: '32px' }}>
+
+      <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '10px', padding: '18px 20px', marginBottom: '14px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px', alignItems: 'center' }}>
+          <span style={{ fontSize: '11px', fontWeight: '500', color: '#1a5fa8', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '2px 10px' }}>
+            <i className="ti ti-sparkles" style={{ fontSize: '10px', marginRight: '4px' }} aria-hidden="true"></i>Plain language summary
+          </span>
+        </div>
+        <p style={{ fontSize: '11px', color: '#a8a39c', marginBottom: '4px' }}>
+          {[reg.state_name, reg.facility_type_name, reg.modality_name].filter(Boolean).join(' · ')}
+        </p>
+        {reg.post_install_requirements && (
+          <p style={{ fontSize: '11px', color: '#2d6a4f', background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '20px', display: 'inline-block', padding: '2px 10px', marginBottom: '10px' }}>
+            Applies to: {reg.post_install_requirements}
+          </p>
+        )}
+        {reg.plain_language_summary ? (
+          <p style={{ fontSize: '14px', color: '#1e1c1a', lineHeight: '1.75', margin: 0 }}>{reg.plain_language_summary}</p>
+        ) : (
+          <p style={{ fontSize: '13px', color: '#827d76', lineHeight: '1.65', margin: 0, fontStyle: 'italic' }}>
+            Compliance summary available — connect your Airtable AI summary field to see a plain language overview for this state and modality.
+          </p>
+        )}
+      </div>
+
+      {(hasLeftRegistration || hasRightRegistration) && (
+        <Section title="Registration &amp; licensing">
+          {hasLeftRegistration && (
+            <Panel title="Machine registration" icon="certificate">
+              <Item label="Facility registration" value={reg.facility_registration_req} required />
+              <Item label="Registration notes" value={reg.registration_notes} />
+              <Item label="Annual renewal" value={reg.annual_renewal} required />
+              <Item label="Renewal timeline" value={reg.renewal_timeline} />
+              <Item label="State registration form" value={reg.state_own_reg_form ? 'State provides its own registration form' : null} />
+              <Item label="Form 2579 rules" value={reg.form_2579_rules} />
+            </Panel>
+          )}
+          {hasRightRegistration && (
+            <Panel title="Shielding &amp; installation" icon="building-arch">
+              <Item label="Shielding plan required" value={reg.shielding_plan_req} required />
+              <Item label="State approval required" value={reg.shielding_approval_req} required />
+              <Item label="Shielding party" value={reg.shielding_party} />
+              <Item label="Post-installation inspection" value={reg.post_install_inspection} required />
+              <Item label="Shielding requirements" value={reg.shielding_expectations} />
+              <Item label="Certificate of need" value={reg.con_required} />
+            </Panel>
+          )}
+        </Section>
+      )}
+
+      {(hasLeftEquipment || hasRightEquipment) && (
+        <Section title="Equipment &amp; operations">
+          {hasLeftEquipment && (
+            <Panel title="X-ray machine care" icon="device-desktop-analytics">
+              <Item label="Post-installation requirements" value={reg.post_install_requirements} />
+              <Item label="Quality assurance testing" value={reg.qa_testing} required />
+              <Item label="Service notes" value={reg.service_notes} />
+              <Item label="Retain maintenance, repairs, service documents" value={reg.retain_service_docs ? 'Yes — all maintenance records, repair invoices, and service reports retained on-site for state inspection.' : null} required />
+              <Item label="X-ray equipment training records" value={reg.equipment_training_records} required />
+            </Panel>
+          )}
+          {hasRightEquipment && (
+            <Panel title="X-ray operator protocols" icon="user-check">
+              <Item label="X-ray operator credentials/certification" value={reg.operator_credentials} />
+              <Item label="Dosimetry monitoring" value={reg.dosimetry_monitoring} required />
+              <Item label="Dosimetry notes" value={reg.dosimetry_notes} />
+              <Item label="Lead aprons required" value={reg.lead_aprons_req && reg.lead_aprons_req !== 'n/a' ? reg.lead_aprons_req : null} required />
+              <Item label="Lead apron inspection" value={reg.lead_apron_inspection} />
+              <Item label="Lead apron notes" value={reg.lead_apron_notes} />
+            </Panel>
+          )}
+        </Section>
+      )}
+
+      {(hasLeftSafety || hasRightSafety) && (
+        <Section title="Safety &amp; compliance documentation">
+          {hasLeftSafety && (
+            <Panel title="Personnel &amp; safety" icon="shield-lock">
+              <Item label="Keep exposure records" value={reg.keep_exposure_records} required />
+              <Item label="Pregnancy protocols" value={reg.pregnancy_protocols} />
+              <Item label="Service provider documentation" value={reg.service_provider_docs} required />
+            </Panel>
+          )}
+          {hasRightSafety && (
+            <Panel title="Notifications &amp; reporting" icon="bell-ringing">
+              <Item label="Timeframe to notify state" value={reg.notify_state_timeframe} />
+              <Item label="Procedure for removing x-ray unit" value={reg.notify_remove_unit} />
+              <Item label="Theft/vandalism reporting" value={reg.termination_notes} />
+            </Panel>
+          )}
+        </Section>
+      )}
+
+    </div>
+  )
+}
+
 export default function HomePage() {
   const [state, setState] = useState('')
   const [modality, setModality] = useState('')
@@ -62,7 +222,7 @@ export default function HomePage() {
       const term = FACILITY_SEARCH[facilityType] || facilityType
       query = query.ilike('facility_type_name', `%${term}%`)
     }
-    const { data } = await query.limit(20)
+    const { data } = await query.limit(10)
     setResults(data || [])
     if (state) {
       const { data: contact } = await supabase
@@ -79,193 +239,190 @@ export default function HomePage() {
 
   const canSearch = state || modality || facilityType
 
-  const chip = {
-    fontSize: '10px', fontWeight: '500' as const,
-    color: '#0d2d5e', background: '#e8f3fb',
-    border: '1px solid #c2ddf0', borderRadius: '20px',
-    padding: '2px 9px',
-  }
-
   return (
-    <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f4f7fb' }}>
+    <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f0f4f8' }}>
 
-      <nav style={{ background: '#0d2d5e', padding: '0 32px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ color: '#fff', fontSize: '17px', fontWeight: '500' }}>The Radiology Coach</span>
-          <span style={{ background: 'rgba(255,255,255,0.1)', color: '#8bb4d4', fontSize: '11px', padding: '2px 8px', borderRadius: '4px', fontWeight: '500', marginLeft: '10px' }}>ComplianceOS</span>
+      <nav style={{ background: '#0d2d5e', padding: '0 32px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <i className="ti ti-wave-sine" style={{ fontSize: '18px', color: '#8bb4d4' }} aria-hidden="true"></i>
+            </div>
+            <div>
+              <p style={{ color: '#fff', fontSize: '14px', fontWeight: '500', margin: 0 }}>X-ray Compliance Hub</p>
+              <p style={{ color: '#8bb4d4', fontSize: '11px', margin: 0 }}>Powered by The Radiology Coach</p>
+            </div>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <a href="/login" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>Log in</a>
-          <a href="/signup" style={{ background: '#fff', color: '#0d2d5e', fontSize: '13px', fontWeight: '500', padding: '7px 18px', borderRadius: '8px', textDecoration: 'none' }}>Get started</a>
+        <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+          <a href="/pricing" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>About</a>
+          <a href="/pricing" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>Pricing</a>
+          <a href="/login" style={{ color: '#fff', fontSize: '13px', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.25)', padding: '6px 16px', borderRadius: '8px' }}>Sign in</a>
+          <a href="/signup" style={{ background: '#1a72e8', color: '#fff', fontSize: '13px', fontWeight: '500', padding: '7px 18px', borderRadius: '8px', textDecoration: 'none' }}>Get started</a>
         </div>
       </nav>
 
-      <div style={{ background: '#0d2d5e', padding: '64px 24px 80px', textAlign: 'center' }}>
-        <p style={{ color: '#8bb4d4', fontSize: '11px', fontWeight: '500', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '16px' }}>
-          X-ray compliance · All 50 states
-        </p>
-        <h1 style={{ color: '#fff', fontSize: '34px', fontWeight: '500', lineHeight: '1.2', margin: '0 auto 14px', maxWidth: '560px' }}>
-          Know exactly what your state requires
-        </h1>
-        <p style={{ color: '#8bb4d4', fontSize: '15px', lineHeight: '1.65', maxWidth: '460px', margin: '0 auto 44px' }}>
-          Search compliance requirements for any x-ray modality, in any state, for any facility type — free.
-        </p>
-        <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', maxWidth: '680px', margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '14px' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '10px', fontWeight: '500', color: '#a8a39c', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>State</label>
+      <div style={{ background: '#f0f4f8', padding: '48px 24px 40px' }}>
+        <div style={{ maxWidth: '860px', margin: '0 auto' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '4px 12px', marginBottom: '20px' }}>
+            <i className="ti ti-shield-check" style={{ fontSize: '12px', color: '#1a5fa8' }} aria-hidden="true"></i>
+            <span style={{ fontSize: '11px', fontWeight: '500', color: '#1a5fa8', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Free compliance search — all 50 states</span>
+          </div>
+          <h1 style={{ fontSize: '36px', fontWeight: '500', color: '#0d2d5e', lineHeight: '1.2', marginBottom: '12px', maxWidth: '640px' }}>
+            Find your X-ray compliance requirements — instantly
+          </h1>
+          <p style={{ fontSize: '15px', color: '#4a6d8c', lineHeight: '1.65', maxWidth: '580px', marginBottom: '32px' }}>
+            Select your state, facility type, and imaging modality for a complete, field-level compliance overview drawn from official state radiation control regulations.
+          </p>
+
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: '160px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#1a5fa8', marginBottom: '6px' }}>State</label>
               <select value={state} onChange={e => setState(e.target.value)}
-                style={{ width: '100%', height: '40px', border: '1px solid #c2ddf0', borderRadius: '8px', padding: '0 10px', fontSize: '13px', color: '#0d2d5e', background: '#fff', cursor: 'pointer', outline: 'none' }}>
-                <option value="">Select state</option>
+                style={{ width: '100%', height: '44px', border: '1px solid #c2ddf0', borderRadius: '8px', padding: '0 12px', fontSize: '13px', color: '#0d2d5e', background: '#fff', cursor: 'pointer', outline: 'none' }}>
+                <option value="">Select state...</option>
                 {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '10px', fontWeight: '500', color: '#a8a39c', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Modality</label>
-              <select value={modality} onChange={e => setModality(e.target.value)}
-                style={{ width: '100%', height: '40px', border: '1px solid #c2ddf0', borderRadius: '8px', padding: '0 10px', fontSize: '13px', color: '#0d2d5e', background: '#fff', cursor: 'pointer', outline: 'none' }}>
-                <option value="">All modalities</option>
-                {modalities.map(m => <option key={m.id} value={m.modality_name}>{m.modality_name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '10px', fontWeight: '500', color: '#a8a39c', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Facility type</label>
+            <div style={{ flex: 1, minWidth: '160px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#1a5fa8', marginBottom: '6px' }}>Facility type</label>
               <select value={facilityType} onChange={e => setFacilityType(e.target.value)}
-                style={{ width: '100%', height: '40px', border: '1px solid #c2ddf0', borderRadius: '8px', padding: '0 10px', fontSize: '13px', color: '#0d2d5e', background: '#fff', cursor: 'pointer', outline: 'none' }}>
+                style={{ width: '100%', height: '44px', border: '1px solid #c2ddf0', borderRadius: '8px', padding: '0 12px', fontSize: '13px', color: '#0d2d5e', background: '#fff', cursor: 'pointer', outline: 'none' }}>
                 <option value="">All facility types</option>
                 {facilityTypes.map(f => <option key={f.id} value={f.facility_type_name}>{f.facility_type_name}</option>)}
               </select>
             </div>
+            <div style={{ flex: 1, minWidth: '160px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#1a5fa8', marginBottom: '6px' }}>Imaging modality</label>
+              <select value={modality} onChange={e => setModality(e.target.value)}
+                style={{ width: '100%', height: '44px', border: '1px solid #c2ddf0', borderRadius: '8px', padding: '0 12px', fontSize: '13px', color: '#0d2d5e', background: '#fff', cursor: 'pointer', outline: 'none' }}>
+                <option value="">All modalities</option>
+                {modalities.map(m => <option key={m.id} value={m.modality_name}>{m.modality_name}</option>)}
+              </select>
+            </div>
+            <button onClick={handleSearch} disabled={!canSearch || loading}
+              style={{ height: '44px', padding: '0 28px', background: canSearch ? '#0d2d5e' : '#c2ddf0', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: canSearch ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
+              <i className="ti ti-search" style={{ fontSize: '15px' }} aria-hidden="true"></i>
+              {loading ? 'Searching...' : 'Search'}
+            </button>
           </div>
-          <button onClick={handleSearch} disabled={!canSearch || loading}
-            style={{ width: '100%', height: '44px', background: canSearch ? '#0d2d5e' : '#e8f3fb', color: canSearch ? '#fff' : '#a8a39c', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: canSearch ? 'pointer' : 'default' }}>
-            {loading ? 'Searching...' : 'Search compliance requirements'}
-          </button>
         </div>
       </div>
 
-      <div style={{ maxWidth: '680px', margin: '0 auto', padding: '32px 24px' }}>
+      <div style={{ maxWidth: '860px', margin: '0 auto', padding: '16px 24px 60px' }}>
 
         {searched && !loading && results && results.length === 0 && (
-          <div style={{ background: '#fff', border: '1px solid #c2ddf0', borderRadius: '12px', padding: '40px 24px', textAlign: 'center' }}>
-            <p style={{ color: '#0d2d5e', fontWeight: '500', marginBottom: '8px' }}>No results found</p>
-            <p style={{ color: '#827d76', fontSize: '13px', lineHeight: '1.6' }}>
-              Try adjusting your filters. Coverage is being added state by state.
+          <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '10px', padding: '48px 24px', textAlign: 'center', marginBottom: '32px' }}>
+            <p style={{ color: '#0d2d5e', fontWeight: '500', marginBottom: '8px', fontSize: '15px' }}>No results found</p>
+            <p style={{ color: '#827d76', fontSize: '13px', lineHeight: '1.6', maxWidth: '360px', margin: '0 auto' }}>
+              Try adjusting your filters or searching by state only. Regulation data is being added state by state.
             </p>
           </div>
         )}
 
         {results && results.length > 0 && (
-          <div>
-            <p style={{ fontSize: '12px', color: '#a8a39c', marginBottom: '12px' }}>
-              {results.length} result{results.length !== 1 ? 's' : ''} found
-            </p>
-
-            {results.map(reg => (
-              <div key={reg.id} style={{ background: '#fff', border: '1px solid #c2ddf0', borderRadius: '12px', padding: '20px', marginBottom: '10px' }}>
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
-                  {reg.state_name && (
-                    <span style={{ background: '#e8f3fb', color: '#0d2d5e', fontSize: '11px', fontWeight: '500', padding: '2px 10px', borderRadius: '20px', border: '1px solid #c2ddf0' }}>
-                      {reg.state_name}
-                    </span>
-                  )}
-                  {reg.modality_name && (
-                    <span style={{ background: '#f4f7fb', color: '#1a5fa8', fontSize: '11px', fontWeight: '500', padding: '2px 10px', borderRadius: '20px', border: '1px solid #c2ddf0' }}>
-                      {reg.modality_name}
-                    </span>
-                  )}
-                  {reg.facility_type_name && (
-                    <span style={{ background: '#f4f7fb', color: '#827d76', fontSize: '11px', padding: '2px 10px', borderRadius: '20px', border: '1px solid #e8e6e2' }}>
-                      {reg.facility_type_name}
-                    </span>
-                  )}
-                </div>
-                {reg.plain_language_summary && (
-                  <p style={{ fontSize: '13px', color: '#1e1c1a', lineHeight: '1.65', marginBottom: '12px' }}>
-                    {reg.plain_language_summary}
-                  </p>
-                )}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                  {reg.facility_registration_req && <span style={chip}>Registration required</span>}
-                  {reg.dosimetry_monitoring && <span style={chip}>Dosimetry required</span>}
-                  {reg.qa_testing && <span style={chip}>QA testing required</span>}
-                  {reg.shielding_plan_req && <span style={chip}>Shielding plan required</span>}
-                  {reg.lead_aprons_req && reg.lead_aprons_req !== 'n/a' && <span style={chip}>Lead aprons required</span>}
-                  {reg.annual_renewal && <span style={chip}>Annual renewal</span>}
-                  {reg.equipment_training_records && <span style={chip}>Training records required</span>}
-                  {reg.retain_service_docs && <span style={chip}>Service records required</span>}
-                </div>
-              </div>
-            ))}
-
-            <div style={{ background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '12px', padding: '16px', textAlign: 'center', marginTop: '6px' }}>
-              <p style={{ fontSize: '13px', color: '#0d2d5e', marginBottom: '10px' }}>
-                You can see what's required. Now manage it — compliance calendar, document repository, RSP builder, AI assistant, and more.
+          <>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <p style={{ fontSize: '12px', color: '#4a6d8c', fontWeight: '500' }}>
+                {results.length} compliance record{results.length !== 1 ? 's' : ''} found
               </p>
-              <a href="/signup" style={{ background: '#0d2d5e', color: '#fff', fontSize: '13px', fontWeight: '500', padding: '8px 20px', borderRadius: '8px', textDecoration: 'none', display: 'inline-block' }}>
-                Start free — Medical Facilities
-              </a>
             </div>
 
+            {results.map(reg => <RegulationResult key={reg.id} reg={reg} />)}
+
             {stateContact && (stateContact.agency_name || stateContact.agency_phone) && (
-              <div style={{ background: '#fff', border: '1px solid #c2ddf0', borderRadius: '12px', padding: '20px', marginTop: '10px' }}>
-                <p style={{ fontSize: '10px', fontWeight: '500', color: '#a8a39c', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
+              <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '10px', padding: '20px 24px', marginBottom: '28px' }}>
+                <p style={{ fontSize: '10px', fontWeight: '500', color: '#4a6d8c', textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: '10px' }}>
                   State radiation control agency
                 </p>
                 {stateContact.agency_name && (
-                  <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>
-                    {stateContact.agency_name}
-                  </p>
+                  <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', marginBottom: '3px' }}>{stateContact.agency_name}</p>
                 )}
                 {stateContact.agency_director && (
-                  <p style={{ fontSize: '12px', color: '#827d76', marginBottom: '10px' }}>
-                    {stateContact.agency_director}
-                  </p>
+                  <p style={{ fontSize: '12px', color: '#827d76', marginBottom: '10px' }}>{stateContact.agency_director}</p>
                 )}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
                   {stateContact.agency_phone && (
-                    <a href={`tel:${stateContact.agency_phone}`} style={{ fontSize: '13px', color: '#1a5fa8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ fontSize: '11px' }}>📞</span> {stateContact.agency_phone}
+                    <a href={`tel:${stateContact.agency_phone}`} style={{ fontSize: '13px', color: '#1a5fa8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <i className="ti ti-phone" style={{ fontSize: '13px' }} aria-hidden="true"></i>{stateContact.agency_phone}
                     </a>
                   )}
                   {stateContact.agency_email && (
-                    <a href={`mailto:${stateContact.agency_email}`} style={{ fontSize: '13px', color: '#1a5fa8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ fontSize: '11px' }}>✉</span> {stateContact.agency_email}
+                    <a href={`mailto:${stateContact.agency_email}`} style={{ fontSize: '13px', color: '#1a5fa8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <i className="ti ti-mail" style={{ fontSize: '13px' }} aria-hidden="true"></i>{stateContact.agency_email}
                     </a>
                   )}
                 </div>
                 {stateContact.agency_notes && (
-                  <p style={{ fontSize: '12px', color: '#827d76', lineHeight: '1.55', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #e8f3fb' }}>
-                    {stateContact.agency_notes}
-                  </p>
+                  <p style={{ fontSize: '12px', color: '#827d76', marginTop: '10px', lineHeight: '1.55', paddingTop: '10px', borderTop: '1px solid #eef3fb' }}>{stateContact.agency_notes}</p>
                 )}
               </div>
             )}
 
-          </div>
+            <div style={{ marginBottom: '28px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                <span style={{ fontSize: '11px', fontWeight: '500', color: '#0d2d5e', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Members-only access</span>
+                <div style={{ flex: 1, height: '1px', background: '#c2ddf0' }} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px' }}>
+                {[
+                  { icon: 'forms', title: 'State forms & applications', desc: 'Downloadable registration applications, renewal forms, CON submission packets, and shielding plan checklists — pre-identified for your state and modality.' },
+                  { icon: 'bell', title: 'Regulatory update alerts', desc: 'Get notified when your state updates radiation control regulations, matched to your facility type and modalities.' },
+                  { icon: 'sparkles', title: 'AI compliance assistant', desc: 'Ask unlimited questions about your specific compliance situation and get instant, citation-backed answers.' },
+                ].map(item => (
+                  <div key={item.title} style={{ background: '#fff', border: '1px dashed #c2ddf0', borderRadius: '10px', padding: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+                      <i className={`ti ti-${item.icon}`} style={{ fontSize: '18px', color: '#a8a39c' }} aria-hidden="true"></i>
+                      <span style={{ fontSize: '10px', fontWeight: '500', color: '#827d76', background: '#f4f7fb', border: '1px solid #e8e6e2', borderRadius: '20px', padding: '2px 8px' }}>Members only</span>
+                    </div>
+                    <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>{item.title}</p>
+                    <p style={{ fontSize: '12px', color: '#827d76', lineHeight: '1.55', marginBottom: '12px' }}>{item.desc}</p>
+                    <a href="/signup" style={{ fontSize: '12px', fontWeight: '500', color: '#1a5fa8', textDecoration: 'none' }}>
+                      Unlock with membership →
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '16px', padding: '12px 16px', background: '#f4f7fb', borderRadius: '8px', border: '1px solid #dce8f5' }}>
+              <i className="ti ti-info-circle" style={{ fontSize: '14px', color: '#4a6d8c', flexShrink: 0, marginTop: '1px' }} aria-hidden="true"></i>
+              <p style={{ fontSize: '12px', color: '#4a6d8c', lineHeight: '1.6', margin: 0 }}>
+                Results sourced from the Regulations table. Verify current requirements with your state agency before acting on compliance decisions. Data current as of {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.
+              </p>
+            </div>
+          </>
         )}
 
         {!searched && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px', paddingTop: '16px' }}>
             {[
-              { label: 'RSP builder', desc: 'Generate your full Radiation Protection Program in minutes', color: '#e8f3fb', border: '#c2ddf0', text: '#0d2d5e' },
-              { label: 'Compliance calendar', desc: 'Never miss a renewal, inspection, or QA deadline again', color: '#edfaf3', border: '#b8e8cc', text: '#1a4731' },
-              { label: 'AI assistant', desc: 'Get cited, state-specific answers to compliance questions', color: '#f5f3ff', border: '#c4b5fd', text: '#3b0764' },
+              { icon: 'file-certificate', title: 'RSP builder', desc: 'Generate a complete, state-specific Radiation Protection Program in minutes — not hours.' },
+              { icon: 'calendar-check', title: 'Compliance calendar', desc: 'Every renewal, QA deadline, and inspection date tracked automatically for your facility.' },
+              { icon: 'sparkles', title: 'AI compliance assistant', desc: 'Ask compliance questions about your state and get cited, regulation-backed answers instantly.' },
             ].map(card => (
-              <div key={card.label} style={{ background: card.color, border: `1px solid ${card.border}`, borderRadius: '12px', padding: '16px' }}>
-                <p style={{ fontSize: '13px', fontWeight: '500', color: card.text, marginBottom: '6px' }}>{card.label}</p>
+              <div key={card.title} style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '10px', padding: '20px' }}>
+                <i className={`ti ti-${card.icon}`} style={{ fontSize: '22px', color: '#1a5fa8', display: 'block', marginBottom: '10px' }} aria-hidden="true"></i>
+                <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>{card.title}</p>
                 <p style={{ fontSize: '12px', color: '#827d76', lineHeight: '1.55' }}>{card.desc}</p>
               </div>
             ))}
           </div>
         )}
+
       </div>
 
-      <div style={{ borderTop: '1px solid #e8e6e2', padding: '24px', textAlign: 'center', marginTop: '40px' }}>
-        <p style={{ fontSize: '12px', color: '#a8a39c' }}>
-          The Radiology Coach · ComplianceOS · theradiologycoach.com
-        </p>
-      </div>
+      {searched && results && results.length > 0 && (
+        <div style={{ background: '#0d2d5e', padding: '28px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+          <div>
+            <p style={{ color: '#fff', fontSize: '16px', fontWeight: '500', marginBottom: '4px' }}>Ready to take action on what you just found?</p>
+            <p style={{ color: '#8bb4d4', fontSize: '13px', margin: 0 }}>Members get forms, update alerts, AI assistance, compliance calendar, document repository, and more.</p>
+          </div>
+          <a href="/signup" style={{ background: '#fff', color: '#0d2d5e', fontSize: '13px', fontWeight: '500', padding: '10px 24px', borderRadius: '8px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+            Become a member
+          </a>
+        </div>
+      )}
 
     </div>
   )
