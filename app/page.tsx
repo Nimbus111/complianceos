@@ -37,6 +37,7 @@ export default function HomePage() {
   const [results, setResults] = useState<any[] | null>(null)
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
+  const [stateContact, setStateContact] = useState<any>(null)
 
   useEffect(() => {
     const supabase = createClient()
@@ -63,6 +64,16 @@ export default function HomePage() {
     }
     const { data } = await query.limit(20)
     setResults(data || [])
+    if (state) {
+      const { data: contact } = await supabase
+        .from('states')
+        .select('agency_name, agency_director, agency_phone, agency_email, agency_notes')
+        .eq('state_name', state)
+        .single()
+      setStateContact(contact || null)
+    } else {
+      setStateContact(null)
+    }
     setLoading(false)
   }
 
@@ -99,7 +110,6 @@ export default function HomePage() {
         <p style={{ color: '#8bb4d4', fontSize: '15px', lineHeight: '1.65', maxWidth: '460px', margin: '0 auto 44px' }}>
           Search compliance requirements for any x-ray modality, in any state, for any facility type — free.
         </p>
-
         <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', maxWidth: '680px', margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '14px' }}>
             <div>
@@ -128,7 +138,7 @@ export default function HomePage() {
             </div>
           </div>
           <button onClick={handleSearch} disabled={!canSearch || loading}
-            style={{ width: '100%', height: '44px', background: canSearch ? '#0d2d5e' : '#e8f3fb', color: canSearch ? '#fff' : '#a8a39c', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: canSearch ? 'pointer' : 'default', transition: 'background 0.15s' }}>
+            style={{ width: '100%', height: '44px', background: canSearch ? '#0d2d5e' : '#e8f3fb', color: canSearch ? '#fff' : '#a8a39c', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: canSearch ? 'pointer' : 'default' }}>
             {loading ? 'Searching...' : 'Search compliance requirements'}
           </button>
         </div>
@@ -150,6 +160,7 @@ export default function HomePage() {
             <p style={{ fontSize: '12px', color: '#a8a39c', marginBottom: '12px' }}>
               {results.length} result{results.length !== 1 ? 's' : ''} found
             </p>
+
             {results.map(reg => (
               <div key={reg.id} style={{ background: '#fff', border: '1px solid #c2ddf0', borderRadius: '12px', padding: '20px', marginBottom: '10px' }}>
                 <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
@@ -169,13 +180,11 @@ export default function HomePage() {
                     </span>
                   )}
                 </div>
-
                 {reg.plain_language_summary && (
                   <p style={{ fontSize: '13px', color: '#1e1c1a', lineHeight: '1.65', marginBottom: '12px' }}>
                     {reg.plain_language_summary}
                   </p>
                 )}
-
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                   {reg.facility_registration_req && <span style={chip}>Registration required</span>}
                   {reg.dosimetry_monitoring && <span style={chip}>Dosimetry required</span>}
@@ -189,7 +198,7 @@ export default function HomePage() {
               </div>
             ))}
 
-            <div style={{ background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '12px', padding: '16px', textAlign: 'center', marginTop: '16px' }}>
+            <div style={{ background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '12px', padding: '16px', textAlign: 'center', marginTop: '6px' }}>
               <p style={{ fontSize: '13px', color: '#0d2d5e', marginBottom: '10px' }}>
                 You can see what's required. Now manage it — compliance calendar, document repository, RSP builder, AI assistant, and more.
               </p>
@@ -197,6 +206,42 @@ export default function HomePage() {
                 Start free — Medical Facilities
               </a>
             </div>
+
+            {stateContact && (stateContact.agency_name || stateContact.agency_phone) && (
+              <div style={{ background: '#fff', border: '1px solid #c2ddf0', borderRadius: '12px', padding: '20px', marginTop: '10px' }}>
+                <p style={{ fontSize: '10px', fontWeight: '500', color: '#a8a39c', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
+                  State radiation control agency
+                </p>
+                {stateContact.agency_name && (
+                  <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>
+                    {stateContact.agency_name}
+                  </p>
+                )}
+                {stateContact.agency_director && (
+                  <p style={{ fontSize: '12px', color: '#827d76', marginBottom: '10px' }}>
+                    {stateContact.agency_director}
+                  </p>
+                )}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {stateContact.agency_phone && (
+                    <a href={`tel:${stateContact.agency_phone}`} style={{ fontSize: '13px', color: '#1a5fa8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '11px' }}>📞</span> {stateContact.agency_phone}
+                    </a>
+                  )}
+                  {stateContact.agency_email && (
+                    <a href={`mailto:${stateContact.agency_email}`} style={{ fontSize: '13px', color: '#1a5fa8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '11px' }}>✉</span> {stateContact.agency_email}
+                    </a>
+                  )}
+                </div>
+                {stateContact.agency_notes && (
+                  <p style={{ fontSize: '12px', color: '#827d76', lineHeight: '1.55', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #e8f3fb' }}>
+                    {stateContact.agency_notes}
+                  </p>
+                )}
+              </div>
+            )}
+
           </div>
         )}
 
