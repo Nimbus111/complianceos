@@ -53,10 +53,11 @@ export async function POST(request: Request) {
     const queryEmbedding = embeddingResponse.data[0].embedding
 
     const { data: regulations } = await admin.rpc('match_regulations', {
-      query_embedding: queryEmbedding,
-      match_threshold: 0.4,
-      match_count: 6,
-    })
+  query_embedding: queryEmbedding,
+  match_threshold: 0.4,
+  match_count: 6,
+  preferred_state: org?.facility_state || null,
+})
 
     const regContext = (regulations || []).map((r: any) => [
       `[${r.state_name} · ${r.modality_name} · ${r.facility_type_name}]`,
