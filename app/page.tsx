@@ -40,6 +40,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
   const [stateContact, setStateContact] = useState<any>(null)
+  const [stateForms, setStateForms] = useState<any[]>([])
 
   useEffect(() => {
     const supabase = createClient()
@@ -87,6 +88,17 @@ export default function HomePage() {
     } else {
       setStateContact(null)
     }
+    if (state) {
+  const { data: forms } = await supabase
+    .from('state_forms')
+    .select('form_name, form_description, classification, for_service_providers')
+    .eq('state_name', state)
+    .order('sort_order')
+    .limit(6)
+  setStateForms(forms || [])
+} else {
+  setStateForms([])
+}
     setLoading(false)
   }
 
