@@ -9,7 +9,7 @@ const features = [
   { name: 'AI assistant', desc: 'Instant answers to state-specific compliance questions', border: '#c4b5fd', href: '/dashboard/ai' },
  { name: 'Keys to Success', desc: 'Step-by-step compliance checklist for your state', border: '#b8e8cc', href: '/dashboard/keys' },
   { name: 'RSP builder', desc: 'Generate your full Radiation Protection Program', border: '#c2ddf0', href: '/dashboard/rsp' },
-]
+]{ name: 'X-ray Operators', desc: 'Operator credentials, training records, and CEU tracking.', border: '#b8e8cc' },
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -64,9 +64,12 @@ const inspectionReady = ktsPct >= 90
           <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>
             {org?.name || 'Your facility'}
           </h1>
-          <p style={{ fontSize: '13px', color: '#827d76' }}>
-            {[org?.facility_type_name, org?.facility_state, ...(org?.modality_names || [])].filter(Boolean).join(' · ')}
-          </p>
+          <p style={{ fontSize: '13px', color: '#827d76', lineHeight: '1.55', marginBottom: '8px' }}>
+  Your account is set up. Complete each section to build toward Inspection Ready (90%+).
+</p>
+<a href="/dashboard/report" style={{ fontSize: '12px', color: '#1a5fa8', fontWeight: '500', textDecoration: 'none' }}>
+  View Inspection Report →
+</a>
         </div>
 
         <div style={{ background: '#fff', border: '1px solid #c2ddf0', borderRadius: '12px', padding: '20px 24px', marginBottom: '28px', display: 'flex', alignItems: 'center', gap: '24px' }}>

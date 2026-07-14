@@ -171,10 +171,11 @@ export default function EquipmentPage() {
       </nav>
 
       <div style={{ maxWidth: '860px', margin: '0 auto', padding: '40px 24px' }}>
-        <div style={{ marginBottom: '32px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>Equipment inventory</h1>
-          <p style={{ fontSize: '13px', color: '#827d76' }}>{orgName}</p>
-        </div>
+        <div style={{ marginBottom: '20px' }}>
+  <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>Equipment inventory</h1>
+  <p style={{ fontSize: '13px', color: '#827d76' }}>{orgName}</p>
+</div>
+
 
         {/* X-ray equipment section header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
