@@ -16,12 +16,14 @@ const US_STATES = [
   'West Virginia','Wisconsin','Wyoming','District of Columbia'
 ]
 
-const MODALITY_SEARCH: Record<string, string> = {
-  'CBCT / 3D': 'Cone Beam',
-  'CT Scan': 'Tomography',
-  'Dental Intraoral': 'Intraoral',
-  'Fluoroscopy': 'Fluoroscop',
-  'Mammography': 'Mammograph',
+const MODALITY_SEARCH_TERMS: Record<string, string[]> = {
+  'General Radiography':       ['General Radiograph', 'GenRad'],
+  'C-arm Fluoroscopy':         ['C-arm'],
+  'Mobile X-ray':              ['Mobile'],
+  'Portable/Handheld X-ray':   ['Portable', 'Handheld'],
+  'CT':                        ['Tomography'],
+  'CBCT':                      ['Cone Beam', 'CBCT'],
+  'Fluoroscopy':               ['luoroscop'],
 }
 
 const FACILITY_SEARCH: Record<string, string> = {
@@ -208,16 +210,20 @@ export default function HomePage() {
   }, [])
 
   const handleSearch = async () => {
-    if (!state && !modality && !facilityType) return
-    setLoading(true)
-    setSearched(true)
-    const supabase = createClient()
-    let query = supabase.from('regulations').select('*')
-    if (state) query = query.eq('state_name', state)
-    if (modality) {
-      const term = MODALITY_SEARCH[modality] || modality
-      query = query.ilike('modality_name', `%${term}%`)
-    }
+    if (modality && MODALITY_SEARCH_TERMS[modality]) {
+  const terms = MODALITY_SEARCH_TERMS[modality]
+  if (modality === 'Fluoroscopy') {
+    query = query
+      .ilike('modality_name', '%luoroscop%')
+      .not('modality_name', 'ilike', '%C-arm%')
+  } else if (terms.length === 1) {
+    query = query.ilike('modality_name', `%${terms[0]}%`)
+  } else {
+    query = query.or(
+      terms.map(t => `modality_name.ilike.%${t}%`).join(',')
+    )
+  }
+}
     if (facilityType) {
       const term = FACILITY_SEARCH[facilityType] || facilityType
       query = query.ilike('facility_type_name', `%${term}%`)
