@@ -30,166 +30,6 @@ const FACILITY_SEARCH: Record<string, string> = {
   'Physician Office': 'Medical Clinic',
 }
 
-const lbl: React.CSSProperties = {
-  fontSize: '10px', fontWeight: '500', color: '#1a5fa8',
-  textTransform: 'uppercase', letterSpacing: '0.09em',
-  marginBottom: '4px', display: 'block',
-}
-
-const val: React.CSSProperties = {
-  fontSize: '13px', color: '#1e1c1a', lineHeight: '1.65', margin: 0,
-}
-
-const valReq: React.CSSProperties = {
-  ...val, fontWeight: '500', color: '#0d2d5e',
-}
-
-function Item({ label, value, required }: { label: string; value: any; required?: boolean }) {
-  if (value === null || value === undefined || value === false || value === '' || value === 'n/a') return null
-  const display = value === true ? 'Required' : String(value)
-  return (
-    <div style={{ marginBottom: '14px' }}>
-      <span style={lbl}>{label}</span>
-      <p style={required || value === true ? valReq : val}>{display}</p>
-    </div>
-  )
-}
-
-function Panel({ title, icon, children }: { title: string; icon: string; children: React.ReactNode }) {
-  return (
-    <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '10px', padding: '18px 20px', flex: 1, minWidth: 0 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', paddingBottom: '10px', borderBottom: '1px solid #eef3fb' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <i className={`ti ti-${icon}`} style={{ fontSize: '16px', color: '#1a5fa8' }} aria-hidden="true"></i>
-          <span style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e' }}>{title}</span>
-        </div>
-        <span style={{ fontSize: '11px', color: '#a8a39c' }}>Regulations table</span>
-      </div>
-      {children}
-    </div>
-  )
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div style={{ marginBottom: '28px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
-        <span style={{ fontSize: '11px', fontWeight: '500', color: '#0d2d5e', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{title}</span>
-        <div style={{ flex: 1, height: '1px', background: '#c2ddf0' }} />
-      </div>
-      <div style={{ display: 'flex', gap: '14px' }}>
-        {children}
-      </div>
-    </div>
-  )
-}
-
-function RegulationResult({ reg }: { reg: any }) {
-  const hasLeftRegistration = reg.facility_registration_req || reg.registration_notes || reg.annual_renewal || reg.state_own_reg_form || reg.form_2579_rules || reg.renewal_timeline
-  const hasRightRegistration = reg.shielding_plan_req || reg.shielding_approval_req || reg.shielding_party || reg.post_install_inspection || reg.shielding_expectations || reg.con_required
-  const hasLeftEquipment = reg.post_install_requirements || reg.qa_testing || reg.service_notes || reg.retain_service_docs || reg.equipment_training_records
-  const hasRightEquipment = reg.operator_credentials || reg.dosimetry_monitoring || reg.dosimetry_notes || reg.lead_aprons_req || reg.lead_apron_inspection || reg.lead_apron_notes
-  const hasLeftSafety = reg.keep_exposure_records || reg.pregnancy_protocols || reg.service_provider_docs
-  const hasRightSafety = reg.notify_state_timeframe || reg.notify_remove_unit || reg.termination_notes
-
-  return (
-    <div style={{ marginBottom: '32px' }}>
-
-      <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '10px', padding: '18px 20px', marginBottom: '14px' }}>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px', alignItems: 'center' }}>
-          <span style={{ fontSize: '11px', fontWeight: '500', color: '#1a5fa8', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '2px 10px' }}>
-            <i className="ti ti-sparkles" style={{ fontSize: '10px', marginRight: '4px' }} aria-hidden="true"></i>Plain language summary
-          </span>
-        </div>
-        <p style={{ fontSize: '11px', color: '#a8a39c', marginBottom: '4px' }}>
-          {[reg.state_name, reg.facility_type_name, reg.modality_name].filter(Boolean).join(' · ')}
-        </p>
-        {reg.post_install_requirements && (
-          <p style={{ fontSize: '11px', color: '#2d6a4f', background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '20px', display: 'inline-block', padding: '2px 10px', marginBottom: '10px' }}>
-            Applies to: {reg.post_install_requirements}
-          </p>
-        )}
-        {reg.plain_language_summary ? (
-          <p style={{ fontSize: '14px', color: '#1e1c1a', lineHeight: '1.75', margin: 0 }}>{reg.plain_language_summary}</p>
-        ) : (
-          <p style={{ fontSize: '13px', color: '#827d76', lineHeight: '1.65', margin: 0, fontStyle: 'italic' }}>
-            Compliance summary available — connect your Airtable AI summary field to see a plain language overview for this state and modality.
-          </p>
-        )}
-      </div>
-
-      {(hasLeftRegistration || hasRightRegistration) && (
-        <Section title="Registration &amp; licensing">
-          {hasLeftRegistration && (
-            <Panel title="Machine registration" icon="certificate">
-              <Item label="Facility registration" value={reg.facility_registration_req} required />
-              <Item label="Registration notes" value={reg.registration_notes} />
-              <Item label="Annual renewal" value={reg.annual_renewal} required />
-              <Item label="Renewal timeline" value={reg.renewal_timeline} />
-              <Item label="State registration form" value={reg.state_own_reg_form ? 'State provides its own registration form' : null} />
-              <Item label="Form 2579 rules" value={reg.form_2579_rules} />
-            </Panel>
-          )}
-          {hasRightRegistration && (
-            <Panel title="Shielding &amp; installation" icon="building-arch">
-              <Item label="Shielding plan required" value={reg.shielding_plan_req} required />
-              <Item label="State approval required" value={reg.shielding_approval_req} required />
-              <Item label="Shielding party" value={reg.shielding_party} />
-              <Item label="Post-installation inspection" value={reg.post_install_inspection} required />
-              <Item label="Shielding requirements" value={reg.shielding_expectations} />
-              <Item label="Certificate of need" value={reg.con_required} />
-            </Panel>
-          )}
-        </Section>
-      )}
-
-      {(hasLeftEquipment || hasRightEquipment) && (
-        <Section title="Equipment &amp; operations">
-          {hasLeftEquipment && (
-            <Panel title="X-ray machine care" icon="device-desktop-analytics">
-              <Item label="Post-installation requirements" value={reg.post_install_requirements} />
-              <Item label="Quality assurance testing" value={reg.qa_testing} required />
-              <Item label="Service notes" value={reg.service_notes} />
-              <Item label="Retain maintenance, repairs, service documents" value={reg.retain_service_docs ? 'Yes — all maintenance records, repair invoices, and service reports retained on-site for state inspection.' : null} required />
-              <Item label="X-ray equipment training records" value={reg.equipment_training_records} required />
-            </Panel>
-          )}
-          {hasRightEquipment && (
-            <Panel title="X-ray operator protocols" icon="user-check">
-              <Item label="X-ray operator credentials/certification" value={reg.operator_credentials} />
-              <Item label="Dosimetry monitoring" value={reg.dosimetry_monitoring} required />
-              <Item label="Dosimetry notes" value={reg.dosimetry_notes} />
-              <Item label="Lead aprons required" value={reg.lead_aprons_req && reg.lead_aprons_req !== 'n/a' ? reg.lead_aprons_req : null} required />
-              <Item label="Lead apron inspection" value={reg.lead_apron_inspection} />
-              <Item label="Lead apron notes" value={reg.lead_apron_notes} />
-            </Panel>
-          )}
-        </Section>
-      )}
-
-      {(hasLeftSafety || hasRightSafety) && (
-        <Section title="Safety &amp; compliance documentation">
-          {hasLeftSafety && (
-            <Panel title="Personnel &amp; safety" icon="shield-lock">
-              <Item label="Keep exposure records" value={reg.keep_exposure_records} required />
-              <Item label="Pregnancy protocols" value={reg.pregnancy_protocols} />
-              <Item label="Service provider documentation" value={reg.service_provider_docs} required />
-            </Panel>
-          )}
-          {hasRightSafety && (
-            <Panel title="Notifications &amp; reporting" icon="bell-ringing">
-              <Item label="Timeframe to notify state" value={reg.notify_state_timeframe} />
-              <Item label="Procedure for removing x-ray unit" value={reg.notify_remove_unit} />
-              <Item label="Theft/vandalism reporting" value={reg.termination_notes} />
-            </Panel>
-          )}
-        </Section>
-      )}
-
-    </div>
-  )
-}
-
 export default function HomePage() {
   const [state, setState] = useState('')
   const [modality, setModality] = useState('')
@@ -210,22 +50,33 @@ export default function HomePage() {
   }, [])
 
   const handleSearch = async () => {
-   if (modality && MODALITY_SEARCH_TERMS[modality]) {
-  const terms = MODALITY_SEARCH_TERMS[modality]
-  if (terms.length === 1) {
-    query = query.ilike('modality_name', `%${terms[0]}%`)
-  } else {
-    query = query.or(
-      terms.map(t => `modality_name.ilike.%${t}%`).join(',')
-    )
-  }
-}
+    if (!state && !modality && !facilityType) return
+    setLoading(true)
+    setSearched(true)
+    const supabase = createClient()
+    let query = supabase.from('regulations').select('*')
+
+    if (state) query = query.eq('state_name', state)
+
+    if (modality && MODALITY_SEARCH_TERMS[modality]) {
+      const terms = MODALITY_SEARCH_TERMS[modality]
+      if (terms.length === 1) {
+        query = query.ilike('modality_name', `%${terms[0]}%`)
+      } else {
+        query = query.or(
+          terms.map(t => `modality_name.ilike.%${t}%`).join(',')
+        )
+      }
+    }
+
     if (facilityType) {
       const term = FACILITY_SEARCH[facilityType] || facilityType
       query = query.ilike('facility_type_name', `%${term}%`)
     }
+
     const { data } = await query.limit(10)
     setResults(data || [])
+
     if (state) {
       const { data: contact } = await supabase
         .from('states')
@@ -241,6 +92,159 @@ export default function HomePage() {
 
   const canSearch = state || modality || facilityType
 
+  const lbl: React.CSSProperties = {
+    fontSize: '10px', fontWeight: '500', color: '#1a5fa8',
+    textTransform: 'uppercase', letterSpacing: '0.09em',
+    marginBottom: '4px', display: 'block',
+  }
+  const val: React.CSSProperties = {
+    fontSize: '13px', color: '#1e1c1a', lineHeight: '1.65', margin: 0,
+  }
+  const valReq: React.CSSProperties = {
+    ...val, fontWeight: '500', color: '#0d2d5e',
+  }
+
+  function Item({ label, value, required }: { label: string; value: any; required?: boolean }) {
+    if (value === null || value === undefined || value === false || value === '' || value === 'n/a') return null
+    const display = value === true ? 'Required' : String(value)
+    return (
+      <div style={{ marginBottom: '14px' }}>
+        <span style={lbl}>{label}</span>
+        <p style={required || value === true ? valReq : val}>{display}</p>
+      </div>
+    )
+  }
+
+  function Panel({ title, icon, children }: { title: string; icon: string; children: React.ReactNode }) {
+    return (
+      <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '10px', padding: '18px 20px', flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', paddingBottom: '10px', borderBottom: '1px solid #eef3fb' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '14px', color: '#1a5fa8' }}>◈</span>
+            <span style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e' }}>{title}</span>
+          </div>
+          <span style={{ fontSize: '11px', color: '#a8a39c' }}>Regulations table</span>
+        </div>
+        {children}
+      </div>
+    )
+  }
+
+  function Section({ title, children }: { title: string; children: React.ReactNode }) {
+    return (
+      <div style={{ marginBottom: '28px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
+          <span style={{ fontSize: '11px', fontWeight: '500', color: '#0d2d5e', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{title}</span>
+          <div style={{ flex: 1, height: '1px', background: '#c2ddf0' }} />
+        </div>
+        <div style={{ display: 'flex', gap: '14px' }}>{children}</div>
+      </div>
+    )
+  }
+
+  function RegulationResult({ reg }: { reg: any }) {
+    const hasLeftReg = reg.facility_registration_req || reg.registration_notes || reg.annual_renewal || reg.state_own_reg_form || reg.form_2579_rules || reg.renewal_timeline
+    const hasRightReg = reg.shielding_plan_req || reg.shielding_approval_req || reg.shielding_party || reg.post_install_inspection || reg.shielding_expectations || reg.con_required
+    const hasLeftEq = reg.post_install_requirements || reg.qa_testing || reg.service_notes || reg.retain_service_docs || reg.equipment_training_records
+    const hasRightEq = reg.operator_credentials || reg.dosimetry_monitoring || reg.dosimetry_notes || reg.lead_aprons_req || reg.lead_apron_inspection || reg.lead_apron_notes
+    const hasLeftSafety = reg.keep_exposure_records || reg.pregnancy_protocols || reg.service_provider_docs
+    const hasRightSafety = reg.notify_state_timeframe || reg.notify_remove_unit || reg.termination_notes
+
+    return (
+      <div style={{ marginBottom: '32px' }}>
+        <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '10px', padding: '18px 20px', marginBottom: '14px' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px', alignItems: 'center' }}>
+            <span style={{ fontSize: '11px', fontWeight: '500', color: '#1a5fa8', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '2px 10px' }}>
+              Plain language summary
+            </span>
+          </div>
+          <p style={{ fontSize: '11px', color: '#a8a39c', marginBottom: '4px' }}>
+            {[reg.state_name, reg.facility_type_name, reg.modality_name].filter(Boolean).join(' · ')}
+          </p>
+          {reg.post_install_requirements && (
+            <p style={{ fontSize: '11px', color: '#2d6a4f', background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '20px', display: 'inline-block', padding: '2px 10px', marginBottom: '10px' }}>
+              Applies to: {reg.post_install_requirements}
+            </p>
+          )}
+          {reg.plain_language_summary ? (
+            <p style={{ fontSize: '14px', color: '#1e1c1a', lineHeight: '1.75', margin: 0 }}>{reg.plain_language_summary}</p>
+          ) : (
+            <p style={{ fontSize: '13px', color: '#827d76', lineHeight: '1.65', margin: 0, fontStyle: 'italic' }}>
+              Compliance summary available once AI field is populated in Airtable for this state and modality.
+            </p>
+          )}
+        </div>
+
+        {(hasLeftReg || hasRightReg) && (
+          <Section title="Registration &amp; licensing">
+            {hasLeftReg && (
+              <Panel title="Machine registration" icon="certificate">
+                <Item label="Facility registration" value={reg.facility_registration_req} required />
+                <Item label="Registration notes" value={reg.registration_notes} />
+                <Item label="Annual renewal" value={reg.annual_renewal} required />
+                <Item label="Renewal timeline" value={reg.renewal_timeline} />
+                <Item label="State registration form" value={reg.state_own_reg_form ? 'State provides its own registration form' : null} />
+                <Item label="Form 2579 rules" value={reg.form_2579_rules} />
+              </Panel>
+            )}
+            {hasRightReg && (
+              <Panel title="Shielding &amp; installation" icon="shield">
+                <Item label="Shielding plan required" value={reg.shielding_plan_req} required />
+                <Item label="State approval required" value={reg.shielding_approval_req} required />
+                <Item label="Shielding party" value={reg.shielding_party} />
+                <Item label="Post-installation inspection" value={reg.post_install_inspection} required />
+                <Item label="Shielding requirements" value={reg.shielding_expectations} />
+                <Item label="Certificate of need" value={reg.con_required} />
+              </Panel>
+            )}
+          </Section>
+        )}
+
+        {(hasLeftEq || hasRightEq) && (
+          <Section title="Equipment &amp; operations">
+            {hasLeftEq && (
+              <Panel title="X-ray machine care" icon="tool">
+                <Item label="Quality assurance testing" value={reg.qa_testing} required />
+                <Item label="Service notes" value={reg.service_notes} />
+                <Item label="Retain service documents" value={reg.retain_service_docs ? 'Yes — all maintenance records, repair invoices, and service reports retained on-site.' : null} required />
+                <Item label="Equipment training records" value={reg.equipment_training_records} required />
+              </Panel>
+            )}
+            {hasRightEq && (
+              <Panel title="X-ray operator protocols" icon="user">
+                <Item label="Operator credentials" value={reg.operator_credentials} />
+                <Item label="Dosimetry monitoring" value={reg.dosimetry_monitoring} required />
+                <Item label="Dosimetry notes" value={reg.dosimetry_notes} />
+                <Item label="Lead aprons required" value={reg.lead_aprons_req && reg.lead_aprons_req !== 'n/a' ? reg.lead_aprons_req : null} required />
+                <Item label="Lead apron inspection" value={reg.lead_apron_inspection} />
+                <Item label="Lead apron notes" value={reg.lead_apron_notes} />
+              </Panel>
+            )}
+          </Section>
+        )}
+
+        {(hasLeftSafety || hasRightSafety) && (
+          <Section title="Safety &amp; compliance documentation">
+            {hasLeftSafety && (
+              <Panel title="Personnel &amp; safety" icon="shield-lock">
+                <Item label="Keep exposure records" value={reg.keep_exposure_records} required />
+                <Item label="Pregnancy protocols" value={reg.pregnancy_protocols} />
+                <Item label="Service provider documentation" value={reg.service_provider_docs} required />
+              </Panel>
+            )}
+            {hasRightSafety && (
+              <Panel title="Notifications &amp; reporting" icon="bell">
+                <Item label="Timeframe to notify state" value={reg.notify_state_timeframe} />
+                <Item label="Procedure for removing x-ray unit" value={reg.notify_remove_unit} />
+                <Item label="Theft/vandalism reporting" value={reg.termination_notes} />
+              </Panel>
+            )}
+          </Section>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f0f4f8' }}>
 
@@ -248,7 +252,7 @@ export default function HomePage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <i className="ti ti-wave-sine" style={{ fontSize: '18px', color: '#8bb4d4' }} aria-hidden="true"></i>
+              <span style={{ fontSize: '18px', color: '#8bb4d4' }}>◈</span>
             </div>
             <div>
               <p style={{ color: '#fff', fontSize: '14px', fontWeight: '500', margin: 0 }}>X-ray Compliance Hub</p>
@@ -267,7 +271,6 @@ export default function HomePage() {
       <div style={{ background: '#f0f4f8', padding: '48px 24px 40px' }}>
         <div style={{ maxWidth: '860px', margin: '0 auto' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '4px 12px', marginBottom: '20px' }}>
-            <i className="ti ti-shield-check" style={{ fontSize: '12px', color: '#1a5fa8' }} aria-hidden="true"></i>
             <span style={{ fontSize: '11px', fontWeight: '500', color: '#1a5fa8', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Free compliance search — all 50 states</span>
           </div>
           <h1 style={{ fontSize: '36px', fontWeight: '500', color: '#0d2d5e', lineHeight: '1.2', marginBottom: '12px', maxWidth: '640px' }}>
@@ -303,8 +306,7 @@ export default function HomePage() {
               </select>
             </div>
             <button onClick={handleSearch} disabled={!canSearch || loading}
-              style={{ height: '44px', padding: '0 28px', background: canSearch ? '#0d2d5e' : '#c2ddf0', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: canSearch ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
-              <i className="ti ti-search" style={{ fontSize: '15px' }} aria-hidden="true"></i>
+              style={{ height: '44px', padding: '0 28px', background: canSearch ? '#0d2d5e' : '#c2ddf0', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: canSearch ? 'pointer' : 'default', whiteSpace: 'nowrap' }}>
               {loading ? 'Searching...' : 'Search'}
             </button>
           </div>
@@ -346,12 +348,12 @@ export default function HomePage() {
                 <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
                   {stateContact.agency_phone && (
                     <a href={`tel:${stateContact.agency_phone}`} style={{ fontSize: '13px', color: '#1a5fa8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <i className="ti ti-phone" style={{ fontSize: '13px' }} aria-hidden="true"></i>{stateContact.agency_phone}
+                      ☎ {stateContact.agency_phone}
                     </a>
                   )}
                   {stateContact.agency_email && (
                     <a href={`mailto:${stateContact.agency_email}`} style={{ fontSize: '13px', color: '#1a5fa8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                      <i className="ti ti-mail" style={{ fontSize: '13px' }} aria-hidden="true"></i>{stateContact.agency_email}
+                      ✉ {stateContact.agency_email}
                     </a>
                   )}
                 </div>
@@ -368,13 +370,12 @@ export default function HomePage() {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px' }}>
                 {[
-                  { icon: 'forms', title: 'State forms & applications', desc: 'Downloadable registration applications, renewal forms, CON submission packets, and shielding plan checklists — pre-identified for your state and modality.' },
-                  { icon: 'bell', title: 'Regulatory update alerts', desc: 'Get notified when your state updates radiation control regulations, matched to your facility type and modalities.' },
-                  { icon: 'sparkles', title: 'AI compliance assistant', desc: 'Ask unlimited questions about your specific compliance situation and get instant, citation-backed answers.' },
+                  { title: 'State forms & applications', desc: 'Downloadable registration applications, renewal forms, CON submission packets, and shielding plan checklists pre-identified for your state and modality.' },
+                  { title: 'Regulatory update alerts', desc: 'Get notified when your state updates radiation control regulations, matched to your facility type and modalities.' },
+                  { title: 'AI compliance assistant', desc: 'Ask unlimited questions about your specific compliance situation and get instant, citation-backed answers.' },
                 ].map(item => (
                   <div key={item.title} style={{ background: '#fff', border: '1px dashed #c2ddf0', borderRadius: '10px', padding: '16px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-                      <i className={`ti ti-${item.icon}`} style={{ fontSize: '18px', color: '#a8a39c' }} aria-hidden="true"></i>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
                       <span style={{ fontSize: '10px', fontWeight: '500', color: '#827d76', background: '#f4f7fb', border: '1px solid #e8e6e2', borderRadius: '20px', padding: '2px 8px' }}>Members only</span>
                     </div>
                     <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>{item.title}</p>
@@ -388,9 +389,8 @@ export default function HomePage() {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '16px', padding: '12px 16px', background: '#f4f7fb', borderRadius: '8px', border: '1px solid #dce8f5' }}>
-              <i className="ti ti-info-circle" style={{ fontSize: '14px', color: '#4a6d8c', flexShrink: 0, marginTop: '1px' }} aria-hidden="true"></i>
               <p style={{ fontSize: '12px', color: '#4a6d8c', lineHeight: '1.6', margin: 0 }}>
-                Results sourced from the Regulations table. Verify current requirements with your state agency before acting on compliance decisions. Data current as of {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.
+                Results sourced from official state radiation control regulations. Verify current requirements with your state agency before acting on compliance decisions. Data current as of {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.
               </p>
             </div>
           </>
@@ -399,12 +399,11 @@ export default function HomePage() {
         {!searched && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px', paddingTop: '16px' }}>
             {[
-              { icon: 'file-certificate', title: 'RSP builder', desc: 'Generate a complete, state-specific Radiation Protection Program in minutes — not hours.' },
-              { icon: 'calendar-check', title: 'Compliance calendar', desc: 'Every renewal, QA deadline, and inspection date tracked automatically for your facility.' },
-              { icon: 'sparkles', title: 'AI compliance assistant', desc: 'Ask compliance questions about your state and get cited, regulation-backed answers instantly.' },
+              { title: 'RSP builder', desc: 'Generate a complete, state-specific Radiation Protection Program in minutes — not hours.' },
+              { title: 'Compliance calendar', desc: 'Every renewal, QA deadline, and inspection date tracked automatically for your facility.' },
+              { title: 'AI compliance assistant', desc: 'Ask compliance questions about your state and get cited, regulation-backed answers instantly.' },
             ].map(card => (
               <div key={card.title} style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '10px', padding: '20px' }}>
-                <i className={`ti ti-${card.icon}`} style={{ fontSize: '22px', color: '#1a5fa8', display: 'block', marginBottom: '10px' }} aria-hidden="true"></i>
                 <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>{card.title}</p>
                 <p style={{ fontSize: '12px', color: '#827d76', lineHeight: '1.55' }}>{card.desc}</p>
               </div>
