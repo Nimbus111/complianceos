@@ -22,6 +22,7 @@ export async function GET() {
         `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/Keys%20to%20Success`
       )
       url.searchParams.set('pageSize', '100')
+      url.searchParams.set('view', 'Grid view') 
       if (offset) url.searchParams.set('offset', offset)
 
       const res = await fetch(url.toString(), {
