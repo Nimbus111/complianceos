@@ -35,36 +35,36 @@ export default function KeysToSuccessPage() {
   const router = useRouter()
 
   const fetchAll = useCallback(async () => {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/login'); return }
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) { router.push('/login'); return }
 
-    const { data: profile } = await supabase
-      .from('profiles').select('org_id').eq('id', user.id).single()
-    if (!profile?.org_id) { router.push('/onboarding'); return }
+  const { data: profile } = await supabase
+    .from('profiles').select('org_id').eq('id', user.id).single()
+  if (!profile?.org_id) { router.push('/onboarding'); return }
 
-    setOrgId(profile.org_id)
+  setOrgId(profile.org_id)
 
-    const { data: org } = await supabase
-      .from('organizations').select('name').eq('id', profile.org_id).single()
-    if (org) setOrgName(org.name)
+  const { data: org } = await supabase
+    .from('organizations').select('name').eq('id', profile.org_id).single()
+  if (org) setOrgName(org.name)
 
-    const { data: ktsItems } = await supabase
-      .from('keys_to_success')
-      .select('*')
-      .order('created_at', { ascending: true })
-    setItems(ktsItems || [])
+  const { data: ktsItems } = await supabase
+    .from('keys_to_success')
+    .select('*')
+    .order('sort_order', { ascending: true })    // ← changed from created_at
+  setItems(ktsItems || [])
 
-    const { data: checks } = await supabase
-      .from('compliance_checklists')
-      .select('guidance_id')
-      .eq('org_id', profile.org_id)
-      .eq('completed', true)
+  const { data: checks } = await supabase
+    .from('compliance_checklists')
+    .select('guidance_id')
+    .eq('org_id', profile.org_id)
+    .eq('completed', true)
 
-    const completedIds = new Set((checks || []).map((c: any) => c.guidance_id))
-    setCompleted(completedIds)
-    setLoading(false)
-  }, [router])
+  const completedIds = new Set((checks || []).map((c: any) => c.guidance_id))
+  setCompleted(completedIds)
+  setLoading(false)
+}, [router])
 
   useEffect(() => { fetchAll() }, [fetchAll])
 
@@ -112,35 +112,55 @@ export default function KeysToSuccessPage() {
 
       <div style={{ maxWidth: '760px', margin: '0 auto', padding: '40px 24px' }}>
 
-        <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', padding: '24px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '28px' }}>
-          <div style={{ position: 'relative', width: '108px', height: '108px', flexShrink: 0 }}>
-            <ProgressRing pct={pct} />
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontSize: '22px', fontWeight: '500', color: '#0d2d5e', lineHeight: 1 }}>{pct}%</span>
-            </div>
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-              <h1 style={{ fontSize: '18px', fontWeight: '500', color: '#0d2d5e' }}>Keys to Success</h1>
-              {inspectionReady && (
-                <span style={{ fontSize: '11px', fontWeight: '500', color: '#2d6a4f', background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '20px', padding: '3px 10px' }}>
-                  Inspection Ready
-                </span>
-              )}
-            </div>
-            <p style={{ fontSize: '13px', color: '#827d76', marginBottom: '10px' }}>
-              {orgName} · {completedCount} of {total} items complete
-            </p>
-            <div style={{ background: '#e8f3fb', borderRadius: '4px', height: '8px', overflow: 'hidden' }}>
-              <div style={{ background: inspectionReady ? '#40916c' : pct >= 60 ? '#1a5fa8' : '#c44a1a', height: '100%', width: `${pct}%`, borderRadius: '4px', transition: 'width 0.5s ease' }} />
-            </div>
-            {!inspectionReady && (
-              <p style={{ fontSize: '11px', color: '#a8a39c', marginTop: '6px' }}>
-                Complete {Math.ceil(total * 0.9) - completedCount} more item{Math.ceil(total * 0.9) - completedCount !== 1 ? 's' : ''} to reach Inspection Ready (90%)
-              </p>
-            )}
-          </div>
-        </div>
+        <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', padding: '24px', marginBottom: '24px' }}>
+
+  {/* Instructor header */}
+  {process.env.NEXT_PUBLIC_INSTRUCTOR_PHOTO && (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #eef3fb' }}>
+      <img
+        src={process.env.NEXT_PUBLIC_INSTRUCTOR_PHOTO}
+        alt="The Radiology Coach"
+        style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #c2ddf0', flexShrink: 0 }}
+      />
+      <div>
+        <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', marginBottom: '2px' }}>Gregory Turner</p>
+        <p style={{ fontSize: '12px', color: '#1a5fa8', marginBottom: '2px' }}>The Radiology Coach</p>
+        <p style={{ fontSize: '11px', color: '#a8a39c' }}>Compliance specialist · X-ray educator</p>
+      </div>
+    </div>
+  )}
+
+  {/* Progress section */}
+  <div style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
+    <div style={{ position: 'relative', width: '108px', height: '108px', flexShrink: 0 }}>
+      <ProgressRing pct={pct} />
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ fontSize: '22px', fontWeight: '500', color: '#0d2d5e', lineHeight: 1 }}>{pct}%</span>
+      </div>
+    </div>
+    <div style={{ flex: 1 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+        <h1 style={{ fontSize: '18px', fontWeight: '500', color: '#0d2d5e' }}>Keys to Success</h1>
+        {inspectionReady && (
+          <span style={{ fontSize: '11px', fontWeight: '500', color: '#2d6a4f', background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '20px', padding: '3px 10px' }}>
+            Inspection Ready
+          </span>
+        )}
+      </div>
+      <p style={{ fontSize: '13px', color: '#827d76', marginBottom: '10px' }}>
+        {orgName} · {completedCount} of {total} items complete
+      </p>
+      <div style={{ background: '#e8f3fb', borderRadius: '4px', height: '8px', overflow: 'hidden' }}>
+        <div style={{ background: inspectionReady ? '#40916c' : pct >= 60 ? '#1a5fa8' : '#c44a1a', height: '100%', width: `${pct}%`, borderRadius: '4px', transition: 'width 0.5s ease' }} />
+      </div>
+      {!inspectionReady && (
+        <p style={{ fontSize: '11px', color: '#a8a39c', marginTop: '6px' }}>
+          Complete {Math.ceil(total * 0.9) - completedCount} more item{Math.ceil(total * 0.9) - completedCount !== 1 ? 's' : ''} to reach Inspection Ready (90%)
+        </p>
+      )}
+    </div>
+  </div>
+</div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {items.map(item => {

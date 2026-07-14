@@ -38,20 +38,21 @@ export async function GET() {
     let synced = 0
     let errors = 0
 
-    for (const record of records) {
-      const f = record.fields
-      const { error } = await admin
-        .from('keys_to_success')
-        .upsert({
-          airtable_record_id: record.id,
-          topic: getStr(f['Name']),
-          notes_text: getStr(f['Notes']),
-          youtube_url: getStr(f['Video']),
-        }, { onConflict: 'airtable_record_id' })
-
-      if (error) { console.error(error.message); errors++ }
-      else synced++
-    }
+    for (let i = 0; i < records.length; i++) {
+  const record = records[i]
+  const f = record.fields
+  const { error } = await admin
+    .from('keys_to_success')
+    .upsert({
+      airtable_record_id: record.id,
+      topic: getStr(f['Name']),
+      notes_text: getStr(f['Notes']),
+      youtube_url: getStr(f['Video']),
+      sort_order: i + 1,
+    }, { onConflict: 'airtable_record_id' })
+  if (error) { console.error(error.message); errors++ }
+  else synced++
+}
 
     return NextResponse.json({
       success: true, synced, errors,

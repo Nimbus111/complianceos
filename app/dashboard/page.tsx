@@ -32,6 +32,20 @@ export default async function DashboardPage() {
     .eq('id', profile.org_id)
     .single()
 
+    const { data: ktsItems } = await supabase
+  .from('keys_to_success').select('id')
+
+const { count: ktsCompleted } = await supabase
+  .from('compliance_checklists')
+  .select('*', { count: 'exact', head: true })
+  .eq('org_id', profile.org_id)
+  .eq('completed', true)
+
+const ktsPct = ktsItems?.length
+  ? Math.round(((ktsCompleted || 0) / ktsItems.length) * 100)
+  : 0
+const inspectionReady = ktsPct >= 90
+
   return (
     <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f4f7fb' }}>
       <nav style={{ background: '#0d2d5e', padding: '0 32px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -57,7 +71,7 @@ export default async function DashboardPage() {
 
         <div style={{ background: '#fff', border: '1px solid #c2ddf0', borderRadius: '12px', padding: '20px 24px', marginBottom: '28px', display: 'flex', alignItems: 'center', gap: '24px' }}>
           <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#e8f3fb', border: '3px solid #c2ddf0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <span style={{ fontSize: '15px', fontWeight: '500', color: '#1a5fa8' }}>0%</span>
+            <span style={{ fontSize: '15px', fontWeight: '500', color: inspectionReady ? '#40916c' : '#1a5fa8' }}>{ktsPct}%</span>
           </div>
           <div>
             <p style={{ fontSize: '15px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>Compliance score</p>
