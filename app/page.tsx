@@ -17,13 +17,13 @@ const US_STATES = [
 ]
 
 const MODALITY_SEARCH_TERMS: Record<string, string[]> = {
-  'General Radiography':       ['General Radiograph', 'GenRad'],
-  'C-arm Fluoroscopy':         ['C-arm'],
-  'Mobile X-ray':              ['Mobile'],
-  'Portable/Handheld X-ray':   ['Portable', 'Handheld'],
-  'CT':                        ['Tomography'],
-  'CBCT':                      ['Cone Beam', 'CBCT'],
-  'Fluoroscopy':               ['luoroscop'],
+  'General Radiography':     ['General Radiograph', 'GenRad'],
+  'C-arm Fluoroscopy':       ['C-arm'],
+  'Mobile X-ray':            ['Mobile'],
+  'Portable/Handheld X-ray': ['Portable', 'Handheld'],
+  'CT':                      ['Tomography'],
+  'CBCT':                    ['Cone Beam', 'CBCT'],
+  'Fluoroscopy':             ['Fluoroscopy'],
 }
 
 const FACILITY_SEARCH: Record<string, string> = {
@@ -210,13 +210,9 @@ export default function HomePage() {
   }, [])
 
   const handleSearch = async () => {
-    if (modality && MODALITY_SEARCH_TERMS[modality]) {
+   if (modality && MODALITY_SEARCH_TERMS[modality]) {
   const terms = MODALITY_SEARCH_TERMS[modality]
-  if (modality === 'Fluoroscopy') {
-    query = query
-      .ilike('modality_name', '%luoroscop%')
-      .not('modality_name', 'ilike', '%C-arm%')
-  } else if (terms.length === 1) {
+  if (terms.length === 1) {
     query = query.ilike('modality_name', `%${terms[0]}%`)
   } else {
     query = query.or(
