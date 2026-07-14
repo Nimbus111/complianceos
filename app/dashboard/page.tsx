@@ -10,6 +10,7 @@ const features = [
  { name: 'Keys to Success', desc: 'Step-by-step compliance checklist for your state', border: '#b8e8cc', href: '/dashboard/keys' },
   { name: 'RSP builder', desc: 'Generate your full Radiation Protection Program', border: '#c2ddf0', href: '/dashboard/rsp' },
 { name: 'X-ray Operators', desc: 'Operator credentials, training records, and CEU tracking.', border: '#b8e8cc' },
+{ name: 'State documents', desc: 'Registration forms, rules, and regulatory documents by state.', border: '#c2ddf0', href: '/dashboard/stateforms' },
 ]
 export default async function DashboardPage() {
   const supabase = await createClient()
