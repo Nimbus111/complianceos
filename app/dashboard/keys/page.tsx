@@ -120,10 +120,10 @@ export default function KeysToSuccessPage() {
       <img
         src={process.env.NEXT_PUBLIC_INSTRUCTOR_PHOTO}
         alt="The Radiology Coach"
-        style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #c2ddf0', flexShrink: 0 }}
+        style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top', border: '2px solid #c2ddf0', flexShrink: 0 }}
       />
       <div>
-        <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', marginBottom: '2px' }}>Gregory Turner</p>
+        <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', marginBottom: '2px' }}>Greg Turner</p>
         <p style={{ fontSize: '12px', color: '#1a5fa8', marginBottom: '2px' }}>The Radiology Coach</p>
         <p style={{ fontSize: '11px', color: '#a8a39c' }}>Compliance specialist · X-ray educator</p>
       </div>
