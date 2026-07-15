@@ -3,6 +3,8 @@ import { createClient as createAdmin } from '@supabase/supabase-js'
 import OpenAI from 'openai'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 const getAdmin = () => createAdmin(
