@@ -30,7 +30,110 @@ const EVENT_TYPES = [
   { value: 'rsp_annual_review', label: 'RSP / RPP annual review', category: 'program_review' },
   { value: 'compliance_self_audit', label: 'Annual compliance self-audit', category: 'program_review' },
 ]
+function YearCalendar({ events }: { events: any[] }) {
+  const now = new Date()
+  const year = now.getFullYear()
 
+  const CATEGORY_COLORS: Record<string, string> = {
+    registration_licensing: '#1a5fa8',
+    equipment_qa:           '#2d6a4f',
+    personnel:              '#4c1d95',
+    safety_equipment:       '#9a3510',
+    program_review:         '#1a72e8',
+  }
+
+  const eventMap: Record<string, any[]> = {}
+  events.forEach(ev => {
+    const key = ev.due_date?.split('T')[0]
+    if (key) {
+      if (!eventMap[key]) eventMap[key] = []
+      eventMap[key].push(ev)
+    }
+  })
+
+  const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px' }}>
+      {Array.from({ length: 12 }, (_, month) => {
+        const firstDay = new Date(year, month, 1)
+        const daysInMonth = new Date(year, month + 1, 0).getDate()
+        const startOffset = firstDay.getDay()
+        const monthName = firstDay.toLocaleDateString('en-US', { month: 'long' })
+        const isCurrentMonth = month === now.getMonth()
+        const isPast = month < now.getMonth()
+
+        return (
+          <div key={month} style={{
+            background: '#fff',
+            border: `1px solid ${isCurrentMonth ? '#1a5fa8' : '#dce8f5'}`,
+            borderRadius: '10px',
+            padding: '12px',
+            opacity: isPast ? 0.7 : 1,
+          }}>
+            <p style={{
+              fontSize: '12px', fontWeight: '500',
+              color: isCurrentMonth ? '#1a5fa8' : '#0d2d5e',
+              marginBottom: '8px', textAlign: 'center',
+            }}>
+              {monthName} {year}
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1px', marginBottom: '4px' }}>
+              {['S','M','T','W','T','F','S'].map((d, i) => (
+                <div key={i} style={{ textAlign: 'center', fontSize: '9px', color: '#a8a39c', fontWeight: '500', padding: '2px 0' }}>{d}</div>
+              ))}
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1px' }}>
+              {Array.from({ length: startOffset }, (_, i) => (
+                <div key={`e${i}`} />
+              ))}
+              {Array.from({ length: daysInMonth }, (_, i) => {
+                const day = i + 1
+                const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+                const dayEvents = eventMap[dateKey] || []
+                const isToday = dateKey === todayKey
+                const hasEvents = dayEvents.length > 0
+
+                return (
+                  <div key={day} style={{
+                    display: 'flex', flexDirection: 'column',
+                    alignItems: 'center', padding: '1px 0',
+                    position: 'relative',
+                  }}>
+                    <span style={{
+                      fontSize: '10px',
+                      color: isToday ? '#fff' : isPast ? '#c2ddf0' : '#0d2d5e',
+                      background: isToday ? '#1a5fa8' : 'transparent',
+                      borderRadius: '50%',
+                      width: '16px', height: '16px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontWeight: isToday ? '500' : '400',
+                    }}>
+                      {day}
+                    </span>
+                    {hasEvents && (
+                      <div style={{ display: 'flex', gap: '1px', marginTop: '1px', flexWrap: 'wrap', justifyContent: 'center', maxWidth: '16px' }}>
+                        {dayEvents.slice(0, 3).map((ev, ei) => (
+                          <div key={ei} style={{
+                            width: '4px', height: '4px', borderRadius: '50%',
+                            background: CATEGORY_COLORS[ev.event_category] || '#c2ddf0',
+                            flexShrink: 0,
+                          }} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
 export default function CalendarPage() {
   const [events, setEvents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -233,6 +336,30 @@ export default function CalendarPage() {
           </>
         )}
       </div>
+      {!loading && events.length > 0 && (
+  <div style={{ marginTop: '32px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+      <span style={{ fontSize: '11px', fontWeight: '500', color: '#0d2d5e', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+        {new Date().getFullYear()} at a glance
+      </span>
+      <div style={{ flex: 1, height: '1px', background: '#c2ddf0' }} />
+      <div style={{ display: 'flex', gap: '10px', flexShrink: 0 }}>
+        {[
+          { label: 'Registration', color: '#1a5fa8' },
+          { label: 'Equipment QA', color: '#2d6a4f' },
+          { label: 'Personnel', color: '#4c1d95' },
+          { label: 'Safety', color: '#9a3510' },
+        ].map(item => (
+          <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: item.color }} />
+            <span style={{ fontSize: '10px', color: '#a8a39c' }}>{item.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+    <YearCalendar events={events} />
+  </div>
+)}
     </div>
   )
 }
