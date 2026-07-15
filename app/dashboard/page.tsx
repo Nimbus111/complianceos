@@ -11,6 +11,7 @@ const features = [
   { name: 'RSP builder', desc: 'Generate your full Radiation Protection Program', border: '#c2ddf0', href: '/dashboard/rsp' },
 { name: 'X-ray Operators', desc: 'Operator credentials, training records, and CEU tracking.', border: '#b8e8cc' },
 { name: 'State documents', desc: 'Registration forms, rules, and regulatory documents by state.', border: '#c2ddf0', href: '/dashboard/stateforms' },
+{ name: 'Equipment & Systems', desc: 'Service contacts, PACS config, warranties, and support numbers.', border: '#b8e8cc', href: '/dashboard/systems' },
 ]
 export default async function DashboardPage() {
   const supabase = await createClient()
