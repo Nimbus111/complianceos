@@ -6,13 +6,14 @@ const features = [
   { name: 'Compliance calendar', desc: 'Track renewals, inspections, and QA deadlines', border: '#c2ddf0', href: '/dashboard/calendar' },
   { name: 'Document repository', desc: 'Store and organize all compliance documents', border: '#c2ddf0', href: '/dashboard/documents' },
   { name: 'Equipment inventory', desc: 'Track x-ray equipment and PM schedules', border: '#c2ddf0', href: '/dashboard/equipment' },
+  { name: 'Equipment & Systems', desc: 'Service contacts, PACS config, warranties, and support numbers.', border: '#b8e8cc', href: '/dashboard/systems' },
   { name: 'AI assistant', desc: 'Instant answers to state-specific compliance questions', border: '#c4b5fd', href: '/dashboard/ai' },
- { name: 'Keys to Success', desc: 'Step-by-step compliance checklist for your state', border: '#b8e8cc', href: '/dashboard/keys' },
+  { name: 'Keys to Success', desc: 'Step-by-step compliance checklist for your state', border: '#b8e8cc', href: '/dashboard/keys' },
   { name: 'RSP builder', desc: 'Generate your full Radiation Protection Program', border: '#c2ddf0', href: '/dashboard/rsp' },
-{ name: 'X-ray Operators', desc: 'Operator credentials, training records, and CEU tracking.', border: '#b8e8cc' },
-{ name: 'State documents', desc: 'Registration forms, rules, and regulatory documents by state.', border: '#c2ddf0', href: '/dashboard/stateforms' },
-{ name: 'Equipment & Systems', desc: 'Service contacts, PACS config, warranties, and support numbers.', border: '#b8e8cc', href: '/dashboard/systems' },
+  { name: 'State documents', desc: 'Registration forms, rules, and regulatory documents by state.', border: '#c2ddf0', href: '/dashboard/stateforms' },
+  { name: 'X-ray Operators', desc: 'Operator credentials, training records, and CEU tracking.', border: '#b8e8cc' },
 ]
+
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -29,34 +30,34 @@ export default async function DashboardPage() {
   }
 
   const { data: org } = await supabase
-  .from('organizations')
-  .select('*')
-  .eq('id', profile.org_id)
-  .single()
+    .from('organizations')
+    .select('*')
+    .eq('id', profile.org_id)
+    .single()
 
-const { data: dealerRaw } = await supabase
-  .from('equipment_contacts')
-  .select('company_name, contact_name, phone_primary, phone_support, contact_type')
-  .eq('org_id', profile.org_id)
-  .in('contact_type', ['dealer', 'manufacturer'])
+  const { data: ktsItems } = await supabase
+    .from('keys_to_success').select('id')
 
-const panicContact = (dealerRaw as any[])?.find(c => c.contact_type === 'dealer')
-  || (dealerRaw as any[])?.[0]
-  || null
+  const { count: ktsCompleted } = await supabase
+    .from('compliance_checklists')
+    .select('*', { count: 'exact', head: true })
+    .eq('org_id', profile.org_id)
+    .eq('completed', true)
 
-    const { data: ktsItems } = await supabase
-  .from('keys_to_success').select('id')
+  const ktsPct = ktsItems?.length
+    ? Math.round(((ktsCompleted || 0) / ktsItems.length) * 100)
+    : 0
+  const inspectionReady = ktsPct >= 90
 
-const { count: ktsCompleted } = await supabase
-  .from('compliance_checklists')
-  .select('*', { count: 'exact', head: true })
-  .eq('org_id', profile.org_id)
-  .eq('completed', true)
+  const { data: dealerRaw } = await supabase
+    .from('equipment_contacts')
+    .select('company_name, contact_name, phone_primary, phone_support, contact_type')
+    .eq('org_id', profile.org_id)
+    .in('contact_type', ['dealer', 'manufacturer'])
 
-const ktsPct = ktsItems?.length
-  ? Math.round(((ktsCompleted || 0) / ktsItems.length) * 100)
-  : 0
-const inspectionReady = ktsPct >= 90
+  const panicContact = (dealerRaw as any[])?.find(c => c.contact_type === 'dealer')
+    || (dealerRaw as any[])?.[0]
+    || null
 
   return (
     <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f4f7fb' }}>
@@ -72,65 +73,73 @@ const inspectionReady = ktsPct >= 90
       </nav>
 
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 24px' }}>
-        {panicContact ? (
-  <div style={{ background: '#fff', border: '1px solid #f0d4a0', borderLeft: '4px solid #c44a1a', borderRadius: '10px', padding: '14px 20px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-      <div style={{ width: '40px', height: '40px', background: '#fff6e8', border: '1px solid #f0d4a0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '20px' }}>
-        📞
-      </div>
-      <div>
-        <p style={{ fontSize: '10px', fontWeight: '500', color: '#c44a1a', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '2px' }}>Equipment support</p>
-        <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', marginBottom: '1px' }}>{panicContact.company_name || 'Your dealer'}</p>
-        {panicContact.contact_name && <p style={{ fontSize: '12px', color: '#827d76', margin: 0 }}>{panicContact.contact_name}</p>}
-      </div>
-    </div>
-    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-      {panicContact.phone_support && (
-        <a href={`tel:${panicContact.phone_support}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#c44a1a', color: '#fff', fontSize: '13px', fontWeight: '500', padding: '8px 16px', borderRadius: '8px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-          📞 Support: {panicContact.phone_support}
-        </a>
-      )}
-      {panicContact.phone_primary && (
-        <a href={`tel:${panicContact.phone_primary}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#fff6e8', color: '#c44a1a', border: '1px solid #f0d4a0', fontSize: '13px', fontWeight: '500', padding: '8px 16px', borderRadius: '8px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-          Main: {panicContact.phone_primary}
-        </a>
-      )}
-      <a href="/dashboard/systems" style={{ fontSize: '12px', color: '#a8a39c', textDecoration: 'none', whiteSpace: 'nowrap' }}>All contacts →</a>
-    </div>
-  </div>
-) : (
-  <div style={{ background: '#fff6e8', border: '1px dashed #f0d4a0', borderRadius: '10px', padding: '12px 20px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-    <span style={{ fontSize: '18px', flexShrink: 0 }}>📞</span>
-    <p style={{ fontSize: '13px', color: '#9a3510', flex: 1, margin: 0 }}>
-      Add your dealer&apos;s emergency support number for quick access during equipment issues.
-    </p>
-    <a href="/dashboard/systems" style={{ fontSize: '12px', fontWeight: '500', color: '#c44a1a', textDecoration: 'none', whiteSpace: 'nowrap' }}>Set up →</a>
-  </div>
-)}
 
-<div style={{ marginBottom: '28px' }}>
-  <h1 style={{ fontSize: '24px',
+        {panicContact ? (
+          <div style={{ background: '#fff', border: '1px solid #f0d4a0', borderLeft: '4px solid #c44a1a', borderRadius: '10px', padding: '14px 20px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{ width: '40px', height: '40px', background: '#fff6e8', border: '1px solid #f0d4a0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '20px' }}>
+                📞
+              </div>
+              <div>
+                <p style={{ fontSize: '10px', fontWeight: '500', color: '#c44a1a', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '2px' }}>Equipment support</p>
+                <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', marginBottom: '1px' }}>{panicContact.company_name || 'Your dealer'}</p>
+                {panicContact.contact_name && <p style={{ fontSize: '12px', color: '#827d76', margin: 0 }}>{panicContact.contact_name}</p>}
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+              {panicContact.phone_support && (
+                <a href={`tel:${panicContact.phone_support}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#c44a1a', color: '#fff', fontSize: '13px', fontWeight: '500', padding: '8px 16px', borderRadius: '8px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                  📞 Support: {panicContact.phone_support}
+                </a>
+              )}
+              {panicContact.phone_primary && (
+                <a href={`tel:${panicContact.phone_primary}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#fff6e8', color: '#c44a1a', border: '1px solid #f0d4a0', fontSize: '13px', fontWeight: '500', padding: '8px 16px', borderRadius: '8px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                  Main: {panicContact.phone_primary}
+                </a>
+              )}
+              <a href="/dashboard/systems" style={{ fontSize: '12px', color: '#a8a39c', textDecoration: 'none', whiteSpace: 'nowrap' }}>All contacts →</a>
+            </div>
+          </div>
+        ) : (
+          <div style={{ background: '#fff6e8', border: '1px dashed #f0d4a0', borderRadius: '10px', padding: '12px 20px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '18px', flexShrink: 0 }}>📞</span>
+            <p style={{ fontSize: '13px', color: '#9a3510', flex: 1, margin: 0 }}>
+              Add your dealer&apos;s emergency support number for quick access during equipment issues.
+            </p>
+            <a href="/dashboard/systems" style={{ fontSize: '12px', fontWeight: '500', color: '#c44a1a', textDecoration: 'none', whiteSpace: 'nowrap' }}>Set up →</a>
+          </div>
+        )}
+
         <div style={{ marginBottom: '28px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>
             {org?.name || 'Your facility'}
           </h1>
-          <p style={{ fontSize: '13px', color: '#827d76', lineHeight: '1.55', marginBottom: '8px' }}>
-  Your account is set up. Complete each section to build toward Inspection Ready (90%+).
-</p>
-<a href="/dashboard/report" style={{ fontSize: '12px', color: '#1a5fa8', fontWeight: '500', textDecoration: 'none' }}>
-  View Inspection Report →
-</a>
+          <p style={{ fontSize: '13px', color: '#827d76' }}>
+            {[org?.facility_type_name, org?.facility_state, ...(org?.modality_names || [])].filter(Boolean).join(' · ')}
+          </p>
         </div>
 
         <div style={{ background: '#fff', border: '1px solid #c2ddf0', borderRadius: '12px', padding: '20px 24px', marginBottom: '28px', display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#e8f3fb', border: '3px solid #c2ddf0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#e8f3fb', border: `3px solid ${inspectionReady ? '#b8e8cc' : '#c2ddf0'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <span style={{ fontSize: '15px', fontWeight: '500', color: inspectionReady ? '#40916c' : '#1a5fa8' }}>{ktsPct}%</span>
           </div>
-          <div>
-            <p style={{ fontSize: '15px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>Compliance score</p>
-            <p style={{ fontSize: '13px', color: '#827d76', lineHeight: '1.55' }}>
-              Your account is set up. Complete each section to build toward Inspection Ready (90%+).
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+              <p style={{ fontSize: '15px', fontWeight: '500', color: '#0d2d5e' }}>Compliance score</p>
+              {inspectionReady && (
+                <span style={{ fontSize: '11px', fontWeight: '500', color: '#2d6a4f', background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '20px', padding: '2px 8px' }}>
+                  Inspection Ready
+                </span>
+              )}
+            </div>
+            <p style={{ fontSize: '13px', color: '#827d76', lineHeight: '1.55', marginBottom: '6px' }}>
+              {inspectionReady
+                ? 'Your facility meets the Inspection Ready threshold. Keep your records current.'
+                : 'Complete your Keys to Success checklist to build toward Inspection Ready (90%+).'}
             </p>
+            <a href="/dashboard/report" style={{ fontSize: '12px', color: '#1a5fa8', fontWeight: '500', textDecoration: 'none' }}>
+              View Inspection Report →
+            </a>
           </div>
         </div>
 
@@ -153,6 +162,7 @@ const inspectionReady = ktsPct >= 90
             )
           ))}
         </div>
+
       </div>
     </div>
   )
