@@ -29,10 +29,20 @@ export default async function DashboardPage() {
   }
 
   const { data: org } = await supabase
-    .from('organizations')
-    .select('*')
-    .eq('id', profile.org_id)
-    .single()
+  .from('organizations')
+  .select('*')
+  .eq('id', profile.org_id)
+  .single()
+
+const { data: dealerRaw } = await supabase
+  .from('equipment_contacts')
+  .select('company_name, contact_name, phone_primary, phone_support, contact_type')
+  .eq('org_id', profile.org_id)
+  .in('contact_type', ['dealer', 'manufacturer'])
+
+const panicContact = (dealerRaw as any[])?.find(c => c.contact_type === 'dealer')
+  || (dealerRaw as any[])?.[0]
+  || null
 
     const { data: ktsItems } = await supabase
   .from('keys_to_success').select('id')
@@ -62,6 +72,44 @@ const inspectionReady = ktsPct >= 90
       </nav>
 
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 24px' }}>
+        {panicContact ? (
+  <div style={{ background: '#fff', border: '1px solid #f0d4a0', borderLeft: '4px solid #c44a1a', borderRadius: '10px', padding: '14px 20px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+      <div style={{ width: '40px', height: '40px', background: '#fff6e8', border: '1px solid #f0d4a0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '20px' }}>
+        📞
+      </div>
+      <div>
+        <p style={{ fontSize: '10px', fontWeight: '500', color: '#c44a1a', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '2px' }}>Equipment support</p>
+        <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', marginBottom: '1px' }}>{panicContact.company_name || 'Your dealer'}</p>
+        {panicContact.contact_name && <p style={{ fontSize: '12px', color: '#827d76', margin: 0 }}>{panicContact.contact_name}</p>}
+      </div>
+    </div>
+    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+      {panicContact.phone_support && (
+        <a href={`tel:${panicContact.phone_support}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#c44a1a', color: '#fff', fontSize: '13px', fontWeight: '500', padding: '8px 16px', borderRadius: '8px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+          📞 Support: {panicContact.phone_support}
+        </a>
+      )}
+      {panicContact.phone_primary && (
+        <a href={`tel:${panicContact.phone_primary}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#fff6e8', color: '#c44a1a', border: '1px solid #f0d4a0', fontSize: '13px', fontWeight: '500', padding: '8px 16px', borderRadius: '8px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+          Main: {panicContact.phone_primary}
+        </a>
+      )}
+      <a href="/dashboard/systems" style={{ fontSize: '12px', color: '#a8a39c', textDecoration: 'none', whiteSpace: 'nowrap' }}>All contacts →</a>
+    </div>
+  </div>
+) : (
+  <div style={{ background: '#fff6e8', border: '1px dashed #f0d4a0', borderRadius: '10px', padding: '12px 20px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+    <span style={{ fontSize: '18px', flexShrink: 0 }}>📞</span>
+    <p style={{ fontSize: '13px', color: '#9a3510', flex: 1, margin: 0 }}>
+      Add your dealer&apos;s emergency support number for quick access during equipment issues.
+    </p>
+    <a href="/dashboard/systems" style={{ fontSize: '12px', fontWeight: '500', color: '#c44a1a', textDecoration: 'none', whiteSpace: 'nowrap' }}>Set up →</a>
+  </div>
+)}
+
+<div style={{ marginBottom: '28px' }}>
+  <h1 style={{ fontSize: '24px',
         <div style={{ marginBottom: '28px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>
             {org?.name || 'Your facility'}

@@ -291,11 +291,25 @@ export default function SystemsPage() {
             {equipment.map(eq => {
               const eqContacts = contacts.filter(c => c.equipment_id === eq.id)
               const isOpen = showContactForm === eq.id
+
+               const primaryContact =
+    eqContacts.find(c => c.contact_type === 'dealer') ||
+    eqContacts.find(c => c.contact_type === 'manufacturer') ||
+    eqContacts[0]
+  const emergencyPhone = primaryContact?.phone_support || primaryContact?.phone_primary
               return (
                 <div key={eq.id} style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', padding: '16px 20px', marginBottom: '14px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: (eqContacts.length > 0 || isOpen) ? '14px' : '0' }}>
                     <div>
-                      <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', marginBottom: '2px' }}>{eq.manufacturer} {eq.model}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '2px' }}>
+  <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', margin: 0 }}>{eq.manufacturer} {eq.model}</p>
+  {emergencyPhone && (
+    <a href={`tel:${emergencyPhone}`}
+      style={{ fontSize: '11px', fontWeight: '500', color: '#c44a1a', textDecoration: 'none', background: '#fff6e8', border: '1px solid #f0d4a0', borderRadius: '20px', padding: '2px 10px', whiteSpace: 'nowrap' }}>
+      📞 {emergencyPhone}
+    </a>
+  )}
+</div>
                       <p style={{ fontSize: '12px', color: '#a8a39c' }}>
                         {[eq.serial_number && `S/N: ${eq.serial_number}`, eq.room_location].filter(Boolean).join(' · ')}
                         {eqContacts.length > 0 && ` · ${eqContacts.length} contact${eqContacts.length !== 1 ? 's' : ''}`}
