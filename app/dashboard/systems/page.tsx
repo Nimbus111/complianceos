@@ -28,13 +28,138 @@ const PACS_TYPES: Record<string, string> = {
 const inp: React.CSSProperties = {
   width: '100%', height: '36px', border: '1px solid #c2ddf0',
   borderRadius: '8px', padding: '0 10px', fontSize: '13px',
-  color: '#0d2d5e', background: '#fff', outline: 'none',
-  boxSizing: 'border-box',
+  color: '#0d2d5e', background: '#fff', outline: 'none', boxSizing: 'border-box',
 }
 const lbl: React.CSSProperties = {
-  display: 'block', fontSize: '10px', fontWeight: '500',
-  color: '#a8a39c', marginBottom: '4px',
-  textTransform: 'uppercase', letterSpacing: '0.07em',
+  display: 'block', fontSize: '10px', fontWeight: '500', color: '#a8a39c',
+  marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.07em',
+}
+
+interface ContactFormValues {
+  contactType: string; companyName: string; contactName: string
+  phonePrimary: string; phoneSupport: string; email: string
+  website: string; accountNumber: string; contractExpiry: string; notes: string
+}
+
+function ContactForm({ equipmentId, values, onChange, saving, onSave, onCancel }: {
+  equipmentId: string | null
+  values: ContactFormValues
+  onChange: (field: keyof ContactFormValues, value: string) => void
+  saving: boolean
+  onSave: (equipmentId: string | null) => void
+  onCancel: () => void
+}) {
+  return (
+    <div style={{ background: '#fafcff', border: '1px solid #c2ddf0', borderRadius: '10px', padding: '16px', marginTop: '10px' }}>
+      <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '12px' }}>Add service contact</p>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
+        <div style={{ gridColumn: '1/-1' }}>
+          <label style={lbl}>Contact type *</label>
+          <select style={inp} value={values.contactType} onChange={e => onChange('contactType', e.target.value)}>
+            <option value="">Select type...</option>
+            {Object.entries(CONTACT_TYPES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+          </select>
+        </div>
+        <div><label style={lbl}>Company name</label><input style={inp} type="text" placeholder="e.g. Carestream Health" value={values.companyName} onChange={e => onChange('companyName', e.target.value)} /></div>
+        <div><label style={lbl}>Contact name</label><input style={inp} type="text" placeholder="Rep or tech name" value={values.contactName} onChange={e => onChange('contactName', e.target.value)} /></div>
+        <div><label style={lbl}>Primary phone</label><input style={inp} type="tel" placeholder="Main number" value={values.phonePrimary} onChange={e => onChange('phonePrimary', e.target.value)} /></div>
+        <div><label style={lbl}>Support / emergency line</label><input style={inp} type="tel" placeholder="After-hours or tech support" value={values.phoneSupport} onChange={e => onChange('phoneSupport', e.target.value)} /></div>
+        <div><label style={lbl}>Email</label><input style={inp} type="email" placeholder="support@company.com" value={values.email} onChange={e => onChange('email', e.target.value)} /></div>
+        <div><label style={lbl}>Website</label><input style={inp} type="url" placeholder="https://..." value={values.website} onChange={e => onChange('website', e.target.value)} /></div>
+        <div><label style={lbl}>Account / customer number</label><input style={inp} type="text" placeholder="Your account ID" value={values.accountNumber} onChange={e => onChange('accountNumber', e.target.value)} /></div>
+        <div><label style={lbl}>Contract / warranty expiry</label><input style={inp} type="date" value={values.contractExpiry} onChange={e => onChange('contractExpiry', e.target.value)} /></div>
+        <div style={{ gridColumn: '1/-1' }}><label style={lbl}>Notes</label><input style={inp} type="text" placeholder="Any additional notes" value={values.notes} onChange={e => onChange('notes', e.target.value)} /></div>
+      </div>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <button onClick={onCancel} style={{ flex: 1, height: '34px', background: '#fff', color: '#0d2d5e', border: '1px solid #c2ddf0', borderRadius: '8px', fontSize: '12px', cursor: 'pointer' }}>Cancel</button>
+        <button onClick={() => onSave(equipmentId)} disabled={!values.contactType || saving}
+          style={{ flex: 2, height: '34px', background: !values.contactType ? '#c2ddf0' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '12px', fontWeight: '500', cursor: !values.contactType ? 'default' : 'pointer' }}>
+          {saving ? 'Saving...' : 'Add contact'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function ContactCard({ contact, onDelete, onCopy }: {
+  contact: any
+  onDelete: (id: string) => void
+  onCopy: (text: string) => void
+}) {
+  const ct = CONTACT_TYPES[contact.contact_type] || CONTACT_TYPES.other
+  const today = new Date()
+  const expiry = contact.contract_expiry ? new Date(contact.contract_expiry) : null
+  const isExpired = expiry && expiry < today
+  const isExpiring = expiry && !isExpired && expiry < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+  return (
+    <div style={{ background: '#fff', border: `1px solid ${ct.border}`, borderRadius: '10px', padding: '14px 16px', marginBottom: '8px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+        <div>
+          <span style={{ fontSize: '10px', fontWeight: '500', color: ct.color, background: ct.bg, border: `1px solid ${ct.border}`, borderRadius: '20px', padding: '2px 8px' }}>{ct.label}</span>
+          {contact.company_name && <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', marginTop: '6px', marginBottom: '2px' }}>{contact.company_name}</p>}
+          {contact.contact_name && <p style={{ fontSize: '12px', color: '#827d76' }}>{contact.contact_name}</p>}
+        </div>
+        <button onClick={() => onDelete(contact.id)} style={{ padding: '3px 10px', border: '1px solid #f5c6c9', borderRadius: '6px', background: '#fff', color: '#931621', fontSize: '11px', cursor: 'pointer', flexShrink: 0 }}>Delete</button>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+        {contact.phone_primary && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '11px', color: '#a8a39c' }}>Primary phone</span>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <a href={`tel:${contact.phone_primary}`} style={{ fontSize: '13px', fontWeight: '500', color: '#1a5fa8', textDecoration: 'none' }}>{contact.phone_primary}</a>
+              <button onClick={() => onCopy(contact.phone_primary)} style={{ padding: '1px 8px', border: '1px solid #c2ddf0', borderRadius: '4px', background: '#fff', color: '#1a5fa8', fontSize: '10px', cursor: 'pointer' }}>Copy</button>
+            </div>
+          </div>
+        )}
+        {contact.phone_support && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '11px', color: '#a8a39c' }}>Support / emergency</span>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <a href={`tel:${contact.phone_support}`} style={{ fontSize: '13px', fontWeight: '500', color: '#c44a1a', textDecoration: 'none' }}>{contact.phone_support}</a>
+              <button onClick={() => onCopy(contact.phone_support)} style={{ padding: '1px 8px', border: '1px solid #f0d4a0', borderRadius: '4px', background: '#fff', color: '#c44a1a', fontSize: '10px', cursor: 'pointer' }}>Copy</button>
+            </div>
+          </div>
+        )}
+        {contact.email && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '11px', color: '#a8a39c' }}>Email</span>
+            <a href={`mailto:${contact.email}`} style={{ fontSize: '12px', color: '#1a5fa8', textDecoration: 'none' }}>{contact.email}</a>
+          </div>
+        )}
+        {contact.website && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '11px', color: '#a8a39c' }}>Website</span>
+            <a href={contact.website} target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: '#1a5fa8', textDecoration: 'none' }}>{contact.website.replace(/^https?:\/\//, '')}</a>
+          </div>
+        )}
+        {contact.account_number && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '11px', color: '#a8a39c' }}>Account #</span>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <span style={{ fontSize: '12px', fontWeight: '500', color: '#0d2d5e' }}>{contact.account_number}</span>
+              <button onClick={() => onCopy(contact.account_number)} style={{ padding: '1px 8px', border: '1px solid #c2ddf0', borderRadius: '4px', background: '#fff', color: '#1a5fa8', fontSize: '10px', cursor: 'pointer' }}>Copy</button>
+            </div>
+          </div>
+        )}
+        {expiry && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '11px', color: '#a8a39c' }}>Contract / warranty expires</span>
+            <span style={{ fontSize: '12px', fontWeight: '500', color: isExpired ? '#931621' : isExpiring ? '#c44a1a' : '#40916c' }}>
+              {expiry.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              {isExpired ? ' — Expired' : isExpiring ? ' — Expiring soon' : ''}
+            </span>
+          </div>
+        )}
+        {contact.notes && <p style={{ fontSize: '12px', color: '#827d76', marginTop: '4px', paddingTop: '4px', borderTop: '1px solid #eef3fb' }}>{contact.notes}</p>}
+      </div>
+    </div>
+  )
+}
+
+const EMPTY_CONTACT_FORM: ContactFormValues = {
+  contactType: '', companyName: '', contactName: '',
+  phonePrimary: '', phoneSupport: '', email: '',
+  website: '', accountNumber: '', contractExpiry: '', notes: '',
 }
 
 export default function SystemsPage() {
@@ -48,16 +173,10 @@ export default function SystemsPage() {
   const [saving, setSaving] = useState(false)
   const router = useRouter()
 
-  const [contactType, setContactType] = useState('')
-  const [companyName, setCompanyName] = useState('')
-  const [contactName, setContactName] = useState('')
-  const [phonePrimary, setPhonePrimary] = useState('')
-  const [phoneSupport, setPhoneSupport] = useState('')
-  const [contactEmail, setContactEmail] = useState('')
-  const [website, setWebsite] = useState('')
-  const [accountNumber, setAccountNumber] = useState('')
-  const [contractExpiry, setContractExpiry] = useState('')
-  const [contactNotes, setContactNotes] = useState('')
+  const [contactForm, setContactForm] = useState<ContactFormValues>(EMPTY_CONTACT_FORM)
+  const handleContactChange = (field: keyof ContactFormValues, value: string) => {
+    setContactForm(prev => ({ ...prev, [field]: value }))
+  }
 
   const [pacsNickname, setPacsNickname] = useState('')
   const [pacsType, setPacsType] = useState('pacs')
@@ -71,49 +190,26 @@ export default function SystemsPage() {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
-
-    const { data: profile } = await supabase
-      .from('profiles').select('org_id').eq('id', user.id).single()
+    const { data: profile } = await supabase.from('profiles').select('org_id').eq('id', user.id).single()
     if (!profile?.org_id) { router.push('/onboarding'); return }
-
-    const { data: org } = await supabase
-      .from('organizations').select('name').eq('id', profile.org_id).single()
+    const { data: org } = await supabase.from('organizations').select('name').eq('id', profile.org_id).single()
     if (org) setOrgName(org.name)
-
-    const { data: eq } = await supabase
-      .from('equipment').select('*').eq('org_id', profile.org_id)
-      .neq('status', 'retired').order('created_at')
+    const { data: eq } = await supabase.from('equipment').select('*').eq('org_id', profile.org_id).neq('status', 'retired').order('created_at')
     setEquipment(eq || [])
-
-    const { data: ctcts } = await supabase
-      .from('equipment_contacts').select('*').eq('org_id', profile.org_id)
-      .order('created_at')
+    const { data: ctcts } = await supabase.from('equipment_contacts').select('*').eq('org_id', profile.org_id).order('created_at')
     setContacts(ctcts || [])
-
-    const { data: pacs } = await supabase
-      .from('pacs_systems').select('*').eq('org_id', profile.org_id)
-      .order('created_at')
+    const { data: pacs } = await supabase.from('pacs_systems').select('*').eq('org_id', profile.org_id).order('created_at')
     setPacsSystems(pacs || [])
     setLoading(false)
   }, [router])
 
   useEffect(() => { fetchAll() }, [fetchAll])
 
-  const resetContact = () => {
-    setContactType(''); setCompanyName(''); setContactName('')
-    setPhonePrimary(''); setPhoneSupport(''); setContactEmail('')
-    setWebsite(''); setAccountNumber(''); setContractExpiry('')
-    setContactNotes(''); setShowContactForm(null)
-  }
-
-  const resetPacs = () => {
-    setPacsNickname(''); setPacsType('pacs'); setPacsUrl('')
-    setPacsPort(''); setPacsAeTitle(''); setPacsUsername('')
-    setPacsNotes(''); setShowPacsForm(false)
-  }
+  const resetContact = () => { setContactForm(EMPTY_CONTACT_FORM); setShowContactForm(null) }
+  const resetPacs = () => { setPacsNickname(''); setPacsType('pacs'); setPacsUrl(''); setPacsPort(''); setPacsAeTitle(''); setPacsUsername(''); setPacsNotes(''); setShowPacsForm(false) }
 
   const handleAddContact = async (equipmentId: string | null) => {
-    if (!contactType) return
+    if (!contactForm.contactType) return
     setSaving(true)
     const res = await fetch('/api/systems', {
       method: 'POST',
@@ -121,11 +217,16 @@ export default function SystemsPage() {
       body: JSON.stringify({
         resource_type: 'contact',
         equipment_id: equipmentId,
-        contact_type: contactType,
-        company_name: companyName, contact_name: contactName,
-        phone_primary: phonePrimary, phone_support: phoneSupport,
-        email: contactEmail, website, account_number: accountNumber,
-        contract_expiry: contractExpiry, notes: contactNotes,
+        contact_type: contactForm.contactType,
+        company_name: contactForm.companyName,
+        contact_name: contactForm.contactName,
+        phone_primary: contactForm.phonePrimary,
+        phone_support: contactForm.phoneSupport,
+        email: contactForm.email,
+        website: contactForm.website,
+        account_number: contactForm.accountNumber,
+        contract_expiry: contactForm.contractExpiry,
+        notes: contactForm.notes,
       })
     })
     if (res.ok) { resetContact(); fetchAll() }
@@ -139,12 +240,7 @@ export default function SystemsPage() {
     const res = await fetch('/api/systems', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        resource_type: 'pacs',
-        nickname: pacsNickname, system_type: pacsType,
-        url: pacsUrl, port: pacsPort, ae_title: pacsAeTitle,
-        username: pacsUsername, notes: pacsNotes,
-      })
+      body: JSON.stringify({ resource_type: 'pacs', nickname: pacsNickname, system_type: pacsType, url: pacsUrl, port: pacsPort, ae_title: pacsAeTitle, username: pacsUsername, notes: pacsNotes })
     })
     if (res.ok) { resetPacs(); fetchAll() }
     else { const r = await res.json(); alert(r.error || 'Error') }
@@ -153,130 +249,11 @@ export default function SystemsPage() {
 
   const handleDelete = async (id: string, resourceType: string) => {
     if (!confirm('Delete this? Cannot be undone.')) return
-    await fetch('/api/systems', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, resource_type: resourceType })
-    })
+    await fetch('/api/systems', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, resource_type: resourceType }) })
     fetchAll()
   }
 
   const copy = (text: string) => navigator.clipboard.writeText(text).catch(() => {})
-
-  const SectionHeader = ({ title }: { title: string }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-      <span style={{ fontSize: '11px', fontWeight: '500', color: '#0d2d5e', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{title}</span>
-      <div style={{ flex: 1, height: '1px', background: '#c2ddf0' }} />
-    </div>
-  )
-
-  const ContactCard = ({ contact }: { contact: any }) => {
-    const ct = CONTACT_TYPES[contact.contact_type] || CONTACT_TYPES.other
-    const today = new Date()
-    const expiry = contact.contract_expiry ? new Date(contact.contract_expiry) : null
-    const isExpired = expiry && expiry < today
-    const isExpiring = expiry && !isExpired && expiry < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-    return (
-      <div style={{ background: '#fff', border: `1px solid ${ct.border}`, borderRadius: '10px', padding: '14px 16px', marginBottom: '8px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-          <div>
-            <span style={{ fontSize: '10px', fontWeight: '500', color: ct.color, background: ct.bg, border: `1px solid ${ct.border}`, borderRadius: '20px', padding: '2px 8px' }}>
-              {ct.label}
-            </span>
-            {contact.company_name && <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', marginTop: '6px', marginBottom: '2px' }}>{contact.company_name}</p>}
-            {contact.contact_name && <p style={{ fontSize: '12px', color: '#827d76' }}>{contact.contact_name}</p>}
-          </div>
-          <button onClick={() => handleDelete(contact.id, 'contact')}
-            style={{ padding: '3px 10px', border: '1px solid #f5c6c9', borderRadius: '6px', background: '#fff', color: '#931621', fontSize: '11px', cursor: 'pointer', flexShrink: 0 }}>
-            Delete
-          </button>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          {contact.phone_primary && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '11px', color: '#a8a39c' }}>Primary phone</span>
-              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                <a href={`tel:${contact.phone_primary}`} style={{ fontSize: '13px', fontWeight: '500', color: '#1a5fa8', textDecoration: 'none' }}>{contact.phone_primary}</a>
-                <button onClick={() => copy(contact.phone_primary)} style={{ padding: '1px 8px', border: '1px solid #c2ddf0', borderRadius: '4px', background: '#fff', color: '#1a5fa8', fontSize: '10px', cursor: 'pointer' }}>Copy</button>
-              </div>
-            </div>
-          )}
-          {contact.phone_support && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '11px', color: '#a8a39c' }}>Support / emergency</span>
-              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                <a href={`tel:${contact.phone_support}`} style={{ fontSize: '13px', fontWeight: '500', color: '#c44a1a', textDecoration: 'none' }}>{contact.phone_support}</a>
-                <button onClick={() => copy(contact.phone_support)} style={{ padding: '1px 8px', border: '1px solid #f0d4a0', borderRadius: '4px', background: '#fff', color: '#c44a1a', fontSize: '10px', cursor: 'pointer' }}>Copy</button>
-              </div>
-            </div>
-          )}
-          {contact.email && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '11px', color: '#a8a39c' }}>Email</span>
-              <a href={`mailto:${contact.email}`} style={{ fontSize: '12px', color: '#1a5fa8', textDecoration: 'none' }}>{contact.email}</a>
-            </div>
-          )}
-          {contact.website && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '11px', color: '#a8a39c' }}>Website</span>
-              <a href={contact.website} target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: '#1a5fa8', textDecoration: 'none' }}>{contact.website.replace(/^https?:\/\//, '')}</a>
-            </div>
-          )}
-          {contact.account_number && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '11px', color: '#a8a39c' }}>Account #</span>
-              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', fontWeight: '500', color: '#0d2d5e' }}>{contact.account_number}</span>
-                <button onClick={() => copy(contact.account_number)} style={{ padding: '1px 8px', border: '1px solid #c2ddf0', borderRadius: '4px', background: '#fff', color: '#1a5fa8', fontSize: '10px', cursor: 'pointer' }}>Copy</button>
-              </div>
-            </div>
-          )}
-          {expiry && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '11px', color: '#a8a39c' }}>Contract / warranty expires</span>
-              <span style={{ fontSize: '12px', fontWeight: '500', color: isExpired ? '#931621' : isExpiring ? '#c44a1a' : '#40916c' }}>
-                {expiry.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                {isExpired ? ' — Expired' : isExpiring ? ' — Expiring soon' : ''}
-              </span>
-            </div>
-          )}
-          {contact.notes && <p style={{ fontSize: '12px', color: '#827d76', marginTop: '4px', paddingTop: '4px', borderTop: '1px solid #eef3fb' }}>{contact.notes}</p>}
-        </div>
-      </div>
-    )
-  }
-
-  const ContactForm = ({ equipmentId }: { equipmentId: string | null }) => (
-    <div style={{ background: '#fafcff', border: '1px solid #c2ddf0', borderRadius: '10px', padding: '16px', marginTop: '10px' }}>
-      <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '12px' }}>Add service contact</p>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
-        <div style={{ gridColumn: '1/-1' }}>
-          <label style={lbl}>Contact type *</label>
-          <select style={inp} value={contactType} onChange={e => setContactType(e.target.value)}>
-            <option value="">Select type...</option>
-            {Object.entries(CONTACT_TYPES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-          </select>
-        </div>
-        <div><label style={lbl}>Company name</label><input style={inp} type="text" placeholder="e.g. Carestream Health" value={companyName} onChange={e => setCompanyName(e.target.value)} /></div>
-        <div><label style={lbl}>Contact name</label><input style={inp} type="text" placeholder="Rep or tech name" value={contactName} onChange={e => setContactName(e.target.value)} /></div>
-        <div><label style={lbl}>Primary phone</label><input style={inp} type="tel" placeholder="Main number" value={phonePrimary} onChange={e => setPhonePrimary(e.target.value)} /></div>
-        <div><label style={lbl}>Support / emergency line</label><input style={inp} type="tel" placeholder="After-hours or tech support" value={phoneSupport} onChange={e => setPhoneSupport(e.target.value)} /></div>
-        <div><label style={lbl}>Email</label><input style={inp} type="email" placeholder="support@company.com" value={contactEmail} onChange={e => setContactEmail(e.target.value)} /></div>
-        <div><label style={lbl}>Website</label><input style={inp} type="url" placeholder="https://..." value={website} onChange={e => setWebsite(e.target.value)} /></div>
-        <div><label style={lbl}>Account / customer number</label><input style={inp} type="text" placeholder="Your account ID" value={accountNumber} onChange={e => setAccountNumber(e.target.value)} /></div>
-        <div><label style={lbl}>Contract / warranty expiry</label><input style={inp} type="date" value={contractExpiry} onChange={e => setContractExpiry(e.target.value)} /></div>
-        <div style={{ gridColumn: '1/-1' }}><label style={lbl}>Notes</label><input style={inp} type="text" placeholder="Any additional notes" value={contactNotes} onChange={e => setContactNotes(e.target.value)} /></div>
-      </div>
-      <div style={{ display: 'flex', gap: '8px' }}>
-        <button onClick={resetContact} style={{ flex: 1, height: '34px', background: '#fff', color: '#0d2d5e', border: '1px solid #c2ddf0', borderRadius: '8px', fontSize: '12px', cursor: 'pointer' }}>Cancel</button>
-        <button onClick={() => handleAddContact(equipmentId)} disabled={!contactType || saving}
-          style={{ flex: 2, height: '34px', background: !contactType ? '#c2ddf0' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '12px', fontWeight: '500', cursor: !contactType ? 'default' : 'pointer' }}>
-          {saving ? 'Saving...' : 'Add contact'}
-        </button>
-      </div>
-    </div>
-  )
-
   const facilityContacts = contacts.filter(c => !c.equipment_id)
 
   if (loading) return (
@@ -299,15 +276,15 @@ export default function SystemsPage() {
 
         <div style={{ marginBottom: '28px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>Equipment &amp; Systems</h1>
-          <p style={{ fontSize: '13px', color: '#827d76' }}>
-            {orgName} · Service contacts, warranties, PACS configuration, and support information
-          </p>
+          <p style={{ fontSize: '13px', color: '#827d76' }}>{orgName} · Service contacts, warranties, PACS configuration, and support information</p>
         </div>
 
-        {/* Per-equipment contacts */}
         {equipment.length > 0 && (
           <div style={{ marginBottom: '36px' }}>
-            <SectionHeader title="Equipment service contacts" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+              <span style={{ fontSize: '11px', fontWeight: '500', color: '#0d2d5e', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Equipment service contacts</span>
+              <div style={{ flex: 1, height: '1px', background: '#c2ddf0' }} />
+            </div>
             <p style={{ fontSize: '12px', color: '#a8a39c', marginBottom: '16px', lineHeight: '1.6' }}>
               Add service contacts for each piece of equipment — dealer, manufacturer tech support, DR plate vendor, DICOM software, physics company, computer support, and insurance.
             </p>
@@ -324,27 +301,26 @@ export default function SystemsPage() {
                         {eqContacts.length > 0 && ` · ${eqContacts.length} contact${eqContacts.length !== 1 ? 's' : ''}`}
                       </p>
                     </div>
-                    <button onClick={() => setShowContactForm(isOpen ? null : eq.id)}
+                    <button onClick={() => { setShowContactForm(isOpen ? null : eq.id); if (!isOpen) setContactForm(EMPTY_CONTACT_FORM) }}
                       style={{ height: '32px', padding: '0 14px', background: isOpen ? '#fff' : '#0d2d5e', color: isOpen ? '#0d2d5e' : '#fff', border: `1px solid ${isOpen ? '#c2ddf0' : '#0d2d5e'}`, borderRadius: '8px', fontSize: '12px', cursor: 'pointer' }}>
                       {isOpen ? 'Cancel' : '+ Add contact'}
                     </button>
                   </div>
-                  {eqContacts.map(c => <ContactCard key={c.id} contact={c} />)}
-                  {isOpen && <ContactForm equipmentId={eq.id} />}
+                  {eqContacts.map(c => <ContactCard key={c.id} contact={c} onDelete={id => handleDelete(id, 'contact')} onCopy={copy} />)}
+                  {isOpen && <ContactForm equipmentId={eq.id} values={contactForm} onChange={handleContactChange} saving={saving} onSave={handleAddContact} onCancel={resetContact} />}
                 </div>
               )
             })}
           </div>
         )}
 
-        {/* Facility-wide contacts */}
         <div style={{ marginBottom: '36px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
               <span style={{ fontSize: '11px', fontWeight: '500', color: '#0d2d5e', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Facility-wide contacts</span>
               <div style={{ flex: 1, height: '1px', background: '#c2ddf0' }} />
             </div>
-            <button onClick={() => setShowContactForm(showContactForm === 'facility' ? null : 'facility')}
+            <button onClick={() => { const opening = showContactForm !== 'facility'; setShowContactForm(opening ? 'facility' : null); if (opening) setContactForm(EMPTY_CONTACT_FORM) }}
               style={{ height: '32px', padding: '0 14px', marginLeft: '12px', background: showContactForm === 'facility' ? '#fff' : '#0d2d5e', color: showContactForm === 'facility' ? '#0d2d5e' : '#fff', border: `1px solid ${showContactForm === 'facility' ? '#c2ddf0' : '#0d2d5e'}`, borderRadius: '8px', fontSize: '12px', cursor: 'pointer', flexShrink: 0 }}>
               {showContactForm === 'facility' ? 'Cancel' : '+ Add contact'}
             </button>
@@ -357,13 +333,12 @@ export default function SystemsPage() {
               <p style={{ fontSize: '13px', color: '#827d76' }}>Add your physics company, IT contact, equipment insurance, and other facility-wide service partners.</p>
             </div>
           )}
-          {facilityContacts.map(c => <ContactCard key={c.id} contact={c} />)}
-          {showContactForm === 'facility' && <ContactForm equipmentId={null} />}
+          {facilityContacts.map(c => <ContactCard key={c.id} contact={c} onDelete={id => handleDelete(id, 'contact')} onCopy={copy} />)}
+          {showContactForm === 'facility' && <ContactForm equipmentId={null} values={contactForm} onChange={handleContactChange} saving={saving} onSave={handleAddContact} onCancel={resetContact} />}
         </div>
 
-        {/* PACS & network systems */}
         <div style={{ marginBottom: '36px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
               <span style={{ fontSize: '11px', fontWeight: '500', color: '#0d2d5e', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>PACS &amp; network systems</span>
               <div style={{ flex: 1, height: '1px', background: '#c2ddf0' }} />
@@ -374,7 +349,7 @@ export default function SystemsPage() {
             </button>
           </div>
           <p style={{ fontSize: '12px', color: '#a8a39c', marginBottom: '14px', lineHeight: '1.6' }}>
-            Archive servers, PACS systems, DICOM worklists, and cloud storage. Store connection details — URL, port, AE Title — for quick access during IT setup, equipment replacement, or troubleshooting.
+            Archive servers, PACS systems, DICOM worklists, and cloud storage. Store connection details — URL, port, AE Title — for quick access during IT setup or troubleshooting.
           </p>
 
           {showPacsForm && (
@@ -382,8 +357,7 @@ export default function SystemsPage() {
               <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '12px' }}>Add PACS / network system</p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
                 <div><label style={lbl}>Nickname *</label><input style={inp} type="text" placeholder="e.g. Main PACS archive" value={pacsNickname} onChange={e => setPacsNickname(e.target.value)} /></div>
-                <div>
-                  <label style={lbl}>System type</label>
+                <div><label style={lbl}>System type</label>
                   <select style={inp} value={pacsType} onChange={e => setPacsType(e.target.value)}>
                     {Object.entries(PACS_TYPES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                   </select>
@@ -419,10 +393,7 @@ export default function SystemsPage() {
                     {PACS_TYPES[pacs.system_type] || pacs.system_type}
                   </span>
                 </div>
-                <button onClick={() => handleDelete(pacs.id, 'pacs')}
-                  style={{ padding: '3px 10px', border: '1px solid #f5c6c9', borderRadius: '6px', background: '#fff', color: '#931621', fontSize: '11px', cursor: 'pointer' }}>
-                  Delete
-                </button>
+                <button onClick={() => handleDelete(pacs.id, 'pacs')} style={{ padding: '3px 10px', border: '1px solid #f5c6c9', borderRadius: '6px', background: '#fff', color: '#931621', fontSize: '11px', cursor: 'pointer' }}>Delete</button>
               </div>
               <div style={{ background: '#f4f7fb', borderRadius: '8px', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {[
