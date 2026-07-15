@@ -409,19 +409,88 @@ export default function HomePage() {
         )}
 
         {!searched && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px', paddingTop: '16px' }}>
-            {[
-              { title: 'RSP builder', desc: 'Generate a complete, state-specific Radiation Protection Program in minutes — not hours.' },
-              { title: 'Compliance calendar', desc: 'Every renewal, QA deadline, and inspection date tracked automatically for your facility.' },
-              { title: 'AI compliance assistant', desc: 'Ask compliance questions about your state and get cited, regulation-backed answers instantly.' },
-            ].map(card => (
-              <div key={card.title} style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '10px', padding: '20px' }}>
-                <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>{card.title}</p>
-                <p style={{ fontSize: '12px', color: '#827d76', lineHeight: '1.55' }}>{card.desc}</p>
-              </div>
-            ))}
+  <div>
+
+    {/* Authority section */}
+    <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', padding: '28px 32px', marginBottom: '20px', display: 'flex', gap: '28px', alignItems: 'center' }}>
+      {process.env.NEXT_PUBLIC_INSTRUCTOR_PHOTO && (
+        <img
+          src={process.env.NEXT_PUBLIC_INSTRUCTOR_PHOTO}
+          alt="Gregory Turner"
+          style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top', border: '3px solid #c2ddf0', flexShrink: 0 }}
+        />
+      )}
+      <div>
+        <p style={{ fontSize: '15px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px', lineHeight: '1.5' }}>
+          "X-ray compliance doesn't have to be confusing. I built ComplianceOS so that every facility — regardless of size — can know exactly what their state requires and prove it."
+        </p>
+        <p style={{ fontSize: '12px', color: '#4a6d8c', fontWeight: '500' }}>Gregory Turner · The Radiology Coach · X-ray Compliance Specialist</p>
+      </div>
+    </div>
+
+    {/* What members get */}
+    <div style={{ marginBottom: '20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+        <span style={{ fontSize: '11px', fontWeight: '500', color: '#0d2d5e', letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Everything in a Professional membership</span>
+        <div style={{ flex: 1, height: '1px', background: '#c2ddf0' }} />
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+        {[
+          { title: 'Compliance calendar', desc: 'Every registration renewal, QA deadline, inspection date, and dosimetry exchange auto-tracked for your state and modality.', highlight: true },
+          { title: 'RSP / RPP builder', desc: 'Generate your complete Radiation Protection Program as a professional PDF in minutes — not the weeks it takes starting from scratch.', highlight: true },
+          { title: 'AI compliance assistant', desc: 'Ask any compliance question and get a cited, state-specific answer instantly. No more guessing or waiting for callbacks.', highlight: false },
+          { title: 'Document repository', desc: 'Store all your compliance documents — registrations, inspection reports, dosimetry records, equipment logs — with expiration tracking.', highlight: false },
+          { title: 'Equipment inventory', desc: 'Track every x-ray unit with its registration numbers, service history, and QA records. Copy registration numbers in one tap during inspections.', highlight: false },
+          { title: 'State documents', desc: 'Every form, application, and regulatory document for your state — pre-identified and one click away. No more searching state websites.', highlight: false },
+          { title: 'Keys to Success checklist', desc: 'A guided 21-item compliance checklist with expert video guidance from The Radiology Coach. Watch your compliance score climb toward Inspection Ready.', highlight: false },
+          { title: 'Inspection report', desc: 'A single printable compliance report showing everything — equipment, documents, calendar, checklist — ready for any state inspector in seconds.', highlight: false },
+        ].map(item => (
+          <div key={item.title} style={{ background: item.highlight ? '#0d2d5e' : '#fff', border: `1px solid ${item.highlight ? '#0d2d5e' : '#dce8f5'}`, borderRadius: '10px', padding: '16px 18px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+            <span style={{ fontSize: '16px', color: item.highlight ? '#8bb4d4' : '#c2ddf0', flexShrink: 0, marginTop: '2px' }}>✓</span>
+            <div>
+              <p style={{ fontSize: '13px', fontWeight: '500', color: item.highlight ? '#fff' : '#0d2d5e', marginBottom: '4px' }}>{item.title}</p>
+              <p style={{ fontSize: '12px', color: item.highlight ? '#8bb4d4' : '#827d76', lineHeight: '1.55' }}>{item.desc}</p>
+            </div>
           </div>
-        )}
+        ))}
+      </div>
+    </div>
+
+    {/* Pricing CTA */}
+    <div style={{ background: '#0d2d5e', borderRadius: '12px', padding: '24px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '24px', flexWrap: 'wrap', marginBottom: '20px' }}>
+      <div>
+        <p style={{ color: '#fff', fontSize: '17px', fontWeight: '500', marginBottom: '6px' }}>Start free — no credit card required</p>
+        <p style={{ color: '#8bb4d4', fontSize: '13px', lineHeight: '1.6', maxWidth: '480px' }}>
+          Search all 50 states free, forever. Upgrade to a Professional membership for your facility's full compliance toolkit — calendar, documents, AI, forms, RPP builder, and more.
+        </p>
+      </div>
+      <div style={{ display: 'flex', gap: '10px', flexShrink: 0 }}>
+        <a href="/signup" style={{ background: '#fff', color: '#0d2d5e', fontSize: '13px', fontWeight: '500', padding: '10px 24px', borderRadius: '8px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+          Create free account
+        </a>
+        <a href="/login" style={{ background: 'transparent', color: '#8bb4d4', fontSize: '13px', padding: '10px 20px', borderRadius: '8px', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap' }}>
+          Sign in
+        </a>
+      </div>
+    </div>
+
+    {/* Trust signals */}
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+      {[
+        { stat: '862+', label: 'Regulation records', sub: 'Across all 50 states' },
+        { stat: '48', label: 'State agencies', sub: 'With direct contact info' },
+        { stat: '100s', label: 'State forms', sub: 'Pre-identified for your state' },
+      ].map(item => (
+        <div key={item.stat} style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '10px', padding: '16px', textAlign: 'center' }}>
+          <p style={{ fontSize: '26px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>{item.stat}</p>
+          <p style={{ fontSize: '13px', fontWeight: '500', color: '#1a5fa8', marginBottom: '2px' }}>{item.label}</p>
+          <p style={{ fontSize: '11px', color: '#a8a39c' }}>{item.sub}</p>
+        </div>
+      ))}
+    </div>
+
+  </div>
+)}
 
       </div>
 
