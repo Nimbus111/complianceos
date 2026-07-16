@@ -39,22 +39,27 @@ export async function POST(request: Request) {
         const subscriptionId = session.subscription as string
         const subscription = await stripe.subscriptions.retrieve(subscriptionId)
 
-        await admin.from('subscriptions').upsert({
-          org_id: orgId,
-          user_id: userId,
-          stripe_customer_id: session.customer as string,
-          stripe_subscription_id: subscriptionId,
-          status: subscription.status,
-          price_id: subscription.items.data[0]?.price.id,
-          current_period_end: (subscription as any).current_period_end
-  ? new Date((subscription as any).current_period_end * 1000).toISOString()
-  : null,
-cancel_at_period_end: (subscription as any).cancel_at_period_end ?? false,
-        }, { onConflict: 'org_id' })
+        const { error: upsertError } = await admin.from('subscriptions').upsert({
+  org_id: orgId,
+  user_id: userId,
+  stripe_customer_id: session.customer as string,
+  stripe_subscription_id: subscriptionId,
+  status: (subscription as any).status,
+  price_id: subscription.items.data[0]?.price.id,
+  current_period_end: (subscription as any).current_period_end
+    ? new Date((subscription as any).current_period_end * 1000).toISOString()
+    : null,
+  cancel_at_period_end: (subscription as any).cancel_at_period_end ?? false,
+}, { onConflict: 'org_id' })
 
-        await admin.from('organizations').update({
-          subscription_tier: plan === 'service_provider' ? 'service_provider' : 'professional'
-        }).eq('id', orgId)
+if (upsertError) {
+  console.error('Subscription upsert failed:', upsertError.message)
+  return NextResponse.json({ error: upsertError.message }, { status: 500 })
+}
+
+await admin.from('organizations').update({
+  subscription_tier: plan === 'service_provider' ? 'service_provider' : 'professional'
+}).eq('id', orgId)
 
         break
       }
