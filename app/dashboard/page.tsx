@@ -37,7 +37,7 @@ export default async function DashboardPage() {
     .single()
 
     if (org?.org_type === 'service_provider') {
-  return <SPDashboard org={org} user={user} panicContact={panicContact} />
+  return <SPDashboard org={org} user={user} />
 }
 
   const { data: ktsItems } = await supabase
@@ -210,7 +210,7 @@ const daysLeft = trialEnd
     </div>
   )
 }
-function SPDashboard({ org, user, panicContact }: { org: any, user: any, panicContact: any }) {
+function SPDashboard({ org, user }: { org: any, user: any }) {
   const spFeatures = [
     { name: 'State Registrations', desc: 'Manage your state x-ray service registration numbers.', border: '#b8e8cc', href: '/dashboard/registrations' },
     { name: 'Client Facilities', desc: 'ComplianceOS accounts linked through your referral code.', border: '#b8e8cc', href: '/dashboard/clients' },
