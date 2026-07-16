@@ -15,6 +15,68 @@ const features = [
   { name: 'X-ray Operators', desc: 'Operator credentials, training records, and CEU tracking.', border: '#b8e8cc' },
 ]
 
+function SPDashboard({ org, user }: { org: any; user: any }) {
+  const spFeatures = [
+    { name: 'State Registrations', desc: 'Manage your state x-ray service registration numbers.', border: '#b8e8cc', href: '/dashboard/registrations' },
+    { name: 'Client Facilities', desc: 'ComplianceOS accounts linked through your referral code.', border: '#b8e8cc', href: '/dashboard/clients' },
+    { name: 'Quarterly Reports', desc: 'Build and track your state installation reports.', border: '#c2ddf0', href: '/dashboard/reports' },
+    { name: 'Revenue', desc: 'Track your referral commissions and subscription credits.', border: '#c2ddf0', href: '/dashboard/revenue' },
+    { name: 'State documents', desc: 'Registration forms, rules, and regulatory documents.', border: '#c2ddf0', href: '/dashboard/stateforms' },
+    { name: 'Compliance calendar', desc: 'Track state reporting deadlines and renewal dates.', border: '#c2ddf0', href: '/dashboard/calendar' },
+    { name: 'Document repository', desc: 'Store your company compliance documents.', border: '#c2ddf0', href: '/dashboard/documents' },
+  ]
+  return (
+    <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f4f7fb' }}>
+      <nav style={{ background: '#0d2d5e', padding: '0 32px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ color: '#fff', fontSize: '17px', fontWeight: '500' }}>The Radiology Coach</span>
+          <span style={{ background: 'rgba(255,255,255,0.1)', color: '#8bb4d4', fontSize: '11px', padding: '2px 8px', borderRadius: '4px', fontWeight: '500', marginLeft: '10px' }}>ComplianceOS</span>
+        </div>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <span style={{ color: '#8bb4d4', fontSize: '13px' }}>{user.email}</span>
+          <SignOutButton />
+        </div>
+      </nav>
+      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 24px' }}>
+        <div style={{ background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '10px', padding: '14px 20px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+          <div>
+            <p style={{ fontSize: '10px', fontWeight: '500', color: '#2d6a4f', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '2px' }}>Your referral code</p>
+            <p style={{ fontSize: '20px', fontWeight: '500', color: '#0d2d5e', letterSpacing: '0.08em', margin: 0 }}>{org.referral_code}</p>
+          </div>
+          <p style={{ fontSize: '12px', color: '#2d6a4f', maxWidth: '360px', margin: 0, lineHeight: '1.6' }}>
+            Share this code with your clinic clients. When they sign up using it, they appear in your Client Facilities list and you earn a commission.
+          </p>
+        </div>
+        <div style={{ marginBottom: '28px' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>{org.name}</h1>
+          <p style={{ fontSize: '13px', color: '#827d76' }}>
+            Dealer / Service Provider · {org.facility_state}
+          </p>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+          {spFeatures.map(f => (
+            f.href ? (
+              <a key={f.name} href={f.href} style={{ textDecoration: 'none' }}>
+                <div style={{ background: '#fff', border: `1px solid ${f.border}`, borderRadius: '12px', padding: '20px', cursor: 'pointer' }}>
+                  <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>{f.name}</p>
+                  <p style={{ fontSize: '12px', color: '#827d76', lineHeight: '1.55', marginBottom: '16px' }}>{f.desc}</p>
+                  <span style={{ background: '#e8f3fb', color: '#0d2d5e', fontSize: '11px', fontWeight: '500', padding: '3px 10px', borderRadius: '20px', border: '1px solid #c2ddf0' }}>Open →</span>
+                </div>
+              </a>
+            ) : (
+              <div key={f.name} style={{ background: '#fff', border: `1px solid ${f.border}`, borderRadius: '12px', padding: '20px' }}>
+                <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>{f.name}</p>
+                <p style={{ fontSize: '12px', color: '#827d76', lineHeight: '1.55', marginBottom: '16px' }}>{f.desc}</p>
+                <span style={{ background: '#f4f7fb', color: '#a8a39c', fontSize: '11px', fontWeight: '500', padding: '3px 10px', borderRadius: '20px', border: '1px solid #e8e6e2' }}>Coming soon</span>
+              </div>
+            )
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -36,9 +98,9 @@ export default async function DashboardPage() {
     .eq('id', profile.org_id)
     .single()
 
-    if (org?.org_type === 'service_provider') {
-  return <SPDashboard org={org} user={user} />
-}
+  if (org?.org_type === 'service_provider') {
+    return <SPDashboard org={org} user={user} />
+  }
 
   const { data: ktsItems } = await supabase
     .from('keys_to_success').select('id')
@@ -48,20 +110,6 @@ export default async function DashboardPage() {
     .select('*', { count: 'exact', head: true })
     .eq('org_id', profile.org_id)
     .eq('completed', true)
-    const { data: subscription } = await supabase
-  .from('subscriptions')
-  .select('status, current_period_end, cancel_at_period_end')
-  .eq('org_id', profile.org_id)
-  .single()
-
-const isActive = subscription?.status === 'active' || subscription?.status === 'trialing'
-const isTrial = subscription?.status === 'trialing'
-const trialEnd = subscription?.current_period_end
-  ? new Date(subscription.current_period_end)
-  : null
-const daysLeft = trialEnd
-  ? Math.max(0, Math.ceil((trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
-  : null
 
   const ktsPct = ktsItems?.length
     ? Math.round(((ktsCompleted || 0) / ktsItems.length) * 100)
@@ -77,6 +125,21 @@ const daysLeft = trialEnd
   const panicContact = (dealerRaw as any[])?.find(c => c.contact_type === 'dealer')
     || (dealerRaw as any[])?.[0]
     || null
+
+  const { data: subscription } = await supabase
+    .from('subscriptions')
+    .select('status, current_period_end, cancel_at_period_end')
+    .eq('org_id', profile.org_id)
+    .single()
+
+  const isActive = subscription?.status === 'active' || subscription?.status === 'trialing'
+  const isTrial = subscription?.status === 'trialing'
+  const trialEnd = subscription?.current_period_end
+    ? new Date(subscription.current_period_end)
+    : null
+  const daysLeft = trialEnd
+    ? Math.max(0, Math.ceil((trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : null
 
   return (
     <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f4f7fb' }}>
@@ -96,9 +159,7 @@ const daysLeft = trialEnd
         {panicContact ? (
           <div style={{ background: '#fff', border: '1px solid #f0d4a0', borderLeft: '4px solid #c44a1a', borderRadius: '10px', padding: '14px 20px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{ width: '40px', height: '40px', background: '#fff6e8', border: '1px solid #f0d4a0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '20px' }}>
-                📞
-              </div>
+              <div style={{ width: '40px', height: '40px', background: '#fff6e8', border: '1px solid #f0d4a0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '20px' }}>📞</div>
               <div>
                 <p style={{ fontSize: '10px', fontWeight: '500', color: '#c44a1a', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '2px' }}>Equipment support</p>
                 <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', marginBottom: '1px' }}>{panicContact.company_name || 'Your dealer'}</p>
@@ -128,30 +189,25 @@ const daysLeft = trialEnd
             <a href="/dashboard/systems" style={{ fontSize: '12px', fontWeight: '500', color: '#c44a1a', textDecoration: 'none', whiteSpace: 'nowrap' }}>Set up →</a>
           </div>
         )}
-        {!isActive && (
-  <div style={{ background: '#0d2d5e', borderRadius: '10px', padding: '14px 20px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-    <div>
-      <p style={{ color: '#fff', fontSize: '14px', fontWeight: '500', marginBottom: '3px' }}>
-        Start your 14-day free trial
-      </p>
-      <p style={{ color: '#8bb4d4', fontSize: '12px', margin: 0 }}>
-        Full access to all features — no charge until your trial ends. Cancel anytime.
-      </p>
-    </div>
-    <UpgradeButton />
-  </div>
-)}
 
-{isTrial && daysLeft !== null && (
-  <div style={{ background: '#fff6e8', border: '1px solid #f0d4a0', borderRadius: '10px', padding: '12px 20px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-    <p style={{ fontSize: '13px', color: '#9a3510', margin: 0 }}>
-      <strong>{daysLeft} day{daysLeft !== 1 ? 's' : ''}</strong> remaining in your free trial.
-    </p>
-    <a href="/api/stripe/portal" style={{ fontSize: '12px', fontWeight: '500', color: '#c44a1a', textDecoration: 'none' }}>
-      Manage subscription →
-    </a>
-  </div>
-)}
+        {!isActive && (
+          <div style={{ background: '#0d2d5e', borderRadius: '10px', padding: '14px 20px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+            <div>
+              <p style={{ color: '#fff', fontSize: '14px', fontWeight: '500', marginBottom: '3px' }}>Start your 14-day free trial</p>
+              <p style={{ color: '#8bb4d4', fontSize: '12px', margin: 0 }}>Full access to all features — no charge until your trial ends. Cancel anytime.</p>
+            </div>
+            <UpgradeButton />
+          </div>
+        )}
+
+        {isTrial && daysLeft !== null && (
+          <div style={{ background: '#fff6e8', border: '1px solid #f0d4a0', borderRadius: '10px', padding: '12px 20px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+            <p style={{ fontSize: '13px', color: '#9a3510', margin: 0 }}>
+              <strong>{daysLeft} day{daysLeft !== 1 ? 's' : ''}</strong> remaining in your free trial.
+            </p>
+            <a href="/dashboard/billing" style={{ fontSize: '12px', fontWeight: '500', color: '#c44a1a', textDecoration: 'none' }}>Manage subscription →</a>
+          </div>
+        )}
 
         <div style={{ marginBottom: '28px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>
@@ -206,67 +262,6 @@ const daysLeft = trialEnd
           ))}
         </div>
 
-      </div>
-    </div>
-  )
-}
-function SPDashboard({ org, user }: { org: any, user: any }) {
-  const spFeatures = [
-    { name: 'State Registrations', desc: 'Manage your state x-ray service registration numbers.', border: '#b8e8cc', href: '/dashboard/registrations' },
-    { name: 'Client Facilities', desc: 'ComplianceOS accounts linked through your referral code.', border: '#b8e8cc', href: '/dashboard/clients' },
-    { name: 'Quarterly Reports', desc: 'Build and track your state installation reports.', border: '#c2ddf0', href: '/dashboard/reports' },
-    { name: 'Revenue', desc: 'Track your referral commissions and subscription credits.', border: '#c2ddf0', href: '/dashboard/revenue' },
-    { name: 'State documents', desc: 'Registration forms, rules, and regulatory documents.', border: '#c2ddf0', href: '/dashboard/stateforms' },
-    { name: 'Compliance calendar', desc: 'Track state reporting deadlines and renewal dates.', border: '#c2ddf0', href: '/dashboard/calendar' },
-    { name: 'Document repository', desc: 'Store your company compliance documents.', border: '#c2ddf0', href: '/dashboard/documents' },
-  ]
-  return (
-    <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f4f7fb' }}>
-      <nav style={{ background: '#0d2d5e', padding: '0 32px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ color: '#fff', fontSize: '17px', fontWeight: '500' }}>The Radiology Coach</span>
-          <span style={{ background: 'rgba(255,255,255,0.1)', color: '#8bb4d4', fontSize: '11px', padding: '2px 8px', borderRadius: '4px', fontWeight: '500', marginLeft: '10px' }}>ComplianceOS</span>
-        </div>
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          <span style={{ color: '#8bb4d4', fontSize: '13px' }}>{user.email}</span>
-        </div>
-      </nav>
-      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 24px' }}>
-        <div style={{ background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '10px', padding: '14px 20px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-          <div>
-            <p style={{ fontSize: '10px', fontWeight: '500', color: '#2d6a4f', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '2px' }}>Your referral code</p>
-            <p style={{ fontSize: '20px', fontWeight: '500', color: '#0d2d5e', letterSpacing: '0.08em', margin: 0 }}>{org.referral_code}</p>
-          </div>
-          <p style={{ fontSize: '12px', color: '#2d6a4f', maxWidth: '360px', margin: 0, lineHeight: '1.6' }}>
-            Share this code with your clinic clients. When they sign up using it, they appear in your Client Facilities list and you earn a commission.
-          </p>
-        </div>
-        <div style={{ marginBottom: '28px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>{org.name}</h1>
-          <p style={{ fontSize: '13px', color: '#827d76' }}>
-            Dealer / Service Provider · {org.facility_state}
-            {(org.modality_names || []).length > 0 && ` · ${(org.modality_names || []).join(', ')}`}
-          </p>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-          {spFeatures.map(f => (
-            f.href ? (
-              <a key={f.name} href={f.href} style={{ textDecoration: 'none' }}>
-                <div style={{ background: '#fff', border: `1px solid ${f.border}`, borderRadius: '12px', padding: '20px', cursor: 'pointer' }}>
-                  <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>{f.name}</p>
-                  <p style={{ fontSize: '12px', color: '#827d76', lineHeight: '1.55', marginBottom: '16px' }}>{f.desc}</p>
-                  <span style={{ background: '#e8f3fb', color: '#0d2d5e', fontSize: '11px', fontWeight: '500', padding: '3px 10px', borderRadius: '20px', border: '1px solid #c2ddf0' }}>Open →</span>
-                </div>
-              </a>
-            ) : (
-              <div key={f.name} style={{ background: '#fff', border: `1px solid ${f.border}`, borderRadius: '12px', padding: '20px' }}>
-                <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>{f.name}</p>
-                <p style={{ fontSize: '12px', color: '#827d76', lineHeight: '1.55', marginBottom: '16px' }}>{f.desc}</p>
-                <span style={{ background: '#f4f7fb', color: '#a8a39c', fontSize: '11px', fontWeight: '500', padding: '3px 10px', borderRadius: '20px', border: '1px solid #e8e6e2' }}>Coming soon</span>
-              </div>
-            )
-          ))}
-        </div>
       </div>
     </div>
   )
