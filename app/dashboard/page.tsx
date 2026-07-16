@@ -124,7 +124,7 @@ const daysLeft = trialEnd
             <a href="/dashboard/systems" style={{ fontSize: '12px', fontWeight: '500', color: '#c44a1a', textDecoration: 'none', whiteSpace: 'nowrap' }}>Set up →</a>
           </div>
         )}
-        {true && (
+        {!isActive && (
   <div style={{ background: '#0d2d5e', borderRadius: '10px', padding: '14px 20px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
     <div>
       <p style={{ color: '#fff', fontSize: '14px', fontWeight: '500', marginBottom: '3px' }}>
