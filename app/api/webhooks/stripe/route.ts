@@ -46,8 +46,10 @@ export async function POST(request: Request) {
           stripe_subscription_id: subscriptionId,
           status: subscription.status,
           price_id: subscription.items.data[0]?.price.id,
-          current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-          cancel_at_period_end: subscription.cancel_at_period_end,
+          current_period_end: (subscription as any).current_period_end
+  ? new Date((subscription as any).current_period_end * 1000).toISOString()
+  : null,
+cancel_at_period_end: (subscription as any).cancel_at_period_end ?? false,
         }, { onConflict: 'org_id' })
 
         await admin.from('organizations').update({
@@ -68,8 +70,10 @@ export async function POST(request: Request) {
           stripe_customer_id: subscription.customer as string,
           status: subscription.status,
           price_id: subscription.items.data[0]?.price.id,
-          current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-          cancel_at_period_end: subscription.cancel_at_period_end,
+          current_period_end: (subscription as any).current_period_end
+  ? new Date((subscription as any).current_period_end * 1000).toISOString()
+  : null,
+cancel_at_period_end: (subscription as any).cancel_at_period_end ?? false,
         }, { onConflict: 'org_id' })
 
         break
