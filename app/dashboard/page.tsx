@@ -134,10 +134,7 @@ const daysLeft = trialEnd
         Full access to all features — no charge until your trial ends. Cancel anytime.
       </p>
     </div>
-    <form action="/api/stripe/checkout" method="POST">
-      <input type="hidden" name="plan" value="professional" />
-      <UpgradeButton />
-    </form>
+    <UpgradeButton />
   </div>
 )}
 
