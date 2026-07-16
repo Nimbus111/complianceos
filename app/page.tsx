@@ -276,7 +276,7 @@ export default function HomePage() {
           <a href="/pricing" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>About</a>
           <a href="/pricing" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>Pricing</a>
           <a href="/login" style={{ color: '#fff', fontSize: '13px', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.25)', padding: '6px 16px', borderRadius: '8px' }}>Sign in</a>
-          <a href="/signup" style={{ background: '#1a72e8', color: '#fff', fontSize: '13px', fontWeight: '500', padding: '7px 18px', borderRadius: '8px', textDecoration: 'none' }}>Get started</a>
+          <a href="/get-started" style={{ background: '#1a72e8', color: '#fff', fontSize: '13px', fontWeight: '500', padding: '7px 18px', borderRadius: '8px', textDecoration: 'none' }}>Get started</a>
         </div>
       </nav>
 
@@ -392,7 +392,7 @@ export default function HomePage() {
                     </div>
                     <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>{item.title}</p>
                     <p style={{ fontSize: '12px', color: '#827d76', lineHeight: '1.55', marginBottom: '12px' }}>{item.desc}</p>
-                    <a href="/signup" style={{ fontSize: '12px', fontWeight: '500', color: '#1a5fa8', textDecoration: 'none' }}>
+                    <a href="/get-started" style={{ fontSize: '12px', fontWeight: '500', color: '#1a5fa8', textDecoration: 'none' }}>
                       Unlock with membership →
                     </a>
                   </div>
@@ -465,7 +465,7 @@ export default function HomePage() {
         </p>
       </div>
       <div style={{ display: 'flex', gap: '10px', flexShrink: 0 }}>
-        <a href="/signup" style={{ background: '#fff', color: '#0d2d5e', fontSize: '13px', fontWeight: '500', padding: '10px 24px', borderRadius: '8px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+        <a href="/get-started" style={{ background: '#fff', color: '#0d2d5e', fontSize: '13px', fontWeight: '500', padding: '10px 24px', borderRadius: '8px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
           Create free account
         </a>
         <a href="/login" style={{ background: 'transparent', color: '#8bb4d4', fontSize: '13px', padding: '10px 20px', borderRadius: '8px', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap' }}>
@@ -500,7 +500,7 @@ export default function HomePage() {
             <p style={{ color: '#fff', fontSize: '16px', fontWeight: '500', marginBottom: '4px' }}>Ready to take action on what you just found?</p>
             <p style={{ color: '#8bb4d4', fontSize: '13px', margin: 0 }}>Members get forms, update alerts, AI assistance, compliance calendar, document repository, and more.</p>
           </div>
-          <a href="/signup" style={{ background: '#fff', color: '#0d2d5e', fontSize: '13px', fontWeight: '500', padding: '10px 24px', borderRadius: '8px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+          <a href="/get-started" style={{ background: '#fff', color: '#0d2d5e', fontSize: '13px', fontWeight: '500', padding: '10px 24px', borderRadius: '8px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
             Become a member
           </a>
         </div>

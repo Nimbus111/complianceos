@@ -1,219 +1,236 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
-
-const US_STATES = [
-  'Alabama','Alaska','Arizona','Arkansas','California','Colorado',
-  'Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho',
-  'Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana',
-  'Maine','Maryland','Massachusetts','Michigan','Minnesota',
-  'Mississippi','Missouri','Montana','Nebraska','Nevada',
-  'New Hampshire','New Jersey','New Mexico','New York',
-  'North Carolina','North Dakota','Ohio','Oklahoma','Oregon',
-  'Pennsylvania','Rhode Island','South Carolina','South Dakota',
-  'Tennessee','Texas','Utah','Vermont','Virginia','Washington',
-  'West Virginia','Wisconsin','Wyoming','District of Columbia'
-]
+import { useRouter, useSearchParams } from 'next/navigation'
 
 const FACILITY_TYPES = [
-  'Dental','Podiatry','Chiropractic','Imaging Center',
-  'Physician Office','Urgent Care','Veterinary','Hospital','Other'
+  'Dental Office','Podiatry Clinic','Chiropractic Clinic','Imaging Center',
+  'Hospital','Urgent Care Center','Medical Clinic','Surgery Center',
+  'Pain Medicine','Veterinary Clinic','Other',
 ]
 
-export default function OnboardingPage() {
+const MODALITY_OPTIONS = [
+  'General Radiography','C-arm Fluoroscopy','Mobile X-ray',
+  'Portable/Handheld X-ray','CT','CBCT','Fluoroscopy',
+  'Panoramic','Dental Intraoral','Mammography','Bone Densitometry',
+]
+
+function OnboardingForm() {
   const [step, setStep] = useState(1)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   const [facilityName, setFacilityName] = useState('')
   const [facilityType, setFacilityType] = useState('')
   const [facilityState, setFacilityState] = useState('')
   const [selectedModalities, setSelectedModalities] = useState<string[]>([])
-  const [modalities, setModalities] = useState<any[]>([])
   const [rsoName, setRsoName] = useState('')
   const [rsoEmail, setRsoEmail] = useState('')
   const [rsoPhone, setRsoPhone] = useState('')
+  const [referralCode, setReferralCode] = useState('')
 
   useEffect(() => {
     const supabase = createClient()
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) { router.push('/login'); return }
-      const { data: profile } = await supabase
-        .from('profiles').select('onboarding_completed').eq('id', user.id).single()
-      if (profile?.onboarding_completed) router.push('/dashboard')
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) router.push('/login')
     })
-    supabase.from('modalities').select('*').order('sort_order').then(({ data }) => {
-      if (data) setModalities(data)
-    })
-  }, [])
+  }, [router])
 
-  const toggleModality = (name: string) => {
+  useEffect(() => {
+    if (searchParams.get('type') === 'service_provider') {
+      router.push('/onboarding/sp')
+    }
+  }, [searchParams, router])
+
+  const toggleModality = (m: string) => {
     setSelectedModalities(prev =>
-      prev.includes(name) ? prev.filter(m => m !== name) : [...prev, name]
+      prev.includes(m) ? prev.filter(x => x !== m) : [...prev, m]
     )
   }
 
   const handleComplete = async () => {
-    setLoading(true)
-    setError('')
-    try {
-      const res = await fetch('/api/onboarding', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          facilityName,
-          facilityType,
-          facilityState,
-          selectedModalities,
-          rsoName,
-          rsoEmail,
-          rsoPhone,
-        })
+    setSaving(true)
+    const res = await fetch('/api/onboarding', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        facilityName,
+        facilityType,
+        facilityState,
+        modalities: selectedModalities,
+        rsoName,
+        rsoEmail,
+        rsoPhone,
+        referral_code: referralCode.trim().toUpperCase() || null,
       })
-      const result = await res.json()
-      if (!res.ok) {
-        setError(result.error || 'Something went wrong')
-        setLoading(false)
-        return
-      }
+    })
+    const result = await res.json()
+    if (res.ok) {
       router.push('/dashboard')
-      router.refresh()
-    } catch (e: any) {
-      setError(e.message)
-      setLoading(false)
+    } else {
+      alert(result.error || 'Error completing setup')
+      setSaving(false)
     }
   }
 
-  const inp = { width: '100%', height: '42px', border: '1px solid #c2ddf0', borderRadius: '8px', padding: '0 12px', fontSize: '14px', color: '#0d2d5e', background: '#fff', outline: 'none', boxSizing: 'border-box' as const }
-  const lbl = { display: 'block', fontSize: '11px', fontWeight: '500' as const, color: '#a8a39c', marginBottom: '6px', textTransform: 'uppercase' as const, letterSpacing: '0.07em' }
+  const US_STATES = [
+    'Alabama','Alaska','Arizona','Arkansas','California','Colorado',
+    'Connecticut','Delaware','Florida','Georgia','Hawaii','Idaho',
+    'Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana',
+    'Maine','Maryland','Massachusetts','Michigan','Minnesota',
+    'Mississippi','Missouri','Montana','Nebraska','Nevada',
+    'New Hampshire','New Jersey','New Mexico','New York',
+    'North Carolina','North Dakota','Ohio','Oklahoma','Oregon',
+    'Pennsylvania','Rhode Island','South Carolina','South Dakota',
+    'Tennessee','Texas','Utah','Vermont','Virginia','Washington',
+    'West Virginia','Wisconsin','Wyoming','District of Columbia',
+  ]
+
+  const inp: React.CSSProperties = {
+    width: '100%', height: '40px', border: '1px solid #c2ddf0',
+    borderRadius: '8px', padding: '0 12px', fontSize: '13px',
+    color: '#0d2d5e', background: '#fff', outline: 'none', boxSizing: 'border-box',
+  }
+  const lbl: React.CSSProperties = {
+    display: 'block', fontSize: '11px', fontWeight: '500',
+    color: '#4a6d8c', marginBottom: '5px',
+    textTransform: 'uppercase', letterSpacing: '0.07em',
+  }
 
   return (
-    <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f4f7fb' }}>
+    <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f0f4f8' }}>
       <nav style={{ background: '#0d2d5e', padding: '0 32px', height: '60px', display: 'flex', alignItems: 'center' }}>
-        <span style={{ color: '#fff', fontSize: '17px', fontWeight: '500' }}>The Radiology Coach</span>
-        <span style={{ background: 'rgba(255,255,255,0.1)', color: '#8bb4d4', fontSize: '11px', padding: '2px 8px', borderRadius: '4px', fontWeight: '500', marginLeft: '10px' }}>ComplianceOS</span>
+        <span style={{ color: '#fff', fontSize: '16px', fontWeight: '500' }}>The Radiology Coach · ComplianceOS</span>
+        <span style={{ background: 'rgba(255,255,255,0.1)', color: '#8bb4d4', fontSize: '11px', padding: '2px 8px', borderRadius: '4px', marginLeft: '12px' }}>Account Setup</span>
       </nav>
 
       <div style={{ maxWidth: '560px', margin: '0 auto', padding: '48px 24px' }}>
-        <div style={{ marginBottom: '32px' }}>
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
+
+        <div style={{ marginBottom: '28px' }}>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
             {[1,2,3,4].map(n => (
               <div key={n} style={{ flex: 1, height: '4px', borderRadius: '2px', background: n <= step ? '#0d2d5e' : '#c2ddf0' }} />
             ))}
           </div>
           <p style={{ fontSize: '12px', color: '#a8a39c', marginBottom: '4px' }}>Step {step} of 4</p>
           <h1 style={{ fontSize: '22px', fontWeight: '500', color: '#0d2d5e' }}>
-            {step === 1 && 'Tell us about your facility'}
-            {step === 2 && 'Which modalities do you operate?'}
-            {step === 3 && 'RSO information'}
-            {step === 4 && 'Review and finish'}
+            {step === 1 && 'Your facility'}
+            {step === 2 && 'Imaging modalities'}
+            {step === 3 && 'Radiation Safety Officer'}
+            {step === 4 && 'Review & create account'}
           </h1>
         </div>
 
-        <div style={{ background: '#fff', border: '1px solid #c2ddf0', borderRadius: '16px', padding: '28px' }}>
+        <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '16px', padding: '28px' }}>
 
           {step === 1 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={lbl}>Facility name</label>
+                <label style={lbl}>Facility name *</label>
                 <input style={inp} type="text" placeholder="e.g. Sunrise Dental" value={facilityName} onChange={e => setFacilityName(e.target.value)} />
               </div>
               <div>
-                <label style={lbl}>Facility type</label>
+                <label style={lbl}>Facility type *</label>
                 <select style={inp} value={facilityType} onChange={e => setFacilityType(e.target.value)}>
                   <option value="">Select type</option>
                   {FACILITY_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
               <div>
-                <label style={lbl}>State</label>
+                <label style={lbl}>State *</label>
                 <select style={inp} value={facilityState} onChange={e => setFacilityState(e.target.value)}>
                   <option value="">Select state</option>
                   {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
-              <button
-                onClick={() => setStep(2)}
-                disabled={!facilityName || !facilityType || !facilityState}
-                style={{ height: '44px', background: (!facilityName || !facilityType || !facilityState) ? '#c2ddf0' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: (!facilityName || !facilityType || !facilityState) ? 'default' : 'pointer', marginTop: '8px' }}
-              >
+              <button onClick={() => setStep(2)} disabled={!facilityName || !facilityType || !facilityState}
+                style={{ height: '42px', background: (!facilityName || !facilityType || !facilityState) ? '#c2ddf0' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '500', cursor: (!facilityName || !facilityType || !facilityState) ? 'default' : 'pointer', marginTop: '4px' }}>
                 Continue
               </button>
             </div>
           )}
 
           {step === 2 && (
-            <div>
-              <p style={{ fontSize: '13px', color: '#827d76', marginBottom: '16px' }}>Select all that apply</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
-                {modalities.map(m => (
-                  <label key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', border: `1px solid ${selectedModalities.includes(m.modality_name) ? '#0d2d5e' : '#c2ddf0'}`, borderRadius: '8px', cursor: 'pointer', background: selectedModalities.includes(m.modality_name) ? '#e8f3fb' : '#fff' }}>
-                    <input type="checkbox" checked={selectedModalities.includes(m.modality_name)} onChange={() => toggleModality(m.modality_name)} style={{ width: '16px', height: '16px', accentColor: '#0d2d5e' }} />
-                    <span style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e' }}>{m.modality_name}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <p style={{ fontSize: '13px', color: '#4a6d8c', margin: 0 }}>Select all modalities used at your facility.</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {MODALITY_OPTIONS.map(m => (
+                  <label key={m} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', border: `1px solid ${selectedModalities.includes(m) ? '#0d2d5e' : '#dce8f5'}`, borderRadius: '8px', cursor: 'pointer', background: selectedModalities.includes(m) ? '#e8f3fb' : '#fff' }}>
+                    <input type="checkbox" checked={selectedModalities.includes(m)} onChange={() => toggleModality(m)} style={{ accentColor: '#0d2d5e', width: '15px', height: '15px' }} />
+                    <span style={{ fontSize: '13px', color: '#0d2d5e', fontWeight: selectedModalities.includes(m) ? '500' : '400' }}>{m}</span>
                   </label>
                 ))}
               </div>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button onClick={() => setStep(1)} style={{ flex: 1, height: '44px', background: '#fff', color: '#0d2d5e', border: '1px solid #c2ddf0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}>Back</button>
-                <button onClick={() => setStep(3)} disabled={selectedModalities.length === 0} style={{ flex: 2, height: '44px', background: selectedModalities.length === 0 ? '#c2ddf0' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: selectedModalities.length === 0 ? 'default' : 'pointer' }}>Continue</button>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                <button onClick={() => setStep(1)} style={{ flex: 1, height: '40px', background: '#fff', color: '#0d2d5e', border: '1px solid #c2ddf0', borderRadius: '8px', fontSize: '13px', cursor: 'pointer' }}>Back</button>
+                <button onClick={() => setStep(3)} disabled={selectedModalities.length === 0}
+                  style={{ flex: 2, height: '40px', background: selectedModalities.length === 0 ? '#c2ddf0' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '500', cursor: selectedModalities.length === 0 ? 'default' : 'pointer' }}>
+                  Continue — {selectedModalities.length} selected
+                </button>
               </div>
             </div>
           )}
 
           {step === 3 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <p style={{ fontSize: '13px', color: '#827d76', marginTop: '-8px' }}>The Radiation Safety Officer responsible for compliance at this facility.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <p style={{ fontSize: '13px', color: '#4a6d8c', margin: 0 }}>
+                The RSO is responsible for radiation safety oversight at your facility.
+              </p>
               <div>
-                <label style={lbl}>RSO full name</label>
-                <input style={inp} type="text" placeholder="e.g. Dr. Sarah Johnson" value={rsoName} onChange={e => setRsoName(e.target.value)} />
+                <label style={lbl}>RSO name *</label>
+                <input style={inp} type="text" placeholder="Full name" value={rsoName} onChange={e => setRsoName(e.target.value)} />
               </div>
               <div>
-                <label style={lbl}>RSO email</label>
+                <label style={lbl}>RSO email *</label>
                 <input style={inp} type="email" placeholder="rso@facility.com" value={rsoEmail} onChange={e => setRsoEmail(e.target.value)} />
               </div>
               <div>
                 <label style={lbl}>RSO phone</label>
-                <input style={inp} type="tel" placeholder="(555) 555-5555" value={rsoPhone} onChange={e => setRsoPhone(e.target.value)} />
+                <input style={inp} type="tel" placeholder="(optional)" value={rsoPhone} onChange={e => setRsoPhone(e.target.value)} />
               </div>
-              <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
-                <button onClick={() => setStep(2)} style={{ flex: 1, height: '44px', background: '#fff', color: '#0d2d5e', border: '1px solid #c2ddf0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}>Back</button>
-                <button onClick={() => setStep(4)} disabled={!rsoName || !rsoEmail} style={{ flex: 2, height: '44px', background: (!rsoName || !rsoEmail) ? '#c2ddf0' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: (!rsoName || !rsoEmail) ? 'default' : 'pointer' }}>Continue</button>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                <button onClick={() => setStep(2)} style={{ flex: 1, height: '40px', background: '#fff', color: '#0d2d5e', border: '1px solid #c2ddf0', borderRadius: '8px', fontSize: '13px', cursor: 'pointer' }}>Back</button>
+                <button onClick={() => setStep(4)} disabled={!rsoName || !rsoEmail}
+                  style={{ flex: 2, height: '40px', background: (!rsoName || !rsoEmail) ? '#c2ddf0' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '500', cursor: (!rsoName || !rsoEmail) ? 'default' : 'pointer' }}>
+                  Continue
+                </button>
               </div>
             </div>
           )}
 
           {step === 4 && (
-            <div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ background: '#f4f7fb', borderRadius: '10px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {[
-                  { label: 'Facility', value: facilityName },
-                  { label: 'Type', value: facilityType },
-                  { label: 'State', value: facilityState },
-                  { label: 'Modalities', value: selectedModalities.join(', ') },
-                  { label: 'RSO', value: rsoName },
-                  { label: 'RSO email', value: rsoEmail },
-                  { label: 'RSO phone', value: rsoPhone || '—' },
-                ].map(row => (
-                  <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #e8f3fb' }}>
-                    <span style={{ fontSize: '12px', color: '#a8a39c', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: '500' }}>{row.label}</span>
-                    <span style={{ fontSize: '13px', color: '#0d2d5e', fontWeight: '500', textAlign: 'right', maxWidth: '60%' }}>{row.value}</span>
+                  ['Facility', facilityName],
+                  ['Type', facilityType],
+                  ['State', facilityState],
+                  ['Modalities', selectedModalities.join(', ')],
+                  ['RSO', rsoName],
+                  ['RSO email', rsoEmail],
+                ].map(([label, value]) => (
+                  <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+                    <span style={{ fontSize: '12px', color: '#a8a39c', flexShrink: 0 }}>{label}</span>
+                    <span style={{ fontSize: '12px', color: '#0d2d5e', fontWeight: '500', textAlign: 'right' }}>{value}</span>
                   </div>
                 ))}
               </div>
 
-              {error && (
-                <div style={{ background: '#fefafb', border: '1px solid #f5c6c9', borderRadius: '8px', padding: '10px 14px', marginBottom: '16px', fontSize: '13px', color: '#931621' }}>
-                  {error}
-                </div>
-              )}
+              <div>
+                <label style={lbl}>Dealer / Service Provider referral code <span style={{ color: '#a8a39c', fontWeight: '400', textTransform: 'none' }}>(optional)</span></label>
+                <input style={inp} type="text" placeholder="e.g. LAYT-X7K2" value={referralCode} onChange={e => setReferralCode(e.target.value.toUpperCase())} />
+                <p style={{ fontSize: '11px', color: '#a8a39c', marginTop: '4px' }}>
+                  If your x-ray dealer or service provider recommended ComplianceOS, enter their code here.
+                </p>
+              </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button onClick={() => setStep(3)} style={{ flex: 1, height: '44px', background: '#fff', color: '#0d2d5e', border: '1px solid #c2ddf0', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}>Back</button>
-                <button onClick={handleComplete} disabled={loading} style={{ flex: 2, height: '44px', background: loading ? '#c2ddf0' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: loading ? 'default' : 'pointer' }}>
-                  {loading ? 'Setting up...' : 'Complete setup'}
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button onClick={() => setStep(3)} style={{ flex: 1, height: '42px', background: '#fff', color: '#0d2d5e', border: '1px solid #c2ddf0', borderRadius: '8px', fontSize: '13px', cursor: 'pointer' }}>Back</button>
+                <button onClick={handleComplete} disabled={saving}
+                  style={{ flex: 2, height: '42px', background: saving ? '#c2ddf0' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '500', cursor: saving ? 'default' : 'pointer' }}>
+                  {saving ? 'Creating account...' : 'Create my account →'}
                 </button>
               </div>
             </div>
@@ -222,5 +239,17 @@ export default function OnboardingPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ color: '#a8a39c' }}>Loading...</p>
+      </div>
+    }>
+      <OnboardingForm />
+    </Suspense>
   )
 }
