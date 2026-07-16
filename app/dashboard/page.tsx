@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import SignOutButton from '../components/SignOutButton'
+import UpgradeButton from '../components/UpgradeButton'
 
 const features = [
   { name: 'Compliance calendar', desc: 'Track renewals, inspections, and QA deadlines', border: '#c2ddf0', href: '/dashboard/calendar' },
@@ -43,6 +44,20 @@ export default async function DashboardPage() {
     .select('*', { count: 'exact', head: true })
     .eq('org_id', profile.org_id)
     .eq('completed', true)
+    const { data: subscription } = await supabase
+  .from('subscriptions')
+  .select('status, current_period_end, cancel_at_period_end')
+  .eq('org_id', profile.org_id)
+  .single()
+
+const isActive = subscription?.status === 'active' || subscription?.status === 'trialing'
+const isTrial = subscription?.status === 'trialing'
+const trialEnd = subscription?.current_period_end
+  ? new Date(subscription.current_period_end)
+  : null
+const daysLeft = trialEnd
+  ? Math.max(0, Math.ceil((trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+  : null
 
   const ktsPct = ktsItems?.length
     ? Math.round(((ktsCompleted || 0) / ktsItems.length) * 100)
@@ -109,6 +124,33 @@ export default async function DashboardPage() {
             <a href="/dashboard/systems" style={{ fontSize: '12px', fontWeight: '500', color: '#c44a1a', textDecoration: 'none', whiteSpace: 'nowrap' }}>Set up →</a>
           </div>
         )}
+        {!isActive && (
+  <div style={{ background: '#0d2d5e', borderRadius: '10px', padding: '14px 20px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+    <div>
+      <p style={{ color: '#fff', fontSize: '14px', fontWeight: '500', marginBottom: '3px' }}>
+        Start your 14-day free trial
+      </p>
+      <p style={{ color: '#8bb4d4', fontSize: '12px', margin: 0 }}>
+        Full access to all features — no charge until your trial ends. Cancel anytime.
+      </p>
+    </div>
+    <form action="/api/stripe/checkout" method="POST">
+      <input type="hidden" name="plan" value="professional" />
+      <UpgradeButton />
+    </form>
+  </div>
+)}
+
+{isTrial && daysLeft !== null && (
+  <div style={{ background: '#fff6e8', border: '1px solid #f0d4a0', borderRadius: '10px', padding: '12px 20px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+    <p style={{ fontSize: '13px', color: '#9a3510', margin: 0 }}>
+      <strong>{daysLeft} day{daysLeft !== 1 ? 's' : ''}</strong> remaining in your free trial.
+    </p>
+    <a href="/api/stripe/portal" style={{ fontSize: '12px', fontWeight: '500', color: '#c44a1a', textDecoration: 'none' }}>
+      Manage subscription →
+    </a>
+  </div>
+)}
 
         <div style={{ marginBottom: '28px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>
