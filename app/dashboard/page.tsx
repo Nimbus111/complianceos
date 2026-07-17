@@ -131,8 +131,13 @@ export default async function DashboardPage() {
     .in('contact_type', ['dealer', 'manufacturer'])
 
   const panicContact = (dealerRaw as any[])?.find(c => c.contact_type === 'dealer')
-    || (dealerRaw as any[])?.[0]
-    || null
+  || (dealerRaw as any[])?.[0]
+  || (org?.dealer_name ? {
+      company_name: org.dealer_name,
+      phone_primary: org.dealer_phone,
+      phone_support: null,
+      contact_name: null,
+    } : null)
 
   const { data: subscription } = await supabase
     .from('subscriptions')

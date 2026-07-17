@@ -32,6 +32,10 @@ export async function POST(request: Request) {
         rso_name: rsoName,
         rso_email: rsoEmail,
         rso_phone: rsoPhone,
+dealer_name: body.dealer_name || null,
+dealer_phone: body.dealer_phone || null,
+dealer_email: body.dealer_email || null,
+dealer_sp_org_id: body.dealer_sp_org_id || null,
       })
       .select()
       .single()
@@ -55,7 +59,14 @@ export async function POST(request: Request) {
 
     if (memberError) return NextResponse.json({ error: memberError.message }, { status: 400 })
 
-    return NextResponse.json({ success: true })
+    if (body.dealer_sp_org_id) {
+  await admin.from('client_facilities').upsert({
+    sp_org_id: body.dealer_sp_org_id,
+    facility_org_id: org.id,
+  }, { onConflict: 'sp_org_id, facility_org_id' }).catch(() => {})
+}
+
+return NextResponse.json({ success: true })
 
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 })
