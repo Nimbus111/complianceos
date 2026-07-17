@@ -1,4 +1,4 @@
-import uimport { createClient } from '@/lib/supabase/server'
+import import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import SignOutButton from '../components/SignOutButton'
 import UpgradeButton from '../components/UpgradeButton'
