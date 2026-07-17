@@ -32,6 +32,7 @@ const lbl: React.CSSProperties = {
 
 export default function RegistrationsPage() {
   const [licenses, setLicenses] = useState<any[]>([])
+const [stateRules, setStateRules] = useState<Record<string, any>>({})
   const [orgName, setOrgName] = useState('')
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -56,7 +57,13 @@ export default function RegistrationsPage() {
     if (org) setOrgName(org.name)
     const { data } = await supabase.from('service_provider_licenses').select('*').eq('org_id', profile.org_id).order('created_at', { ascending: false })
     setLicenses(data || [])
-    setLoading(false)
+const { data: rules } = await supabase
+  .from('sp_state_rules')
+  .select('*')
+const rulesMap: Record<string, any> = {}
+;(rules || []).forEach((r: any) => { if (r.state_name) rulesMap[r.state_name] = r })
+setStateRules(rulesMap)
+setLoading(false)
   }, [router])
 
   useEffect(() => { fetchAll() }, [fetchAll])
@@ -110,7 +117,12 @@ export default function RegistrationsPage() {
       <div style={{ maxWidth: '860px', margin: '0 auto', padding: '40px 24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div>
-            <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>State Registrations</h1>
+           <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>State Registrations</h1>
+<button onClick={async () => {
+  const res = await fetch('/api/sp/populate-calendar', { method: 'POST' })
+  const r = await res.json()
+
+
             <p style={{ fontSize: '13px', color: '#827d76' }}>{orgName} · Your x-ray service provider license numbers by state</p>
           </div>
           <button onClick={() => setShowForm(!showForm)}
@@ -215,6 +227,22 @@ export default function RegistrationsPage() {
                     )}
                   </div>
                   {lic.notes && <p style={{ fontSize: '12px', color: '#827d76', marginTop: '8px' }}>{lic.notes}</p>}
+{stateRules[lic.state] && (
+  <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #eef3fb', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+    {stateRules[lic.state].vendor_registration_required && (
+      <span style={{ fontSize: '10px', fontWeight: '500', color: '#0d2d5e', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '2px 8px' }}>Registration required</span>
+    )}
+    {stateRules[lic.state].renewal_frequency && (
+      <span style={{ fontSize: '10px', fontWeight: '500', color: '#2d6a4f', background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '20px', padding: '2px 8px' }}>{stateRules[lic.state].renewal_frequency} renewal</span>
+    )}
+    {stateRules[lic.state].out_of_state_reciprocity === 'Yes' && (
+      <span style={{ fontSize: '10px', fontWeight: '500', color: '#4c1d95', background: '#f5f3ff', border: '1px solid #c4b5fd', borderRadius: '20px', padding: '2px 8px' }}>Reciprocity allowed</span>
+    )}
+    {stateRules[lic.state].annual_renewal_date && (
+      <span style={{ fontSize: '10px', color: '#827d76', background: '#f4f7fb', border: '1px solid #e8e6e2', borderRadius: '20px', padding: '2px 8px' }}>Renews: {stateRules[lic.state].annual_renewal_date}</span>
+    )}
+  </div>
+)}
                 </div>
               )
             })}
