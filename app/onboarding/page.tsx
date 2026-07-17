@@ -39,10 +39,14 @@ function OnboardingForm() {
   }, [router])
 
   useEffect(() => {
-    if (searchParams.get('type') === 'service_provider') {
+  const supabase = createClient()
+  supabase.auth.getUser().then(({ data: { user } }) => {
+    if (user?.user_metadata?.account_type === 'service_provider') {
       router.push('/onboarding/sp')
     }
-  }, [searchParams, router])
+  })
+}, [router])
+    
 
   const toggleModality = (m: string) => {
     setSelectedModalities(prev =>
