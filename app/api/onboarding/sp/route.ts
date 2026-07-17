@@ -60,7 +60,7 @@ if (profileError) {
     await admin.from('memberships').upsert({
   org_id: org.id,
   user_id: user.id,
-  role: 'owner',
+  role: 'Admin',
 }, { onConflict: 'org_id, user_id' })
 
 
