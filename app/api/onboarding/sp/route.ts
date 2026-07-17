@@ -45,17 +45,24 @@ export async function POST(request: Request) {
 
     if (orgError) return NextResponse.json({ error: orgError.message }, { status: 400 })
 
-    await admin.from('profiles').update({
-      org_id: org.id,
-      onboarding_completed: true,
-      display_name: contactName || companyName,
-    }).eq('id', user.id)
+    const { error: profileError } = await admin.from('profiles').upsert({
+  id: user.id,
+  org_id: org.id,
+  onboarding_completed: true,
+  display_name: contactName || companyName,
+}, { onConflict: 'id' })
 
-    await admin.from('memberships').insert({
-      org_id: org.id,
-      user_id: user.id,
-      role: 'owner',
-    })
+if (profileError) {
+  console.error('Profile upsert error:', profileError.message)
+  return NextResponse.json({ error: `Profile update failed: ${profileError.message}` }, { status: 400 })
+}
+
+    await admin.from('memberships').upsert({
+  org_id: org.id,
+  user_id: user.id,
+  role: 'owner',
+}, { onConflict: 'org_id, user_id' })
+
 
     return NextResponse.json({ success: true, referral_code: referralCode })
   } catch (e: any) {
