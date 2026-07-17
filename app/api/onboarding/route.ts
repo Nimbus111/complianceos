@@ -63,7 +63,7 @@ dealer_sp_org_id: body.dealer_sp_org_id || null,
   await admin.from('client_facilities').upsert({
     sp_org_id: body.dealer_sp_org_id,
     facility_org_id: org.id,
-  }, { onConflict: 'sp_org_id, facility_org_id' }).catch(() => {})
+  }, { onConflict: 'sp_org_id, facility_org_id' })
 }
 
 return NextResponse.json({ success: true })
