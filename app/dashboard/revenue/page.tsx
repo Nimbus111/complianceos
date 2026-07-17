@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
-const COMMISSION_RATE = 0.15
+const COMMISSION_RATE = 0.60
 const FACILITY_PRICE = 49
 
 export default function RevenuePage() {

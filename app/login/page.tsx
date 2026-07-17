@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
@@ -16,78 +17,61 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-    } else {
-      router.push('/dashboard')
-    }
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+    if (signInError) { setError(signInError.message); setLoading(false); return }
+    router.push('/dashboard')
+    router.refresh()
+  }
+
+  const inp: React.CSSProperties = {
+    width: '100%', height: '44px', border: '1px solid #c2ddf0', borderRadius: '8px',
+    padding: '0 14px', fontSize: '14px', color: '#0d2d5e', background: '#fff',
+    outline: 'none', boxSizing: 'border-box',
   }
 
   return (
-    <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f4f7fb', display: 'flex', flexDirection: 'column' }}>
-      <nav style={{ background: '#0d2d5e', padding: '0 32px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <a href="/" style={{ textDecoration: 'none' }}>
-          <span style={{ color: '#fff', fontSize: '17px', fontWeight: '500' }}>The Radiology Coach</span>
-          <span style={{ background: 'rgba(255,255,255,0.1)', color: '#8bb4d4', fontSize: '11px', padding: '2px 8px', borderRadius: '4px', fontWeight: '500', marginLeft: '10px' }}>ComplianceOS</span>
-        </a>
-        <a href="/signup" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>
-          Create account →
-        </a>
+    <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f0f4f8' }}>
+      <nav style={{ background: '#0d2d5e', padding: '0 32px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <p style={{ color: '#fff', fontSize: '15px', fontWeight: '500', margin: 0 }}>The Radiology Coach · ComplianceOS</p>
+        <a href="/get-started" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>Create account</a>
       </nav>
 
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
-        <div style={{ background: '#fff', border: '1px solid #c2ddf0', borderRadius: '16px', padding: '40px', width: '100%', maxWidth: '400px' }}>
-          <h1 style={{ fontSize: '22px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>Welcome back</h1>
-          <p style={{ fontSize: '13px', color: '#827d76', marginBottom: '28px' }}>Sign in to your ComplianceOS account</p>
+      <div style={{ maxWidth: '420px', margin: '0 auto', padding: '64px 24px' }}>
+        <div style={{ marginBottom: '28px', textAlign: 'center' }}>
+          <h1 style={{ fontSize: '26px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>Welcome back</h1>
+          <p style={{ fontSize: '13px', color: '#4a6d8c' }}>Sign in to your ComplianceOS account</p>
+        </div>
 
-          <form onSubmit={handleLogin}>
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '11px', fontWeight: '500', color: '#a8a39c', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
-                Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                placeholder="you@example.com"
-                style={{ width: '100%', height: '42px', border: '1px solid #c2ddf0', borderRadius: '8px', padding: '0 12px', fontSize: '14px', color: '#0d2d5e', background: '#fff', outline: 'none', boxSizing: 'border-box' }}
-              />
+        <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', padding: '28px' }}>
+          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#4a6d8c', marginBottom: '6px' }}>Email address</label>
+              <input style={inp} type="email" placeholder="you@yourcompany.com" value={email} onChange={e => setEmail(e.target.value)} required />
             </div>
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', fontSize: '11px', fontWeight: '500', color: '#a8a39c', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-                placeholder="••••••••"
-                style={{ width: '100%', height: '42px', border: '1px solid #c2ddf0', borderRadius: '8px', padding: '0 12px', fontSize: '14px', color: '#0d2d5e', background: '#fff', outline: 'none', boxSizing: 'border-box' }}
-              />
-            </div>
-
-            {error && (
-              <div style={{ background: '#fefafb', border: '1px solid #f5c6c9', borderRadius: '8px', padding: '10px 14px', marginBottom: '16px', fontSize: '13px', color: '#931621' }}>
-                {error}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <label style={{ fontSize: '12px', fontWeight: '500', color: '#4a6d8c' }}>Password</label>
+                <a href="/forgot-password" style={{ fontSize: '11px', color: '#1a5fa8', textDecoration: 'none' }}>Forgot password?</a>
               </div>
+              <div style={{ position: 'relative' }}>
+                <input style={{ ...inp, paddingRight: '60px' }} type={showPassword ? 'text' : 'password'} placeholder="Your password" value={password} onChange={e => setPassword(e.target.value)} required />
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#a8a39c', fontSize: '11px', fontWeight: '500', padding: '0' }}>
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
+            </div>
+            {error && (
+              <p style={{ fontSize: '13px', color: '#931621', background: '#fefafb', border: '1px solid #f5c6c9', borderRadius: '6px', padding: '8px 12px', margin: 0 }}>{error}</p>
             )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              style={{ width: '100%', height: '44px', background: loading ? '#c2ddf0' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: loading ? 'default' : 'pointer' }}
-            >
+            <button type="submit" disabled={loading}
+              style={{ height: '46px', background: loading ? '#c2ddf0' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: loading ? 'default' : 'pointer', marginTop: '4px' }}>
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
-
-          <p style={{ textAlign: 'center', fontSize: '13px', color: '#827d76', marginTop: '20px' }}>
-            Don't have an account?{' '}
-            <a href="/signup" style={{ color: '#1a5fa8', textDecoration: 'none', fontWeight: '500' }}>Get started</a>
+          <p style={{ fontSize: '12px', color: '#a8a39c', textAlign: 'center', marginTop: '16px' }}>
+            Don&apos;t have an account?{' '}
+            <a href="/get-started" style={{ color: '#1a5fa8', textDecoration: 'none' }}>Create one free</a>
           </p>
         </div>
       </div>

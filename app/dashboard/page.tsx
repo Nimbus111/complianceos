@@ -1,7 +1,8 @@
-import { createClient } from '@/lib/supabase/server'
+import uimport { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import SignOutButton from '../components/SignOutButton'
 import UpgradeButton from '../components/UpgradeButton'
+import CopyButton from '../components/CopyButton'
 
 const features = [
   { name: 'Compliance calendar', desc: 'Track renewals, inspections, and QA deadlines', border: '#c2ddf0', href: '/dashboard/calendar' },
@@ -41,7 +42,14 @@ function SPDashboard({ org, user }: { org: any; user: any }) {
         <div style={{ background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '10px', padding: '14px 20px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
           <div>
             <p style={{ fontSize: '10px', fontWeight: '500', color: '#2d6a4f', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '2px' }}>Your referral code</p>
-            <p style={{ fontSize: '20px', fontWeight: '500', color: '#0d2d5e', letterSpacing: '0.08em', margin: 0 }}>{org.referral_code}</p>
+            <p style={{ fontSize: '20px', fontWeight: '500', color: '#0d2d5e', letterSpacing: '0.08em', margin: '0 0 12px' }}>{org.referral_code}</p>
+<p style={{ fontSize: '11px', fontWeight: '500', color: '#2d6a4f', marginBottom: '6px' }}>Your referral link — send this directly to your clinic clients:</p>
+<div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+  <code style={{ fontSize: '11px', color: '#0d2d5e', background: '#fff', border: '1px solid #b8e8cc', borderRadius: '6px', padding: '5px 10px', flex: 1 }}>
+    app.theradiologycoach.com/signup?ref={org.referral_code}
+  </code>
+  <CopyButton text={`https://app.theradiologycoach.com/signup?ref=${org.referral_code}`} label="Copy link" />
+</div>
           </div>
           <p style={{ fontSize: '12px', color: '#2d6a4f', maxWidth: '360px', margin: 0, lineHeight: '1.6' }}>
             Share this code with your clinic clients. When they sign up using it, they appear in your Client Facilities list and you earn a commission.
