@@ -10,8 +10,8 @@ export default function RequiredActions({ tasks, completedIds }: {
   completedIds: string[]
 }) {
   const [done, setDone] = useState<Set<string>>(new Set(completedIds))
+  const router = useRouter()
 
-const router = useRouter()
   const toggle = async (taskId: string) => {
     const isCompleted = done.has(taskId)
     const newDone = new Set(done)
@@ -24,7 +24,6 @@ const router = useRouter()
       body: JSON.stringify({ task_id: taskId, completed: !isCompleted })
     })
     router.refresh()
-    })
   }
 
   const total = tasks.length
