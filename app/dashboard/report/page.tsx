@@ -14,6 +14,7 @@ export default function InspectorReportPage() {
   const [reportData, setReportData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [taskPct, setTaskPct] = useState(0)
   const router = useRouter()
 
   const fetchAll = useCallback(async () => {
@@ -52,7 +53,21 @@ export default function InspectorReportPage() {
     } finally {
       setLoading(false)
     }
-  }, [router])
+  
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return
+      const { data: profile } = await supabase.from('profiles').select('org_id').eq('id', user.id).single()
+      if (!profile?.org_id) return
+      const [{ data: tasks }, { data: completions }] = await Promise.all([
+        supabase.from('facility_tasks').select('id'),
+        supabase.from('user_task_completions').select('task_id').eq('org_id', profile.org_id),
+      ])
+      const pct = tasks?.length ? Math.round(((completions?.length || 0) / tasks.length) * 100) : 0
+      setTaskPct(pct)
+    })
+  }, [])
 
   useEffect(() => { fetchAll() }, [fetchAll])
 
@@ -79,7 +94,7 @@ export default function InspectorReportPage() {
   today.setHours(0, 0, 0, 0)
   const overdueEvents = events.filter((e: any) => new Date(e.due_date) < today)
   const upcomingEvents = events.filter((e: any) => new Date(e.due_date) >= today).slice(0, 20)
-  const ktsPct = ktsItems.length > 0 ? Math.round((ktsCompleted.size / ktsItems.length) * 100) : 0
+  const ktsPct = ktsItems.length > 0 ? {taskPct}
   const generatedAt = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 
   const th: React.CSSProperties = {
