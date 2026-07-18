@@ -125,7 +125,10 @@ export default async function DashboardPage() {
   const ktsPct = ktsItems?.length
     ? Math.round(((ktsCompleted || 0) / ktsItems.length) * 100)
     : 0
-  const inspectionReady = ktsPct >= 90
+  const taskPct = (tasks?.length || 0) > 0
+    ? Math.round((completedTaskIds.length / (tasks?.length || 1)) * 100)
+    : 0
+  const inspectionReady = taskPct === 100
 
   const panicContact = (dealerRaw as any[])?.find(c => c.contact_type === 'dealer')
     || (dealerRaw as any[])?.[0]
@@ -225,7 +228,7 @@ export default async function DashboardPage() {
 
         <div style={{ background: '#fff', border: '1px solid #c2ddf0', borderRadius: '12px', padding: '20px 24px', marginBottom: '28px', display: 'flex', alignItems: 'center', gap: '24px' }}>
           <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#e8f3fb', border: `3px solid ${inspectionReady ? '#b8e8cc' : '#c2ddf0'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <span style={{ fontSize: '15px', fontWeight: '500', color: inspectionReady ? '#40916c' : '#1a5fa8' }}>{ktsPct}%</span>
+            <span style={{ fontSize: '15px', fontWeight: '500', color: inspectionReady ? '#40916c' : '#1a5fa8' }}>{taskPct}%</span>
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
@@ -235,7 +238,7 @@ export default async function DashboardPage() {
               )}
             </div>
             <p style={{ fontSize: '13px', color: '#827d76', lineHeight: '1.55', marginBottom: '6px' }}>
-              {inspectionReady ? 'Your facility meets the Inspection Ready threshold. Keep your records current.' : 'Complete your Keys to Success checklist to build toward Inspection Ready (90%+).'}
+              {inspectionReady ? 'All required actions complete — your facility is inspection ready.' : `Check off your Required Actions above to build toward 100% — ${8 - completedTaskIds.length} item${8 - completedTaskIds.length !== 1 ? 's' : ''} remaining.`}
             </p>
             <a href="/dashboard/report" style={{ fontSize: '12px', color: '#1a5fa8', fontWeight: '500', textDecoration: 'none' }}>View Inspection Report →</a>
           </div>
