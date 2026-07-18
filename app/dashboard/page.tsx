@@ -15,7 +15,10 @@ const features = [
   { name: 'Keys to Success', desc: 'Step-by-step compliance checklist for your state', border: '#b8e8cc', href: '/dashboard/keys' },
   { name: 'RSP builder', desc: 'Generate your full Radiation Protection Program', border: '#c2ddf0', href: '/dashboard/rsp' },
   { name: 'State documents', desc: 'Registration forms, rules, and regulatory documents by state.', border: '#c2ddf0', href: '/dashboard/stateforms' },
-  { name: 'X-ray Operators', desc: 'Operator credentials, training records, and CEU tracking.', border: '#b8e8cc' },
+  { name: 'Preferred Partners', desc: 'PACS, radiology reading, and compliance equipment partners.', border: '#c2ddf0', href: '/dashboard/partners' },
+{ name: 'Video Training', desc: 'Expert tutorials from The Radiology Coach on YouTube.', border: '#c2ddf0', href: '/dashboard/training' },
+{ name: 'Account Settings', desc: 'Update your dealer, account info, and preferences.', border: '#c2ddf0', href: '/dashboard/settings' },
+{ name: 'X-ray Operators', desc: 'Operator credentials, training records, and CEU tracking.', border: '#b8e8cc' },
 ]
 
 function SPDashboard({ org, user }: { org: any; user: any }) {
@@ -258,7 +261,7 @@ export default async function DashboardPage() {
           ))}
         </div>
 
-        <BadgesSection badges={badges || []} earnedIds={earnedBadgeIds} />
+        <BadgesSection badges={badges || []} earnedIds={earnedBadgeIds} facilityName={org?.name} />
 
       </div>
     </div>

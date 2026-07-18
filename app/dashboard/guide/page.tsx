@@ -104,7 +104,29 @@ export default async function GuidePage() {
               )
             })}
 
-            {reg.plain_language_summary && (
+            <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden' }}>
+  <div style={{ padding: '11px 20px', background: '#0d2d5e', borderBottom: '1px solid rgba(255,255,255,.1)' }}>
+    <p style={{ fontSize: '11px', fontWeight: '500', color: '#8bb4d4', margin: 0, textTransform: 'uppercase', letterSpacing: '.06em' }}>Federal Requirements — All Facilities</p>
+  </div>
+  {[
+    ['HIPAA image retention', 'Required — 7 years minimum (6 years from creation or last use, whichever is later) for human x-ray images'],
+    ['HIPAA-compliant storage', 'Required — images must be stored on HIPAA-compliant infrastructure; home computers and unencrypted removable drives are not compliant'],
+    ['Cloud or network backup', 'Federal guideline — DICOM image storage on cloud or network-based system recommended as redundancy standard'],
+    ['Radiation safety records', 'Required — personnel dosimetry records must be retained per NRC guidelines (duration varies by record type)'],
+    ['Annual radiation safety review', 'Required — ALARA principle mandates documented annual review of radiation safety program'],
+  ].map(([label, value]) => (
+    <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', padding: '11px 20px', borderBottom: '1px solid #eef3fb' }}>
+      <span style={{ fontSize: '13px', color: '#4a6d8c', flexShrink: 0, maxWidth: '200px' }}>{label}</span>
+      <span style={{ fontSize: '12px', color: '#0d2d5e', textAlign: 'right', lineHeight: '1.5' }}>{value}</span>
+    </div>
+  ))}
+  <div style={{ padding: '10px 20px' }}>
+    <a href="/dashboard/partners" style={{ fontSize: '12px', color: '#1a5fa8', textDecoration: 'none', fontWeight: '500' }}>View PACS and storage partners → </a>
+  </div>
+</div>
+
+{reg.plain_language_summary && (
+
               <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', padding: '18px 20px' }}>
                 <p style={{ fontSize: '11px', fontWeight: '500', color: '#1a5fa8', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: '8px' }}>Summary</p>
                 <p style={{ fontSize: '13px', color: '#1e1c1a', lineHeight: '1.75', margin: 0 }}>{reg.plain_language_summary}</p>
