@@ -4,9 +4,9 @@ export default function Footer() {
   const links = [
     { label: 'Website', href: 'https://www.theradiologycoach.com' },
     { label: 'YouTube', href: 'https://www.youtube.com/c/TheRadiologyCoach' },
-    { label: 'LinkedIn', href: 'https://www.linkedin.com/company/the-radiology-coach' },
+    { label: 'LinkedIn', href: 'https://www.linkedin.com/in/greg-turner-1396868/' },
     { label: 'Instagram', href: 'https://www.instagram.com/theradiologycoach' },
-    { label: 'Facebook', href: 'https://www.facebook.com/theradiologycoach' },
+    { label: 'Facebook', href: 'https://www.facebook.com/gturnerconsultants' },
   ]
   return (
     <footer style={{ background: '#0d2d5e', padding: '20px 32px', borderTop: '1px solid rgba(255,255,255,.08)' }}>
