@@ -273,7 +273,7 @@ export default function HomePage() {
           </div>
         </div>
         <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-          <a href="/pricing" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>About</a>
+          <a href="/about" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>About</a>
           <a href="/pricing" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>Pricing</a>
           <a href="/login" style={{ color: '#fff', fontSize: '13px', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.25)', padding: '6px 16px', borderRadius: '8px' }}>Sign in</a>
           <a href="/get-started" style={{ background: '#1a72e8', color: '#fff', fontSize: '13px', fontWeight: '500', padding: '7px 18px', borderRadius: '8px', textDecoration: 'none' }}>Get started</a>
