@@ -2,13 +2,15 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import SignOutButton from '../components/SignOutButton'
 import UpgradeButton from '../components/UpgradeButton'
-import CopyButton from '../components/CopyButton'
+import RequiredActions from '../components/RequiredActions'
+import BadgesSection from '../components/BadgesSection'
 
 const features = [
   { name: 'Compliance calendar', desc: 'Track renewals, inspections, and QA deadlines', border: '#c2ddf0', href: '/dashboard/calendar' },
   { name: 'Document repository', desc: 'Store and organize all compliance documents', border: '#c2ddf0', href: '/dashboard/documents' },
   { name: 'Equipment inventory', desc: 'Track x-ray equipment and PM schedules', border: '#c2ddf0', href: '/dashboard/equipment' },
   { name: 'Equipment & Systems', desc: 'Service contacts, PACS config, warranties, and support numbers.', border: '#b8e8cc', href: '/dashboard/systems' },
+  { name: 'State Compliance Guide', desc: 'Your state\'s x-ray requirements — always accessible from your dashboard.', border: '#c2ddf0', href: '/dashboard/guide' },
   { name: 'AI assistant', desc: 'Instant answers to state-specific compliance questions', border: '#c4b5fd', href: '/dashboard/ai' },
   { name: 'Keys to Success', desc: 'Step-by-step compliance checklist for your state', border: '#b8e8cc', href: '/dashboard/keys' },
   { name: 'RSP builder', desc: 'Generate your full Radiation Protection Program', border: '#c2ddf0', href: '/dashboard/rsp' },
@@ -41,25 +43,17 @@ function SPDashboard({ org, user }: { org: any; user: any }) {
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 24px' }}>
         <div style={{ background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '10px', padding: '14px 20px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
           <div>
-            <p style={{ fontSize: '10px', fontWeight: '500', color: '#2d6a4f', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '2px' }}>Your referral code</p>
-            <p style={{ fontSize: '20px', fontWeight: '500', color: '#0d2d5e', letterSpacing: '0.08em', margin: '0 0 12px' }}>{org.referral_code}</p>
-<p style={{ fontSize: '11px', fontWeight: '500', color: '#2d6a4f', marginBottom: '6px' }}>Your referral link — send this directly to your clinic clients:</p>
-<div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-  <code style={{ fontSize: '11px', color: '#0d2d5e', background: '#fff', border: '1px solid #b8e8cc', borderRadius: '6px', padding: '5px 10px', flex: 1 }}>
-    app.theradiologycoach.com/signup?ref={org.referral_code}
-  </code>
-  <CopyButton text={`https://app.theradiologycoach.com/signup?ref=${org.referral_code}`} label="Copy link" />
-</div>
+            <p style={{ fontSize: '10px', fontWeight: '500', color: '#2d6a4f', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '2px' }}>Your referral link</p>
+            <p style={{ fontSize: '16px', fontWeight: '500', color: '#0d2d5e', letterSpacing: '0.06em', margin: '0 0 6px' }}>{org.referral_code}</p>
+            <p style={{ fontSize: '12px', color: '#2d6a4f', margin: 0 }}>app.theradiologycoach.com/signup?ref={org.referral_code}</p>
           </div>
-          <p style={{ fontSize: '12px', color: '#2d6a4f', maxWidth: '360px', margin: 0, lineHeight: '1.6' }}>
-            Share this code with your clinic clients. When they sign up using it, they appear in your Client Facilities list and you earn a commission.
+          <p style={{ fontSize: '12px', color: '#2d6a4f', maxWidth: '320px', margin: 0, lineHeight: '1.6' }}>
+            Share this link with your clinic clients. When they sign up, they appear in your Client Facilities list and you earn a commission.
           </p>
         </div>
         <div style={{ marginBottom: '28px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>{org.name}</h1>
-          <p style={{ fontSize: '13px', color: '#827d76' }}>
-            Dealer / Service Provider · {org.facility_state}
-          </p>
+          <p style={{ fontSize: '13px', color: '#827d76' }}>Dealer / Service Provider · {org.facility_state}</p>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
           {spFeatures.map(f => (
@@ -96,63 +90,56 @@ export default async function DashboardPage() {
     .eq('id', user.id)
     .single()
 
-  if (!profile?.onboarding_completed || !profile?.org_id) {
-    redirect('/onboarding')
-  }
+  if (!profile?.onboarding_completed || !profile?.org_id) redirect('/onboarding')
 
   const { data: org } = await supabase
-    .from('organizations')
-    .select('*')
-    .eq('id', profile.org_id)
-    .single()
+    .from('organizations').select('*').eq('id', profile.org_id).single()
 
   if (org?.org_type === 'service_provider') {
     return <SPDashboard org={org} user={user} />
   }
 
-  const { data: ktsItems } = await supabase
-    .from('keys_to_success').select('id')
-
-  const { count: ktsCompleted } = await supabase
-    .from('compliance_checklists')
-    .select('*', { count: 'exact', head: true })
-    .eq('org_id', profile.org_id)
-    .eq('completed', true)
+  const [
+    { data: ktsItems },
+    { count: ktsCompleted },
+    { data: dealerRaw },
+    { data: subscription },
+    { data: tasks },
+    { data: completions },
+    { data: badges },
+    { data: userBadges },
+  ] = await Promise.all([
+    supabase.from('keys_to_success').select('id'),
+    supabase.from('compliance_checklists').select('*', { count: 'exact', head: true }).eq('org_id', profile.org_id).eq('completed', true),
+    supabase.from('equipment_contacts').select('company_name, contact_name, phone_primary, phone_support, contact_type').eq('org_id', profile.org_id).in('contact_type', ['dealer', 'manufacturer']),
+    supabase.from('subscriptions').select('status, current_period_end, cancel_at_period_end').eq('org_id', profile.org_id).single(),
+    supabase.from('facility_tasks').select('*').order('sort_order'),
+    supabase.from('user_task_completions').select('task_id').eq('org_id', profile.org_id),
+    supabase.from('badges').select('*').order('sort_order'),
+    supabase.from('user_badges').select('badge_id').eq('org_id', profile.org_id),
+  ])
 
   const ktsPct = ktsItems?.length
     ? Math.round(((ktsCompleted || 0) / ktsItems.length) * 100)
     : 0
   const inspectionReady = ktsPct >= 90
 
-  const { data: dealerRaw } = await supabase
-    .from('equipment_contacts')
-    .select('company_name, contact_name, phone_primary, phone_support, contact_type')
-    .eq('org_id', profile.org_id)
-    .in('contact_type', ['dealer', 'manufacturer'])
-
   const panicContact = (dealerRaw as any[])?.find(c => c.contact_type === 'dealer')
-  || (dealerRaw as any[])?.[0]
-  || (org?.dealer_name ? {
-      company_name: org.dealer_name,
-      phone_primary: org.dealer_phone,
-      phone_support: null,
-      contact_name: null,
-    } : null)
-
-  const { data: subscription } = await supabase
-    .from('subscriptions')
-    .select('status, current_period_end, cancel_at_period_end')
-    .eq('org_id', profile.org_id)
-    .single()
+    || (dealerRaw as any[])?.[0]
+    || (org?.dealer_name ? {
+        company_name: org.dealer_name,
+        phone_primary: org.dealer_phone,
+        phone_support: null,
+        contact_name: null,
+      } : null)
 
   const isActive = subscription?.status === 'active' || subscription?.status === 'trialing'
   const isTrial = subscription?.status === 'trialing'
-  const trialEnd = subscription?.current_period_end
-    ? new Date(subscription.current_period_end)
-    : null
-  const daysLeft = trialEnd
-    ? Math.max(0, Math.ceil((trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
-    : null
+  const trialEnd = subscription?.current_period_end ? new Date(subscription.current_period_end) : null
+  const daysLeft = trialEnd ? Math.max(0, Math.ceil((trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : null
+
+  const completedTaskIds = (completions || []).map((c: any) => c.task_id)
+  const earnedBadgeIds = (userBadges || []).map((b: any) => b.badge_id)
 
   return (
     <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f4f7fb' }}>
@@ -222,6 +209,8 @@ export default async function DashboardPage() {
           </div>
         )}
 
+        <RequiredActions tasks={tasks || []} completedIds={completedTaskIds} />
+
         <div style={{ marginBottom: '28px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>
             {org?.name || 'Your facility'}
@@ -239,19 +228,13 @@ export default async function DashboardPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
               <p style={{ fontSize: '15px', fontWeight: '500', color: '#0d2d5e' }}>Compliance score</p>
               {inspectionReady && (
-                <span style={{ fontSize: '11px', fontWeight: '500', color: '#2d6a4f', background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '20px', padding: '2px 8px' }}>
-                  Inspection Ready
-                </span>
+                <span style={{ fontSize: '11px', fontWeight: '500', color: '#2d6a4f', background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '20px', padding: '2px 8px' }}>Inspection Ready</span>
               )}
             </div>
             <p style={{ fontSize: '13px', color: '#827d76', lineHeight: '1.55', marginBottom: '6px' }}>
-              {inspectionReady
-                ? 'Your facility meets the Inspection Ready threshold. Keep your records current.'
-                : 'Complete your Keys to Success checklist to build toward Inspection Ready (90%+).'}
+              {inspectionReady ? 'Your facility meets the Inspection Ready threshold. Keep your records current.' : 'Complete your Keys to Success checklist to build toward Inspection Ready (90%+).'}
             </p>
-            <a href="/dashboard/report" style={{ fontSize: '12px', color: '#1a5fa8', fontWeight: '500', textDecoration: 'none' }}>
-              View Inspection Report →
-            </a>
+            <a href="/dashboard/report" style={{ fontSize: '12px', color: '#1a5fa8', fontWeight: '500', textDecoration: 'none' }}>View Inspection Report →</a>
           </div>
         </div>
 
@@ -274,6 +257,8 @@ export default async function DashboardPage() {
             )
           ))}
         </div>
+
+        <BadgesSection badges={badges || []} earnedIds={earnedBadgeIds} />
 
       </div>
     </div>
