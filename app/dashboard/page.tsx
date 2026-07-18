@@ -125,11 +125,7 @@ export default async function DashboardPage() {
   const ktsPct = ktsItems?.length
     ? Math.round(((ktsCompleted || 0) / ktsItems.length) * 100)
     : 0
-  const taskPct = (tasks?.length || 0) > 0
-    ? Math.round((completedTaskIds.length / (tasks?.length || 1)) * 100)
-    : 0
-  const inspectionReady = taskPct === 100
-
+  
   const panicContact = (dealerRaw as any[])?.find(c => c.contact_type === 'dealer')
     || (dealerRaw as any[])?.[0]
     || (org?.dealer_name ? {
@@ -145,6 +141,10 @@ export default async function DashboardPage() {
   const daysLeft = trialEnd ? Math.max(0, Math.ceil((trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : null
 
   const completedTaskIds = (completions || []).map((c: any) => c.task_id)
+  const taskPct = (tasks?.length || 0) > 0
+    ? Math.round((completedTaskIds.length / (tasks?.length || 1)) * 100)
+    : 0
+  const inspectionReady = taskPct === 100
   const earnedBadgeIds = (userBadges || []).map((b: any) => b.badge_id)
 
   return (
