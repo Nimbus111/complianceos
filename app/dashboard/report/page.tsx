@@ -94,7 +94,7 @@ export default function InspectorReportPage() {
   today.setHours(0, 0, 0, 0)
   const overdueEvents = events.filter((e: any) => new Date(e.due_date) < today)
   const upcomingEvents = events.filter((e: any) => new Date(e.due_date) >= today).slice(0, 20)
-  const ktsPct = ktsItems.length > 0 ? {taskPct}
+  const ktsPct = taskPct
   const generatedAt = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 
   const th: React.CSSProperties = {
