@@ -1,3 +1,5 @@
+'use client'
+
 export default function Footer() {
   const links = [
     { label: 'Website', href: 'https://www.theradiologycoach.com' },
