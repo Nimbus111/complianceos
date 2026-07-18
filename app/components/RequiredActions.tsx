@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 interface Task { id: string; task_text: string; urgency: string; sort_order: number }
 
@@ -10,6 +11,7 @@ export default function RequiredActions({ tasks, completedIds }: {
 }) {
   const [done, setDone] = useState<Set<string>>(new Set(completedIds))
 
+const router = useRouter()
   const toggle = async (taskId: string) => {
     const isCompleted = done.has(taskId)
     const newDone = new Set(done)
@@ -20,6 +22,8 @@ export default function RequiredActions({ tasks, completedIds }: {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ task_id: taskId, completed: !isCompleted })
+    })
+    router.refresh()
     })
   }
 
