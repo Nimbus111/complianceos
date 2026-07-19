@@ -1,34 +1,64 @@
+// ─────────────────────────────────────────────────────────
+// ADD YOUR VIDEOS HERE
+// For each video:
+//   id: the part after ?v= in your YouTube URL
+//   title: your video's actual title
+//   description: one sentence describing what it covers
+//   category: group name (videos with the same category appear together)
+// ─────────────────────────────────────────────────────────
+
+const videos = [
+  {
+    id: 'H9o-N_8wSds&t=54s',
+    title: 'What is a SHIELDING PLAN and Do I NEED One??',
+    description: ' The Radiology Coach breaks this down Shielding Plans into digestible information so your clinic can make proper assessments.',
+    category: 'Getting Started',
+  },
+  {
+    id: 'YSva26QVKVM',
+    title: 'BUYING X ray Machines WHERE DO I EVEN START??!!',
+    description: 'There is no manual on how to buy x-ray machines (until now!!). Here are some hints on how to land the best system for your practice, with little or no regrets.',
+    category: 'Getting Started',
+  },
+  {
+    id: 'Kolux_kGFO8',
+    title: '6 THINGS EVERY Medical X ray Department SHOULD HAVE',
+    description: 'Often, managers are tasked with equipping x-ray rooms  with the basic components. it takes foresight and experience to determine what is needed in these environments. Here are a few items that should be considered to enable a practice to run their department proficiently.',
+    category: 'Getting Started',
+  },
+  {
+    id: 'CvwCsr9TSx4',
+    title: 'Does My X-RAY MACHINE Need Regular SERVICING??',
+    description: 'X-ray machine lifespans are usually decades long. However, some machines do experience frequent servicing, shorter lifespans, and nagging glitches when not appropriately cared for. Here are some points of interest regarding x-ray machines.',
+    category: 'Getting Started',
+  },
+  {
+    id: 'hIgJKoKK6XU',
+    title: 'Is It Better to Buy from X-RAY MANUFACTURERS??',
+    description: 'Here are a few insights for medical leaders looking for the best solutions.',
+    category: 'Getting Started',
+  },
+  {
+    id: 'rfKPb5ibiy8&t=1s',
+    title: '5 Things THEY NEVER TELL YOU About X ray APRONS',
+    description: 'Here are some helpful hints on choosing and tending to these garments.',
+    category: 'Lead Aprons',
+  },
+  {
+    id: 'Wgj9GXYRhnM',
+    title: 'How to INSPECT Lead APRONS',
+    description: 'Here are some pointers on effectively keeping your lead protection in working order.',
+    category: 'Lead Aprons',
+  },
+  // Add as many as you want — just copy a block above and fill it in
+]
+
+// ─────────────────────────────────────────────────────────
+// NO CHANGES NEEDED BELOW THIS LINE
+// ─────────────────────────────────────────────────────────
+
 export default function TrainingPage() {
-  const categories = [
-    {
-      title: 'Getting Started',
-      videos: [
-        { title: 'Welcome to ComplianceOS — Your First 15 Minutes', id: 'YOUTUBE_ID_1', desc: 'A quick walkthrough of the dashboard and how to set up your facility profile.' },
-        { title: 'Understanding Your State X-ray Requirements', id: 'YOUTUBE_ID_2', desc: 'How to read your compliance requirements and know what applies to your facility.' },
-      ]
-    },
-    {
-      title: 'Lead Aprons & Radiation Protection',
-      videos: [
-        { title: 'Lead Apron Annual Inspection — What You Need to Know', id: 'YOUTUBE_ID_3', desc: 'Step-by-step guide to conducting and documenting your annual lead apron inspection.' },
-        { title: 'Choosing the Right Radiation Protection Equipment', id: 'YOUTUBE_ID_4', desc: 'What to look for when purchasing aprons, thyroid shields, and other protective gear.' },
-      ]
-    },
-    {
-      title: 'Equipment Registration & QA',
-      videos: [
-        { title: 'How to Register Your X-ray Equipment with the State', id: 'YOUTUBE_ID_5', desc: 'State registration process explained — what forms you need and where to send them.' },
-        { title: 'Annual QA Testing — What Does a Physicist Do?', id: 'YOUTUBE_ID_6', desc: 'Understanding the annual physics evaluation and what the report means for your facility.' },
-      ]
-    },
-    {
-      title: 'Radiation Safety Programs',
-      videos: [
-        { title: 'What Is a Radiation Protection Program (RPP)?', id: 'YOUTUBE_ID_7', desc: 'The required elements of an RPP and how to use the RSP Builder to generate yours.' },
-        { title: 'Dosimetry Badges — Who Needs Them and How Often?', id: 'YOUTUBE_ID_8', desc: 'Personnel dosimetry requirements by facility type and modality.' },
-      ]
-    },
-  ]
+  const categories = [...new Set(videos.map(v => v.category))]
 
   return (
     <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f0f4f8' }}>
@@ -52,53 +82,49 @@ export default function TrainingPage() {
           </a>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
-          {categories.map(cat => (
-            <div key={cat.title}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', margin: 0 }}>{cat.title}</p>
-                <div style={{ flex: 1, height: '1px', background: '#dce8f5' }} />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                {cat.videos.map(video => (
-                  <a key={video.title}
-                    href={video.id.startsWith('YOUTUBE_ID') ? 'https://www.youtube.com/c/TheRadiologyCoach' : `https://www.youtube.com/watch?v=${video.id}`}
-                    target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                    <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '10px', overflow: 'hidden', cursor: 'pointer' }}>
-                      <div style={{ background: '#0d2d5e', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                        {!video.id.startsWith('YOUTUBE_ID') ? (
+        {videos.length === 0 ? (
+          <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', padding: '48px 24px', textAlign: 'center' }}>
+            <p style={{ fontSize: '15px', fontWeight: '500', color: '#0d2d5e', marginBottom: '8px' }}>No videos added yet</p>
+            <p style={{ fontSize: '13px', color: '#827d76' }}>Add your YouTube videos to the top of the training page file.</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+            {categories.map(cat => (
+              <div key={cat}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+                  <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', margin: 0 }}>{cat}</p>
+                  <div style={{ flex: 1, height: '1px', background: '#dce8f5' }} />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                  {videos.filter(v => v.category === cat).map(video => (
+                    <a key={video.id}
+                      href={`https://www.youtube.com/watch?v=${video.id}`}
+                      target="_blank" rel="noopener noreferrer"
+                      style={{ textDecoration: 'none' }}>
+                      <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '10px', overflow: 'hidden' }}>
+                        <div style={{ position: 'relative', paddingBottom: '56.25%', background: '#0d2d5e' }}>
                           <iframe
                             src={`https://www.youtube.com/embed/${video.id}`}
-                            style={{ width: '100%', height: '100%', border: 'none', position: 'absolute', inset: 0 }}
+                            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen
                           />
-                        ) : (
-                          <div style={{ textAlign: 'center' }}>
-                            <div style={{ width: '48px', height: '48px', background: 'rgba(255,255,255,.15)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
-                              <span style={{ color: '#fff', fontSize: '20px', marginLeft: '3px' }}>▶</span>
-                            </div>
-                            <p style={{ color: 'rgba(255,255,255,.5)', fontSize: '10px', margin: 0 }}>Video coming soon</p>
-                          </div>
-                        )}
+                        </div>
+                        <div style={{ padding: '12px 14px' }}>
+                          <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px', lineHeight: '1.4' }}>{video.title}</p>
+                          <p style={{ fontSize: '11px', color: '#827d76', lineHeight: '1.55', margin: 0 }}>{video.description}</p>
+                        </div>
                       </div>
-                      <div style={{ padding: '12px 14px' }}>
-                        <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px', lineHeight: '1.4' }}>{video.title}</p>
-                        <p style={{ fontSize: '11px', color: '#827d76', lineHeight: '1.55', margin: 0 }}>{video.desc}</p>
-                      </div>
-                    </div>
-                  </a>
-                ))}
+                    </a>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
-        <div style={{ background: '#fff6e8', border: '1px solid #f0d4a0', borderRadius: '10px', padding: '16px 20px', marginTop: '24px', display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <span style={{ fontSize: '20px' }}>💡</span>
-          <p style={{ fontSize: '13px', color: '#9a3510', flex: 1, margin: 0, lineHeight: '1.6' }}>
-            To add your actual YouTube video IDs to this page, open <code style={{ background: 'rgba(0,0,0,.06)', padding: '1px 5px', borderRadius: '3px', fontSize: '11px' }}>app/dashboard/training/page.tsx</code> and replace each <code style={{ background: 'rgba(0,0,0,.06)', padding: '1px 5px', borderRadius: '3px', fontSize: '11px' }}>YOUTUBE_ID_N</code> with the video ID from your YouTube URL.
-          </p>
+        <div style={{ background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '10px', padding: '14px 20px', marginTop: '28px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <p style={{ fontSize: '13px', color: '#0d2d5e', flex: 1, margin: 0 }}>To add more videos, open the training page file and add entries to the <strong>videos</strong> list at the top.</p>
         </div>
       </div>
     </div>
