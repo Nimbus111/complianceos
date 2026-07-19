@@ -9,7 +9,7 @@
 
 const videos = [
   {
-    id: 'H9o-N_8wSds&t=54s',
+    id: 'H9o-N_8wSds&t',
     title: 'What is a SHIELDING PLAN and Do I NEED One??',
     description: ' The Radiology Coach breaks this down Shielding Plans into digestible information so your clinic can make proper assessments.',
     category: 'Getting Started',
@@ -39,7 +39,7 @@ const videos = [
     category: 'Getting Started',
   },
   {
-    id: 'rfKPb5ibiy8&t=1s',
+    id: 'rfKPb5ibiy8&t',
     title: '5 Things THEY NEVER TELL YOU About X ray APRONS',
     description: 'Here are some helpful hints on choosing and tending to these garments.',
     category: 'Lead Aprons',
