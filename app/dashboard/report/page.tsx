@@ -53,7 +53,8 @@ export default function InspectorReportPage() {
     } finally {
       setLoading(false)
     }
-  
+  }, [router])
+
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getUser().then(async ({ data: { user } }) => {
