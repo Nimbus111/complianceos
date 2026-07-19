@@ -4,6 +4,8 @@ import SignOutButton from '../components/SignOutButton'
 import UpgradeButton from '../components/UpgradeButton'
 import RequiredActions from '../components/RequiredActions'
 import BadgesSection from '../components/BadgesSection'
+import WelcomeModal from '../components/WelcomeModal'
+import FeatureCards from '../components/FeatureCards'
 
 const features = [
   { name: 'Compliance calendar', desc: 'Track renewals, inspections, and QA deadlines', border: '#c2ddf0', href: '/dashboard/calendar' },
@@ -58,22 +60,7 @@ function SPDashboard({ org, user }: { org: any; user: any }) {
           <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>{org.name}</h1>
           <p style={{ fontSize: '13px', color: '#827d76' }}>Dealer / Service Provider · {org.facility_state}</p>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-          {spFeatures.map(f => (
-            f.href ? (
-              <a key={f.name} href={f.href} style={{ textDecoration: 'none' }}>
-                <div style={{ background: '#fff', border: `1px solid ${f.border}`, borderRadius: '12px', padding: '20px', cursor: 'pointer' }}>
-                  <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>{f.name}</p>
-                  <p style={{ fontSize: '12px', color: '#827d76', lineHeight: '1.55', marginBottom: '16px' }}>{f.desc}</p>
-                  <span style={{ background: '#e8f3fb', color: '#0d2d5e', fontSize: '11px', fontWeight: '500', padding: '3px 10px', borderRadius: '20px', border: '1px solid #c2ddf0' }}>Open →</span>
-                </div>
-              </a>
-            ) : (
-              <div key={f.name} style={{ background: '#fff', border: `1px solid ${f.border}`, borderRadius: '12px', padding: '20px' }}>
-                <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>{f.name}</p>
-                <p style={{ fontSize: '12px', color: '#827d76', lineHeight: '1.55', marginBottom: '16px' }}>{f.desc}</p>
-                <span style={{ background: '#f4f7fb', color: '#a8a39c', fontSize: '11px', fontWeight: '500', padding: '3px 10px', borderRadius: '20px', border: '1px solid #e8e6e2' }}>Coming soon</span>
-              </div>
+        <FeatureCards features={features} />
             )
           ))}
         </div>
@@ -265,6 +252,7 @@ export default async function DashboardPage() {
         </div>
 
         <BadgesSection badges={badges || []} earnedIds={earnedBadgeIds} facilityName={org?.name} />
+        <WelcomeModal facilityName={org?.name} />
 
       </div>
     </div>
