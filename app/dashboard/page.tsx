@@ -61,9 +61,6 @@ function SPDashboard({ org, user }: { org: any; user: any }) {
           <p style={{ fontSize: '13px', color: '#827d76' }}>Dealer / Service Provider · {org.facility_state}</p>
         </div>
         <FeatureCards features={features} />
-            )
-          ))}
-        </div>
       </div>
     </div>
   )
