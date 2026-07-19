@@ -159,6 +159,24 @@ export default function SettingsPage() {
           )}
         </div>
 
+        {/* MANAGE SUBSCRIPTION */}
+        <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', padding: '20px 24px', marginBottom: '20px' }}>
+          <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>Subscription</p>
+          <p style={{ fontSize: '12px', color: '#827d76', marginBottom: '14px', lineHeight: '1.6' }}>
+            Update your payment method, view invoices, or cancel your subscription through the secure Stripe billing portal.
+          </p>
+          <button
+            onClick={async () => {
+              const res = await fetch('/api/billing/portal', { method: 'POST' })
+              const data = await res.json()
+              if (data.url) window.location.href = data.url
+              else alert(data.error || 'No active subscription found')
+            }}
+            style={{ height: '36px', padding: '0 18px', background: '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '500', cursor: 'pointer' }}>
+            Manage subscription →
+          </button>
+        </div>
+
         {/* ACCOUNT INFO */}
         <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', padding: '20px 24px' }}>
           <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '14px' }}>Account information</p>

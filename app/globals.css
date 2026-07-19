@@ -24,3 +24,37 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ── MOBILE RESPONSIVE ─────────────────────────────────── */
+
+@media (max-width: 768px) {
+  [style*="grid-template-columns: repeat(3, 1fr)"] { grid-template-columns: 1fr !important; }
+  [style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
+  [style*="grid-template-columns: repeat(4, 1fr)"] { grid-template-columns: 1fr 1fr !important; }
+  [style*="grid-template-columns: 1fr 1fr 1fr"] { grid-template-columns: 1fr !important; }
+  [style*="padding: 40px 24px"] { padding: 20px 16px !important; }
+  [style*="padding: 48px 24px"] { padding: 24px 16px !important; }
+  [style*="padding: 64px 24px"] { padding: 28px 16px !important; }
+  [style*="padding: 56px 32px"] { padding: 28px 16px !important; }
+  [style*="padding: 0 32px"] { padding: 0 16px !important; }
+  [style*="font-size: 38px"] { font-size: 26px !important; line-height: 1.3 !important; }
+  [style*="font-size: 36px"] { font-size: 24px !important; line-height: 1.3 !important; }
+  [style*="font-size: 32px"] { font-size: 22px !important; }
+  [style*="padding: 28px"] { padding: 16px !important; }
+  [style*="padding: 32px"] { padding: 16px !important; }
+  [style*="padding: 24px 28px"] { padding: 16px !important; }
+  nav > div:last-of-type > a:not(:last-child),
+  nav > div:last-of-type > span { display: none !important; }
+  footer > div { flex-direction: column !important; align-items: flex-start !important; gap: 14px !important; }
+  table { display: block; overflow-x: auto; max-width: 100%; font-size: 12px !important; }
+  th, td { padding: 8px 10px !important; }
+}
+
+@media (max-width: 480px) {
+  [style*="grid-template-columns: repeat(4, 1fr)"],
+  [style*="grid-template-columns: repeat(2, 1fr)"] { grid-template-columns: 1fr !important; }
+  [style*="font-size: 26px"] { font-size: 20px !important; }
+  [style*="font-size: 24px"] { font-size: 18px !important; }
+  [style*="padding: 40px 24px"],
+  [style*="padding: 48px 24px"] { padding: 16px 12px !important; }
+}
