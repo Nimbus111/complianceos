@@ -82,6 +82,15 @@ export default async function DashboardPage() {
   const { data: org } = await supabase
     .from('organizations').select('*').eq('id', profile.org_id).single()
 
+  const { data: subCheck } = await supabase
+    .from('subscriptions')
+    .select('status')
+    .eq('org_id', profile.org_id)
+    .single()
+
+  const subActive = subCheck?.status === 'active' || subCheck?.status === 'trialing'
+  if (!subActive) redirect('/subscribe')
+
   if (org?.org_type === 'service_provider') {
     return <SPDashboard org={org} user={user} />
   }
