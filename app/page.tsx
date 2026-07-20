@@ -75,7 +75,7 @@ export default function HomePage() {
       query = query.ilike('facility_type_name', `%${term}%`)
     }
 
-    const { data } = await query.limit(10)
+    const { data } = await query.limit(1)
     setResults(data || [])
 
     if (state) {
