@@ -84,7 +84,46 @@ cancel_at_period_end: (subscription as any).cancel_at_period_end ?? false,
         break
       }
 
-      case 'customer.subscription.deleted': {
+      case 'invoice.payment_succeeded': {
+      const invoice = event.data.object as any
+      const customerId = invoice.customer as string
+      const amountPaid = (invoice.amount_paid || 0) / 100
+
+      if (amountPaid <= 0) break
+
+      const { data: sub } = await admin
+        .from('subscriptions')
+        .select('org_id')
+        .eq('stripe_customer_id', customerId)
+        .single()
+
+      if (!sub?.org_id) break
+
+      const { data: clientFacility } = await admin
+        .from('client_facilities')
+        .select('sp_org_id')
+        .eq('facility_org_id', sub.org_id)
+        .single()
+
+      if (!clientFacility?.sp_org_id) break
+
+      const commissionRate = 0.60
+      await admin.from('partner_revenue').upsert({
+        sp_org_id: clientFacility.sp_org_id,
+        facility_org_id: sub.org_id,
+        stripe_invoice_id: invoice.id,
+        period_start: new Date(invoice.period_start * 1000).toISOString(),
+        period_end: new Date(invoice.period_end * 1000).toISOString(),
+        gross_revenue: amountPaid,
+        sp_share_amount: parseFloat((amountPaid * commissionRate).toFixed(2)),
+        sp_share_pct: commissionRate * 100,
+        status: 'pending',
+      }, { onConflict: 'stripe_invoice_id' })
+
+      break
+    }
+
+    case 'customer.subscription.deleted':
         const subscription = event.data.object as Stripe.Subscription
         const orgId = subscription.metadata?.org_id
         if (!orgId) break

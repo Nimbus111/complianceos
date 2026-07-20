@@ -59,9 +59,16 @@ dealer_sp_org_id: body.dealer_sp_org_id || null,
 
     if (memberError) return NextResponse.json({ error: memberError.message }, { status: 400 })
 
-    if (body.dealer_sp_org_id) {
+    // Referral code always takes priority over dropdown for commission
+const referralSpId = body.referral_code
+  ? (await admin.from('organizations').select('id').eq('referral_code', body.referral_code).single()).data?.id
+  : null
+
+const commissionSpId = referralSpId || body.dealer_sp_org_id || null
+
+if (commissionSpId) {
   await admin.from('client_facilities').upsert({
-    sp_org_id: body.dealer_sp_org_id,
+    sp_org_id: commissionSpId,
     facility_org_id: org.id,
   }, { onConflict: 'sp_org_id, facility_org_id' })
 }
