@@ -123,7 +123,7 @@ cancel_at_period_end: (subscription as any).cancel_at_period_end ?? false,
       break
     }
 
-    case 'customer.subscription.deleted':
+    case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription
         const orgId = subscription.metadata?.org_id
         if (!orgId) break
