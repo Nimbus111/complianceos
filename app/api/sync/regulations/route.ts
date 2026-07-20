@@ -35,8 +35,12 @@ const getBool = (val: any): boolean | null => {
 const getArr = (val: any): string | null => {
   if (!val) return null
   if (Array.isArray(val)) {
-    const filtered = val.filter(v => typeof v === 'string')
-    return filtered.length > 0 ? filtered.join(', ') : null
+    const strings = val.map((v: any) => {
+      if (typeof v === 'string') return v.trim()
+      if (typeof v === 'object' && v !== null) return v.name || v.value || v.text || null
+      return null
+    }).filter(Boolean) as string[]
+    return strings.length > 0 ? strings.join(', ') : null
   }
   return getStr(val)
 }
