@@ -32,6 +32,7 @@ function SPDashboard({ org, user }: { org: any; user: any }) {
     { name: 'State documents', desc: 'Registration forms, rules, and regulatory documents.', border: '#c2ddf0', href: '/dashboard/stateforms' },
     { name: 'Compliance calendar', desc: 'Track state reporting deadlines and renewal dates.', border: '#c2ddf0', href: '/dashboard/calendar' },
     { name: 'Document repository', desc: 'Store your company compliance documents.', border: '#c2ddf0', href: '/dashboard/documents' },
+      { name: 'Account Settings', desc: 'Set your commission payout method and manage account preferences.', border: '#b8e8cc', href: '/dashboard/sp-settings' },
   ]
   return (
     <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f4f7fb' }}>
