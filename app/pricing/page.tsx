@@ -165,7 +165,7 @@ export default function PricingPage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             {[
-              { q: 'Do I need a credit card for the free trial?', a: 'No. Start your 14-day trial and explore every feature. Your card is only charged if you choose to continue after the trial ends.' },
+              { q: 'Do I need a credit card for the free trial?', a: 'Yes. Start your 14-day free trial with a card on file. You will not be charged until after the trial period ends. Cancel anytime before then and you will not be billed.' },
               { q: 'Can I cancel anytime?', a: 'Yes — cancel from the Manage Subscription page at any time. You keep full access until the end of your current billing period.' },
               { q: 'What is the 60% referral commission?', a: 'Dealer and Service Provider accounts earn 60% of each referred facility\'s monthly subscription ($29.40/month per facility) as long as they remain subscribed.' },
               { q: 'What is the Enterprise tier?', a: 'Enterprise is designed for facilities with 4 or more x-ray machines or multiple locations. Coming soon — contact us if you have an immediate need.' },

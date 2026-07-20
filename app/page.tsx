@@ -459,7 +459,7 @@ export default function HomePage() {
     {/* Pricing CTA */}
     <div style={{ background: '#0d2d5e', borderRadius: '12px', padding: '24px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '24px', flexWrap: 'wrap', marginBottom: '20px' }}>
       <div>
-        <p style={{ color: '#fff', fontSize: '17px', fontWeight: '500', marginBottom: '6px' }}>Start free — no credit card required</p>
+        <p style={{ color: '#fff', fontSize: '17px', fontWeight: '500', marginBottom: '6px' }}>Cancel anytime</p>
         <p style={{ color: '#8bb4d4', fontSize: '13px', lineHeight: '1.6', maxWidth: '480px' }}>
           Search all 50 states free, forever. Upgrade to a Professional membership for your facility's full compliance toolkit — calendar, documents, AI, forms, RPP builder, and more.
         </p>
