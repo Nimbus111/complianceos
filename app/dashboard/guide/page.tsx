@@ -1,6 +1,33 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
+function RequirementRow({ label, value, detail }: { label: string; value: any; detail?: string }) {
+  const isRequired = value === true
+  const isNotRequired = value === false
+  const isText = typeof value === 'string' && value
+
+  if (!isRequired && !isText) return null
+
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 20px', borderBottom: '1px solid #eef3fb' }}>
+      <span style={{ fontSize: '13px', color: '#1e1c1a' }}>{label}</span>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+        {isRequired && (
+          <span style={{ fontSize: '11px', fontWeight: '500', color: '#2d6a4f', background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '20px', padding: '2px 10px' }}>
+            ✓ Required
+          </span>
+        )}
+        {isText && (
+          <span style={{ fontSize: '11px', fontWeight: '500', color: '#0d2d5e', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '2px 10px' }}>
+            {value}
+          </span>
+        )}
+        {detail && <span style={{ fontSize: '11px', color: '#a8a39c' }}>{detail}</span>}
+      </div>
+    </div>
+  )
+}
+
 export default async function GuidePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -13,48 +40,46 @@ export default async function GuidePage() {
   const { data: org } = await supabase
     .from('organizations').select('*').eq('id', profile.org_id).single()
 
-  const modalities = org?.modality_names || []
+  const modalities: string[] = org?.modality_names || []
+  const facilityState: string = org?.facility_state || ''
+  const facilityType: string = org?.facility_type_name || ''
 
-  const { data: regs } = await supabase
-    .from('regulations')
-    .select('*')
-    .eq('state_name', org?.facility_state || '')
-    .in('modality_name', modalities.length ? modalities : ['General Radiography'])
-    .limit(4)
+  const [{ data: regs }, { data: forms }, { data: updates }] = await Promise.all([
+    supabase.from('regulations').select('*')
+      .eq('state_name', facilityState)
+      .or(modalities.length > 0
+        ? modalities.map(m => `modality_name.ilike.%${m}%`).join(',')
+        : 'modality_name.ilike.%%')
+      .limit(20),
+    supabase.from('state_forms').select('*')
+      .eq('state', facilityState)
+      .order('document_type'),
+    supabase.from('state_updates').select('*')
+      .eq('state_name', facilityState)
+      .order('created_at', { ascending: false })
+      .limit(10),
+  ])
 
-  const reg = regs?.[0]
+  // Aggregate boolean requirements across all modality records
+  const agg = {
+    facility_registration_req: regs?.some(r => r.facility_registration_req) || false,
+    machine_registration_req: regs?.some(r => r.machine_registration_req) || false,
+    rso_req: regs?.some(r => r.rso_req) || false,
+    rpp_req: regs?.some(r => r.rpp_req) || false,
+    rpp_annual_review: regs?.some(r => r.rpp_annual_review) || false,
+    dosimetry_monitoring: regs?.some(r => r.dosimetry_monitoring) || false,
+    qa_testing: regs?.some(r => r.qa_testing) || false,
+    lead_aprons_req: regs?.some(r => r.lead_aprons_req) || false,
+    posting_requirements: regs?.some(r => r.posting_requirements) || false,
+    registration_renewal_frequency: regs?.find(r => r.registration_renewal_frequency)?.registration_renewal_frequency || null,
+    qa_testing_frequency: regs?.find(r => r.qa_testing_frequency)?.qa_testing_frequency || null,
+  }
 
-  const bool = (v: any) => v === true ? { text: 'Required', color: '#2d6a4f', bg: '#edfaf3', border: '#b8e8cc' }
-    : v === false ? { text: 'Not required', color: '#a8a39c', bg: '#f4f7fb', border: '#e8e6e2' }
-    : null
-
-  const sections = [
-    {
-      title: 'Registration & Licensing',
-      rows: [
-        ['Facility registration', bool(reg?.facility_registration_req)],
-        ['Machine registration', bool(reg?.machine_registration_req)],
-        ['Renewal frequency', reg?.registration_renewal_frequency ? { text: reg.registration_renewal_frequency, color: '#0d2d5e', bg: '#e8f3fb', border: '#c2ddf0' } : null],
-      ]
-    },
-    {
-      title: 'Equipment & QA',
-      rows: [
-        ['QA testing', bool(reg?.qa_testing)],
-        ['Lead aprons', bool(reg?.lead_aprons_req)],
-        ['Shielding requirements', reg?.shielding_requirements ? { text: 'Required — see details', color: '#0d2d5e', bg: '#e8f3fb', border: '#c2ddf0' } : null],
-      ]
-    },
-    {
-      title: 'Safety & Personnel',
-      rows: [
-        ['Radiation Safety Officer', bool(reg?.rso_req)],
-        ['Dosimetry monitoring', bool(reg?.dosimetry_monitoring)],
-        ['RPP / RSP required', bool(reg?.rpp_req)],
-        ['Posting requirements', bool(reg?.posting_requirements)],
-      ]
-    },
-  ]
+  const severityStyle = (s: string) => {
+    if (s === 'urgent') return { color: '#931621', bg: '#fefafb', border: '#f5c6c9', label: 'Urgent' }
+    if (s === 'warning') return { color: '#9a3510', bg: '#fff6e8', border: '#f0d4a0', label: 'Important' }
+    return { color: '#1a5fa8', bg: '#e8f3fb', border: '#c2ddf0', label: 'Info' }
+  }
 
   return (
     <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f0f4f8' }}>
@@ -67,82 +92,176 @@ export default async function GuidePage() {
       </nav>
 
       <div style={{ maxWidth: '860px', margin: '0 auto', padding: '40px 24px' }}>
-        <div style={{ marginBottom: '24px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>
-            {org?.facility_state} Compliance Reference
+
+        {/* Header */}
+        <div style={{ marginBottom: '28px' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>
+            {facilityState} Compliance Reference
           </h1>
-          <p style={{ fontSize: '13px', color: '#827d76' }}>
-            {org?.name} · {[org?.facility_type_name, ...modalities].filter(Boolean).join(' · ')}
-          </p>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '11px', color: '#0d2d5e', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '2px 10px' }}>{org?.name}</span>
+            {facilityType && <span style={{ fontSize: '11px', color: '#0d2d5e', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '2px 10px' }}>{facilityType}</span>}
+            {modalities.map(m => (
+              <span key={m} style={{ fontSize: '11px', color: '#0d2d5e', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '2px 10px' }}>{m}</span>
+            ))}
+          </div>
         </div>
 
-        {!reg ? (
-          <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', padding: '48px 24px', textAlign: 'center' }}>
-            <p style={{ fontSize: '15px', fontWeight: '500', color: '#0d2d5e', marginBottom: '8px' }}>No regulation data found</p>
-            <p style={{ fontSize: '13px', color: '#827d76', maxWidth: '380px', margin: '0 auto 16px' }}>
-              We may not have data yet for your specific state and modality combination. Try the full compliance search.
-            </p>
-            <a href="/" style={{ fontSize: '13px', fontWeight: '500', color: '#fff', background: '#0d2d5e', padding: '8px 20px', borderRadius: '8px', textDecoration: 'none' }}>Search compliance requirements →</a>
+        {/* BLOCK 1: Requirements Grid */}
+        <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden', marginBottom: '20px' }}>
+          <div style={{ padding: '14px 20px', background: '#0d2d5e' }}>
+            <p style={{ fontSize: '14px', fontWeight: '500', color: '#fff', margin: 0 }}>Requirements overview</p>
+            <p style={{ fontSize: '11px', color: '#8bb4d4', margin: '2px 0 0' }}>All requirements that apply to your facility based on state, facility type, and modalities</p>
           </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {sections.map(section => {
-              const validRows = section.rows.filter(([, v]) => v !== null)
-              if (!validRows.length) return null
-              return (
-                <div key={section.title} style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden' }}>
-                  <div style={{ padding: '11px 20px', background: '#f4f7fb', borderBottom: '1px solid #eef3fb' }}>
-                    <p style={{ fontSize: '11px', fontWeight: '500', color: '#0d2d5e', margin: 0, textTransform: 'uppercase', letterSpacing: '.06em' }}>{section.title}</p>
-                  </div>
-                  {validRows.map(([label, val]: any) => val && (
-                    <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 20px', borderBottom: '1px solid #eef3fb' }}>
-                      <span style={{ fontSize: '13px', color: '#4a6d8c' }}>{label}</span>
-                      <span style={{ fontSize: '11px', fontWeight: '500', color: val.color, background: val.bg, border: `1px solid ${val.border}`, borderRadius: '20px', padding: '2px 10px' }}>{val.text}</span>
+
+          {!regs || regs.length === 0 ? (
+            <div style={{ padding: '32px 20px', textAlign: 'center' }}>
+              <p style={{ fontSize: '13px', color: '#a8a39c' }}>No regulation data found for this combination.</p>
+              <a href="/" style={{ fontSize: '12px', color: '#1a5fa8', textDecoration: 'none' }}>Search compliance requirements →</a>
+            </div>
+          ) : (
+            <div>
+              <RequirementRow label="Facility registration" value={agg.facility_registration_req} detail={agg.registration_renewal_frequency || undefined} />
+              <RequirementRow label="Machine registration" value={agg.machine_registration_req} />
+              <RequirementRow label="Radiation Safety Officer (RSO)" value={agg.rso_req} />
+              <RequirementRow label="Radiation Protection Program (RPP/RSP)" value={agg.rpp_req} />
+              <RequirementRow label="Annual RPP review" value={agg.rpp_annual_review} />
+              <RequirementRow label="Dosimetry / personnel monitoring" value={agg.dosimetry_monitoring} />
+              <RequirementRow label="Equipment QA testing" value={agg.qa_testing} detail={agg.qa_testing_frequency || undefined} />
+              <RequirementRow label="Lead aprons" value={agg.lead_aprons_req} />
+              <RequirementRow label="Radiation safety posting" value={agg.posting_requirements} />
+              {agg.registration_renewal_frequency && (
+                <RequirementRow label="Registration renewal frequency" value={agg.registration_renewal_frequency} />
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* BLOCK 2: Modality-by-Modality Rules */}
+        {regs && regs.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
+            <p style={{ fontSize: '12px', fontWeight: '500', color: '#a8a39c', textTransform: 'uppercase', letterSpacing: '.08em', margin: 0 }}>Detailed rules by modality</p>
+            {regs.map(reg => (
+              <div key={reg.id} style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden' }}>
+                <div style={{ padding: '12px 20px', background: '#f4f7fb', borderBottom: '1px solid #eef3fb', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <span style={{ fontSize: '12px', fontWeight: '500', color: '#0d2d5e' }}>{reg.modality_name}</span>
+                  {reg.facility_type_name && (
+                    <span style={{ fontSize: '10px', color: '#827d76', background: '#e8e6e2', borderRadius: '20px', padding: '1px 8px' }}>{reg.facility_type_name}</span>
+                  )}
+                </div>
+                <div style={{ padding: '8px 0' }}>
+                  {[
+                    ['Registration notes', reg.registration_notes],
+                    ['QA requirements', reg.qa_requirements_notes],
+                    ['Personnel requirements', reg.personnel_requirements_notes],
+                    ['Safety requirements', reg.safety_requirements_notes],
+                    ['Plain language summary', reg.plain_language_summary],
+                  ].filter(([, v]) => v).map(([label, value]) => (
+                    <div key={label} style={{ padding: '10px 20px', borderBottom: '1px solid #eef3fb' }}>
+                      <p style={{ fontSize: '10px', fontWeight: '500', color: '#a8a39c', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: '4px' }}>{label}</p>
+                      <p style={{ fontSize: '13px', color: '#1e1c1a', lineHeight: '1.7', margin: 0 }}>{value}</p>
                     </div>
                   ))}
+                  {reg.source_url && (
+                    <div style={{ padding: '10px 20px' }}>
+                      <a href={reg.source_url} target="_blank" rel="noopener noreferrer"
+                        style={{ fontSize: '12px', color: '#1a5fa8', textDecoration: 'none', fontWeight: '500' }}>
+                        View source regulation →
+                      </a>
+                    </div>
+                  )}
                 </div>
-              )
-            })}
-
-            <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden' }}>
-  <div style={{ padding: '11px 20px', background: '#0d2d5e', borderBottom: '1px solid rgba(255,255,255,.1)' }}>
-    <p style={{ fontSize: '11px', fontWeight: '500', color: '#8bb4d4', margin: 0, textTransform: 'uppercase', letterSpacing: '.06em' }}>Federal Requirements — All Facilities</p>
-  </div>
-  {[
-    ['HIPAA image retention', 'Required — 7 years minimum (6 years from creation or last use, whichever is later) for human x-ray images'],
-    ['HIPAA-compliant storage', 'Required — images must be stored on HIPAA-compliant infrastructure; home computers and unencrypted removable drives are not compliant'],
-    ['Cloud or network backup', 'Federal guideline — DICOM image storage on cloud or network-based system recommended as redundancy standard'],
-    ['Radiation safety records', 'Required — personnel dosimetry records must be retained per NRC guidelines (duration varies by record type)'],
-    ['Annual radiation safety review', 'Required — ALARA principle mandates documented annual review of radiation safety program'],
-  ].map(([label, value]) => (
-    <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', padding: '11px 20px', borderBottom: '1px solid #eef3fb' }}>
-      <span style={{ fontSize: '13px', color: '#4a6d8c', flexShrink: 0, maxWidth: '200px' }}>{label}</span>
-      <span style={{ fontSize: '12px', color: '#0d2d5e', textAlign: 'right', lineHeight: '1.5' }}>{value}</span>
-    </div>
-  ))}
-  <div style={{ padding: '10px 20px' }}>
-    <a href="/dashboard/partners" style={{ fontSize: '12px', color: '#1a5fa8', textDecoration: 'none', fontWeight: '500' }}>View PACS and storage partners → </a>
-  </div>
-</div>
-
-{reg.plain_language_summary && (
-
-              <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', padding: '18px 20px' }}>
-                <p style={{ fontSize: '11px', fontWeight: '500', color: '#1a5fa8', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: '8px' }}>Summary</p>
-                <p style={{ fontSize: '13px', color: '#1e1c1a', lineHeight: '1.75', margin: 0 }}>{reg.plain_language_summary}</p>
               </div>
-            )}
+            ))}
+          </div>
+        )}
 
-            <div style={{ background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '10px', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-              <p style={{ fontSize: '13px', color: '#0d2d5e', flex: 1, margin: 0 }}>
-                Have a question about any of these requirements for <strong>{org?.facility_state}</strong>?
-              </p>
-              <a href="/dashboard/ai" style={{ fontSize: '12px', fontWeight: '500', color: '#fff', background: '#0d2d5e', padding: '7px 16px', borderRadius: '8px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-                Ask AI assistant →
-              </a>
+        {/* BLOCK 3: Official State Documents */}
+        {forms && forms.length > 0 && (
+          <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden', marginBottom: '20px' }}>
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid #eef3fb' }}>
+              <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', margin: 0 }}>Official {facilityState} documents</p>
+            </div>
+            <div style={{ padding: '8px 0' }}>
+              {forms.slice(0, 8).map(form => (
+                <div key={form.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 20px', borderBottom: '1px solid #eef3fb' }}>
+                  <div>
+                    <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', margin: '0 0 2px' }}>{form.form_name || form.document_name}</p>
+                    {form.document_type && <p style={{ fontSize: '11px', color: '#a8a39c', margin: 0 }}>{form.document_type}</p>}
+                  </div>
+                  {form.form_url && (
+                    <a href={form.form_url} target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize: '12px', fontWeight: '500', color: '#fff', background: '#0d2d5e', padding: '5px 14px', borderRadius: '6px', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0, marginLeft: '12px' }}>
+                      Open →
+                    </a>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         )}
+
+        {/* BLOCK 4: State Updates */}
+        <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden', marginBottom: '20px' }}>
+          <div style={{ padding: '14px 20px', borderBottom: '1px solid #eef3fb', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', margin: 0 }}>{facilityState} regulatory updates</p>
+              <p style={{ fontSize: '11px', color: '#a8a39c', margin: '2px 0 0' }}>Posted by The Radiology Coach as state regulations change</p>
+            </div>
+          </div>
+
+          {!updates || updates.length === 0 ? (
+            <div style={{ padding: '24px 20px', textAlign: 'center' }}>
+              <p style={{ fontSize: '13px', color: '#a8a39c', margin: 0 }}>No updates posted yet for {facilityState}. Check back as regulations evolve.</p>
+            </div>
+          ) : (
+            <div style={{ padding: '8px 0' }}>
+              {updates.map(update => {
+                const s = severityStyle(update.severity || 'info')
+                return (
+                  <div key={update.id} style={{ padding: '14px 20px', borderBottom: '1px solid #eef3fb' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                      <span style={{ fontSize: '10px', fontWeight: '500', color: s.color, background: s.bg, border: `1px solid ${s.border}`, borderRadius: '20px', padding: '2px 8px', whiteSpace: 'nowrap', marginTop: '2px' }}>
+                        {s.label}
+                      </span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', marginBottom: '4px' }}>
+                          <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', margin: 0 }}>{update.title}</p>
+                          <span style={{ fontSize: '11px', color: '#a8a39c', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                            {new Date(update.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </span>
+                        </div>
+                        <p style={{ fontSize: '13px', color: '#1e1c1a', lineHeight: '1.7', margin: 0 }}>{update.content}</p>
+                        {update.effective_date && (
+                          <p style={{ fontSize: '11px', color: '#827d76', marginTop: '4px' }}>
+                            Effective: {new Date(update.effective_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                          </p>
+                        )}
+                        {update.source_url && (
+                          <a href={update.source_url} target="_blank" rel="noopener noreferrer"
+                            style={{ fontSize: '11px', color: '#1a5fa8', textDecoration: 'none', marginTop: '4px', display: 'inline-block' }}>
+                            View official source →
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* AI CTA */}
+        <div style={{ background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '10px', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+          <p style={{ fontSize: '13px', color: '#0d2d5e', flex: 1, margin: 0 }}>
+            Have a question about any of these requirements for <strong>{facilityState}</strong>?
+          </p>
+          <a href="/dashboard/ai" style={{ fontSize: '12px', fontWeight: '500', color: '#fff', background: '#0d2d5e', padding: '7px 16px', borderRadius: '8px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+            Ask AI assistant →
+          </a>
+        </div>
+
       </div>
     </div>
   )
