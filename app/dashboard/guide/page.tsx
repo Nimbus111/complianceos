@@ -131,7 +131,7 @@ export default async function GuidePage() {
             </div>
           ) : (
             <div>
-              {agg.equipment_performance_eval && (
+              {agg.equipment_performance_eval &&
               <div style={{ margin: '0 0 16px', background: '#fefafb', border: '2px solid #931621', borderRadius: '10px', padding: '14px 18px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                 <span style={{ fontSize: '20px', flexShrink: 0 }}>⚠️</span>
                 <div>
@@ -143,7 +143,7 @@ export default async function GuidePage() {
                   </p>
                 </div>
               </div>
-            )}
+            }
             <RequirementRow label="Facility registration" value={agg.facility_registration_req}
               <RequirementRow label="Machine registration" value={agg.machine_registration_req} />
               <RequirementRow label="Radiation Safety Officer (RSO)" value={agg.rso_req} />
