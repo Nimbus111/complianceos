@@ -263,7 +263,7 @@ export default function EquipmentPage() {
                       <input style={inp} placeholder="Phone" value={contactForm.phone_primary} onChange={e => setContactForm(p => ({ ...p, phone_primary: e.target.value }))} />
                       <input style={inp} placeholder="Email" value={contactForm.email} onChange={e => setContactForm(p => ({ ...p, email: e.target.value }))} />
                     </div>
-                    {openContact.type === 'warranty' && (
+                    {openContact?.type === 'warranty' && (
                       <p style={{ fontSize: '11px', color: '#827d76', marginBottom: '10px', fontStyle: 'italic' }}>
                         💡 Upload warranty documents in your <a href="/dashboard/repository" style={{ color: '#1a5fa8', textDecoration: 'none' }}>Document Repository →</a>
                       </p>
