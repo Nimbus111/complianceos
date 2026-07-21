@@ -256,7 +256,7 @@ export default function EquipmentPage() {
                 {openContact?.equipId === eq.id && (
                   <div style={{ padding: '14px 20px', borderTop: '1px solid #eef3fb', background: '#f4f7fb' }}>
                     <p style={{ fontSize: '11px', fontWeight: '500', color: '#0d2d5e', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '.06em' }}>
-                      {CONTACT_TYPES.find(c => c.key === openContact.type)?.label} Contact
+                      {CONTACT_TYPES.find(c => c.key === openContact?.type)?.label} Contact
                     </p>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
                       <input style={{ ...inp, gridColumn: 'span 2' }} placeholder="Company name" value={contactForm.company_name} onChange={e => setContactForm(p => ({ ...p, company_name: e.target.value }))} />
