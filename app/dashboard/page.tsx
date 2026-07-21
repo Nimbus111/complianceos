@@ -10,8 +10,7 @@ import FeatureCards from '../components/FeatureCards'
 const features = [
   { name: 'Compliance calendar', desc: 'Track renewals, inspections, and QA deadlines', border: '#c2ddf0', href: '/dashboard/calendar' },
   { name: 'Document repository', desc: 'Store and organize all compliance documents', border: '#c2ddf0', href: '/dashboard/documents' },
-  { name: 'Equipment inventory', desc: 'Track x-ray equipment and PM schedules', border: '#c2ddf0', href: '/dashboard/equipment' },
-  { name: 'Equipment & Systems', desc: 'Service contacts, PACS config, warranties, and support numbers.', border: '#b8e8cc', href: '/dashboard/systems' },
+  { name: 'Equipment & Safety', desc: 'X-ray equipment, lead protection garments, and dosimetry monitoring in one place.', border: '#b8e8cc', href: '/dashboard/equipment' },
   { name: 'State Compliance Guide', desc: 'Your state\'s x-ray requirements — always accessible from your dashboard.', border: '#c2ddf0', href: '/dashboard/guide' },
   { name: 'AI assistant', desc: 'Instant answers to state-specific compliance questions', border: '#c4b5fd', href: '/dashboard/ai' },
   { name: 'Keys to Success', desc: 'Step-by-step compliance checklist for your state', border: '#b8e8cc', href: '/dashboard/keys' },
