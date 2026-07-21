@@ -22,7 +22,7 @@ const getStr = (val: any): string | null => {
   if (typeof val === 'object') {
     if (val.state === 'error') return null
     return null
-  }git a
+  }
   const s = String(val).trim()
   return s || null
 }

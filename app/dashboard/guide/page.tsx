@@ -1,27 +1,16 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
-function RequirementRow({ label, value, detail }: { label: string; value: any; detail?: string }) {
-  const isRequired = value === true
-  const isNotRequired = value === false
-  const isText = typeof value === 'string' && value
-
-  if (!isRequired && !isText) return null
-
+function Req({ label, value, detail }: { label: string; value: any; detail?: string }) {
+  const isTrue = value === true
+  const isText = typeof value === 'string' && value.trim().length > 0
+  if (!isTrue && !isText) return null
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 20px', borderBottom: '1px solid #eef3fb' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 20px', borderBottom: '1px solid #eef3fb', gap: '12px' }}>
       <span style={{ fontSize: '13px', color: '#1e1c1a' }}>{label}</span>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
-        {isRequired && (
-          <span style={{ fontSize: '11px', fontWeight: '500', color: '#2d6a4f', background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '20px', padding: '2px 10px' }}>
-            ✓ Required
-          </span>
-        )}
-        {isText && (
-          <span style={{ fontSize: '11px', fontWeight: '500', color: '#0d2d5e', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '2px 10px' }}>
-            {value}
-          </span>
-        )}
+        {isTrue && <span style={{ fontSize: '11px', fontWeight: '500', color: '#2d6a4f', background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '20px', padding: '2px 10px' }}>✓ Required</span>}
+        {isText && <span style={{ fontSize: '11px', fontWeight: '500', color: '#0d2d5e', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '2px 10px' }}>{value}</span>}
         {detail && <span style={{ fontSize: '11px', color: '#a8a39c' }}>{detail}</span>}
       </div>
     </div>
@@ -60,29 +49,30 @@ export default async function GuidePage() {
       .limit(10),
   ])
 
-  // Aggregate boolean requirements across all modality records
+  const r = regs || []
+
   const agg = {
-    facility_registration_req: regs?.some(r => r.facility_registration_req) || false,
-    machine_registration_req: regs?.some(r => r.machine_registration_req) || false,
-    rso_req: regs?.some(r => r.rso_req) || false,
-    rpp_req: regs?.some(r => r.rpp_req) || false,
-    rpp_annual_review: regs?.some(r => r.rpp_annual_review) || false,
-    dosimetry_monitoring: regs?.some(r => r.dosimetry_monitoring) || false,
-    qa_testing: regs?.some(r => r.qa_testing) || false,
-    lead_aprons_req: regs?.some(r => r.lead_aprons_req) || false,
-    posting_requirements: regs?.some(r => r.posting_requirements) || false,
-    registration_renewal_frequency: regs?.find(r => r.registration_renewal_frequency)?.registration_renewal_frequency || null,
-    qa_testing_frequency: regs?.find(r => r.qa_testing_frequency)?.qa_testing_frequency || null,
-    equipment_performance_eval: regs?.some(r => r.equipment_performance_eval) || false,
-    equipment_training_records: regs?.some(r => r.equipment_training_records) || false,
-    floor_plan_req: regs?.some(r => r.floor_plan_req) || false,
-    digital_receptor_qa: regs?.some(r => r.digital_receptor_qa) || false,
-    device_stored_securely: regs?.some(r => r.device_stored_securely) || false,
-    business_license_req: regs?.some(r => r.business_license_req) || false,
-    annual_ceu_records: regs?.some(r => r.annual_ceu_records) || false,
-    dosimetry_notes: regs?.find(r => r.dosimetry_notes)?.dosimetry_notes || null,
-    imaging_plate_requirements: regs?.find(r => r.imaging_plate_requirements)?.imaging_plate_requirements || null,
-    facility_renewal_timeline: regs?.find(r => r.facility_renewal_timeline)?.facility_renewal_timeline || null,
+    equipment_performance_eval: r.some(x => x.equipment_performance_eval) || false,
+    facility_registration_req: r.some(x => x.facility_registration_req) || false,
+    machine_registration_req: r.some(x => x.machine_registration_req) || false,
+    rso_req: r.some(x => x.rso_req) || false,
+    rpp_req: r.some(x => x.rpp_req) || false,
+    rpp_annual_review: r.some(x => x.rpp_annual_review) || false,
+    dosimetry_monitoring: r.some(x => x.dosimetry_monitoring) || false,
+    qa_testing: r.some(x => x.qa_testing) || false,
+    lead_aprons_req: r.some(x => x.lead_aprons_req) || false,
+    posting_requirements: r.some(x => x.posting_requirements) || false,
+    floor_plan_req: r.some(x => x.floor_plan_req) || false,
+    business_license_req: r.some(x => x.business_license_req) || false,
+    equipment_training_records: r.some(x => x.equipment_training_records) || false,
+    annual_ceu_records: r.some(x => x.annual_ceu_records) || false,
+    digital_receptor_qa: r.some(x => x.digital_receptor_qa) || false,
+    device_stored_securely: r.some(x => x.device_stored_securely) || false,
+    registration_renewal_frequency: r.find(x => x.registration_renewal_frequency)?.registration_renewal_frequency || null,
+    qa_testing_frequency: r.find(x => x.qa_testing_frequency)?.qa_testing_frequency || null,
+    facility_renewal_timeline: r.find(x => x.facility_renewal_timeline)?.facility_renewal_timeline || null,
+    dosimetry_notes: r.find(x => x.dosimetry_notes)?.dosimetry_notes || null,
+    imaging_plate_requirements: r.find(x => x.imaging_plate_requirements)?.imaging_plate_requirements || null,
   }
 
   const severityStyle = (s: string) => {
@@ -117,75 +107,89 @@ export default async function GuidePage() {
           </div>
         </div>
 
+        {/* EPE ALERT — rendered as its own block, separate from the requirements grid */}
+        {agg.equipment_performance_eval && (
+          <div style={{ background: '#fefafb', border: '2px solid #931621', borderRadius: '12px', padding: '16px 20px', marginBottom: '20px', display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+            <span style={{ fontSize: '22px', flexShrink: 0 }}>⚠️</span>
+            <div>
+              <p style={{ fontSize: '14px', fontWeight: '600', color: '#931621', marginBottom: '6px' }}>
+                Equipment Performance Evaluation Required — {facilityState}
+              </p>
+              <p style={{ fontSize: '13px', color: '#1e1c1a', lineHeight: '1.75', margin: 0 }}>
+                {facilityState} requires a qualified medical physicist perform an Equipment Performance Evaluation (EPE) upon installation, after major repairs, and annually for most radiographic equipment. Schedule your physicist and retain the written report on-site.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* BLOCK 1: Requirements Grid */}
         <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden', marginBottom: '20px' }}>
           <div style={{ padding: '14px 20px', background: '#0d2d5e' }}>
             <p style={{ fontSize: '14px', fontWeight: '500', color: '#fff', margin: 0 }}>Requirements overview</p>
-            <p style={{ fontSize: '11px', color: '#8bb4d4', margin: '2px 0 0' }}>All requirements that apply to your facility based on state, facility type, and modalities</p>
+            <p style={{ fontSize: '11px', color: '#8bb4d4', margin: '2px 0 0' }}>All requirements applicable to your facility based on state, type, and modalities</p>
           </div>
 
-          {!regs || regs.length === 0 ? (
+          {r.length === 0 ? (
             <div style={{ padding: '32px 20px', textAlign: 'center' }}>
-              <p style={{ fontSize: '13px', color: '#a8a39c' }}>No regulation data found for this combination.</p>
+              <p style={{ fontSize: '13px', color: '#a8a39c', marginBottom: '8px' }}>No regulation data found for this combination.</p>
               <a href="/" style={{ fontSize: '12px', color: '#1a5fa8', textDecoration: 'none' }}>Search compliance requirements →</a>
             </div>
           ) : (
             <div>
-              {agg.equipment_performance_eval &&
-              <div style={{ margin: '0 0 16px', background: '#fefafb', border: '2px solid #931621', borderRadius: '10px', padding: '14px 18px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '20px', flexShrink: 0 }}>⚠️</span>
-                <div>
-                  <p style={{ fontSize: '13px', fontWeight: '600', color: '#931621', marginBottom: '5px' }}>
-                    Equipment Performance Evaluation Required
-                  </p>
-                  <p style={{ fontSize: '13px', color: '#1e1c1a', lineHeight: '1.7', margin: 0 }}>
-                    {facilityState} requires a qualified medical physicist perform an Equipment Performance Evaluation (EPE) upon installation, after major repairs, and annually for most radiographic equipment. Schedule your physicist and retain the written report on-site.
-                  </p>
-                </div>
-              </div>
-            }
-            <RequirementRow label="Facility registration" value={agg.facility_registration_req}
-              <RequirementRow label="Machine registration" value={agg.machine_registration_req} />
-              <RequirementRow label="Radiation Safety Officer (RSO)" value={agg.rso_req} />
-              <RequirementRow label="Radiation Protection Program (RPP/RSP)" value={agg.rpp_req} />
-              <RequirementRow label="Annual RPP review" value={agg.rpp_annual_review} />
-              <RequirementRow label="Dosimetry / personnel monitoring" value={agg.dosimetry_monitoring} />
-              <RequirementRow label="Equipment QA testing" value={agg.qa_testing} detail={agg.qa_testing_frequency || undefined} />
-              <RequirementRow label="Lead aprons" value={agg.lead_aprons_req} />
-              <RequirementRow label="Radiation safety posting" value={agg.posting_requirements} />
-              {agg.registration_renewal_frequency && (
-                <RequirementRow label="Registration renewal frequency" value={agg.registration_renewal_frequency} />
-              )}
-              {agg.facility_renewal_timeline && (
-                <RequirementRow label="Renewal timeline" value={agg.facility_renewal_timeline} />
-              )}
-              <RequirementRow label="Floor plan required" value={agg.floor_plan_req} />
-              <RequirementRow label="Business license required" value={agg.business_license_req} />
-              <RequirementRow label="Equipment training records" value={agg.equipment_training_records} />
-              <RequirementRow label="Annual CEU records required" value={agg.annual_ceu_records} />
-              <RequirementRow label="Digital receptor QA" value={agg.digital_receptor_qa} />
-              <RequirementRow label="Device stored securely" value={agg.device_stored_securely} />
-              {agg.imaging_plate_requirements && (
-                <RequirementRow label="Imaging plate requirements" value={agg.imaging_plate_requirements} />
-              )}
-              {agg.dosimetry_notes && (
-                <RequirementRow label="Dosimetry notes" value={agg.dosimetry_notes} />
-              )}
+              <Req label="Facility registration" value={agg.facility_registration_req} detail={agg.registration_renewal_frequency || undefined} />
+              <Req label="Machine registration" value={agg.machine_registration_req} />
+              <Req label="Radiation Safety Officer (RSO)" value={agg.rso_req} />
+              <Req label="Radiation Protection Program (RPP/RSP)" value={agg.rpp_req} />
+              <Req label="Annual RPP review" value={agg.rpp_annual_review} />
+              <Req label="Dosimetry / personnel monitoring" value={agg.dosimetry_monitoring} />
+              <Req label="Equipment QA testing" value={agg.qa_testing} detail={agg.qa_testing_frequency || undefined} />
+              <Req label="Lead aprons" value={agg.lead_aprons_req} />
+              <Req label="Radiation safety posting" value={agg.posting_requirements} />
+              <Req label="Floor plan required" value={agg.floor_plan_req} />
+              <Req label="Business license required" value={agg.business_license_req} />
+              <Req label="Equipment training records" value={agg.equipment_training_records} />
+              <Req label="Annual CEU records required" value={agg.annual_ceu_records} />
+              <Req label="Digital receptor QA" value={agg.digital_receptor_qa} />
+              <Req label="Device stored securely" value={agg.device_stored_securely} />
+              {agg.registration_renewal_frequency && <Req label="Registration renewal frequency" value={agg.registration_renewal_frequency} />}
+              {agg.facility_renewal_timeline && <Req label="Renewal timeline" value={agg.facility_renewal_timeline} />}
+              {agg.dosimetry_notes && <Req label="Dosimetry notes" value={agg.dosimetry_notes} />}
+              {agg.imaging_plate_requirements && <Req label="Imaging plate requirements" value={agg.imaging_plate_requirements} />}
             </div>
           )}
         </div>
 
-        {/* BLOCK 2: Modality-by-Modality Rules */}
-        {regs && regs.length > 0 && (
+        {/* BLOCK 2: Federal Requirements */}
+        <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden', marginBottom: '20px' }}>
+          <div style={{ padding: '11px 20px', background: '#0d2d5e', borderBottom: '1px solid rgba(255,255,255,.1)' }}>
+            <p style={{ fontSize: '11px', fontWeight: '500', color: '#8bb4d4', margin: 0, textTransform: 'uppercase', letterSpacing: '.06em' }}>Federal Requirements — All Facilities</p>
+          </div>
+          {[
+            ['HIPAA image retention', 'Required — 7 years minimum for human x-ray images'],
+            ['HIPAA-compliant storage', 'Required — images must be stored on HIPAA-compliant infrastructure'],
+            ['Cloud or network backup', 'Federal guideline — DICOM image storage on cloud or network-based system recommended'],
+            ['Radiation safety records', 'Required — personnel dosimetry records must be retained per NRC guidelines'],
+            ['Annual radiation safety review', 'Required — ALARA principle mandates documented annual review'],
+          ].map(([label, value]) => (
+            <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', padding: '11px 20px', borderBottom: '1px solid #eef3fb' }}>
+              <span style={{ fontSize: '13px', color: '#4a6d8c', flexShrink: 0, maxWidth: '200px' }}>{label}</span>
+              <span style={{ fontSize: '12px', color: '#0d2d5e', textAlign: 'right', lineHeight: '1.5' }}>{value}</span>
+            </div>
+          ))}
+          <div style={{ padding: '10px 20px' }}>
+            <a href="/dashboard/partners" style={{ fontSize: '12px', color: '#1a5fa8', textDecoration: 'none', fontWeight: '500' }}>View PACS and storage partners →</a>
+          </div>
+        </div>
+
+        {/* BLOCK 3: Modality-by-Modality Rules */}
+        {r.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
             <p style={{ fontSize: '12px', fontWeight: '500', color: '#a8a39c', textTransform: 'uppercase', letterSpacing: '.08em', margin: 0 }}>Detailed rules by modality</p>
-            {regs.map(reg => (
+            {r.map(reg => (
               <div key={reg.id} style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden' }}>
                 <div style={{ padding: '12px 20px', background: '#f4f7fb', borderBottom: '1px solid #eef3fb', display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span style={{ fontSize: '12px', fontWeight: '500', color: '#0d2d5e' }}>{reg.modality_name}</span>
-                  {reg.facility_type_name && (
-                    <span style={{ fontSize: '10px', color: '#827d76', background: '#e8e6e2', borderRadius: '20px', padding: '1px 8px' }}>{reg.facility_type_name}</span>
-                  )}
+                  {reg.facility_type_name && <span style={{ fontSize: '10px', color: '#827d76', background: '#e8e6e2', borderRadius: '20px', padding: '1px 8px' }}>{reg.facility_type_name}</span>}
                 </div>
                 <div style={{ padding: '8px 0' }}>
                   {[
@@ -202,10 +206,7 @@ export default async function GuidePage() {
                   ))}
                   {reg.source_url && (
                     <div style={{ padding: '10px 20px' }}>
-                      <a href={reg.source_url} target="_blank" rel="noopener noreferrer"
-                        style={{ fontSize: '12px', color: '#1a5fa8', textDecoration: 'none', fontWeight: '500' }}>
-                        View source regulation →
-                      </a>
+                      <a href={reg.source_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: '#1a5fa8', textDecoration: 'none', fontWeight: '500' }}>View source regulation →</a>
                     </div>
                   )}
                 </div>
@@ -214,7 +215,7 @@ export default async function GuidePage() {
           </div>
         )}
 
-        {/* BLOCK 3: Official State Documents */}
+        {/* BLOCK 4: Official State Documents */}
         {forms && forms.length > 0 && (
           <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden', marginBottom: '20px' }}>
             <div style={{ padding: '14px 20px', borderBottom: '1px solid #eef3fb' }}>
@@ -239,18 +240,15 @@ export default async function GuidePage() {
           </div>
         )}
 
-        {/* BLOCK 4: State Updates */}
+        {/* BLOCK 5: State Updates */}
         <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden', marginBottom: '20px' }}>
-          <div style={{ padding: '14px 20px', borderBottom: '1px solid #eef3fb', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div>
-              <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', margin: 0 }}>{facilityState} regulatory updates</p>
-              <p style={{ fontSize: '11px', color: '#a8a39c', margin: '2px 0 0' }}>Posted by The Radiology Coach as state regulations change</p>
-            </div>
+          <div style={{ padding: '14px 20px', borderBottom: '1px solid #eef3fb' }}>
+            <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', margin: 0 }}>{facilityState} regulatory updates</p>
+            <p style={{ fontSize: '11px', color: '#a8a39c', margin: '2px 0 0' }}>Posted by The Radiology Coach as state regulations change</p>
           </div>
-
           {!updates || updates.length === 0 ? (
             <div style={{ padding: '24px 20px', textAlign: 'center' }}>
-              <p style={{ fontSize: '13px', color: '#a8a39c', margin: 0 }}>No updates posted yet for {facilityState}. Check back as regulations evolve.</p>
+              <p style={{ fontSize: '13px', color: '#a8a39c', margin: 0 }}>No updates posted yet for {facilityState}.</p>
             </div>
           ) : (
             <div style={{ padding: '8px 0' }}>
@@ -259,9 +257,7 @@ export default async function GuidePage() {
                 return (
                   <div key={update.id} style={{ padding: '14px 20px', borderBottom: '1px solid #eef3fb' }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                      <span style={{ fontSize: '10px', fontWeight: '500', color: s.color, background: s.bg, border: `1px solid ${s.border}`, borderRadius: '20px', padding: '2px 8px', whiteSpace: 'nowrap', marginTop: '2px' }}>
-                        {s.label}
-                      </span>
+                      <span style={{ fontSize: '10px', fontWeight: '500', color: s.color, background: s.bg, border: `1px solid ${s.border}`, borderRadius: '20px', padding: '2px 8px', whiteSpace: 'nowrap', marginTop: '2px' }}>{s.label}</span>
                       <div style={{ flex: 1 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', marginBottom: '4px' }}>
                           <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', margin: 0 }}>{update.title}</p>
@@ -270,16 +266,8 @@ export default async function GuidePage() {
                           </span>
                         </div>
                         <p style={{ fontSize: '13px', color: '#1e1c1a', lineHeight: '1.7', margin: 0 }}>{update.content}</p>
-                        {update.effective_date && (
-                          <p style={{ fontSize: '11px', color: '#827d76', marginTop: '4px' }}>
-                            Effective: {new Date(update.effective_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                          </p>
-                        )}
                         {update.source_url && (
-                          <a href={update.source_url} target="_blank" rel="noopener noreferrer"
-                            style={{ fontSize: '11px', color: '#1a5fa8', textDecoration: 'none', marginTop: '4px', display: 'inline-block' }}>
-                            View official source →
-                          </a>
+                          <a href={update.source_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '11px', color: '#1a5fa8', textDecoration: 'none', marginTop: '4px', display: 'inline-block' }}>View official source →</a>
                         )}
                       </div>
                     </div>
