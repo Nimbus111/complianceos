@@ -22,7 +22,7 @@ const getStr = (val: any): string | null => {
   if (typeof val === 'object') {
     if (val.state === 'error') return null
     return null
-  }
+  }git a
   const s = String(val).trim()
   return s || null
 }
@@ -70,6 +70,7 @@ function mapRecord(record: any) {
     shielding_party: getStr(f['Party required to perform/approve shielding plan']),
     shielding_expectations: getStr(f['Shielding Plan Expectations']),
 
+    equipment_performance_eval: getBool(f['Equipment Performance Evaluation']),
     equipment_training_records: getBool(f['X-ray Equipment Training Records']),
     operator_credentials: getBool(f['X-ray Operator Credentials/Certification'])
       ? 'Required'
