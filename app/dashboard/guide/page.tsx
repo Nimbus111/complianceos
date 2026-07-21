@@ -73,6 +73,16 @@ export default async function GuidePage() {
     posting_requirements: regs?.some(r => r.posting_requirements) || false,
     registration_renewal_frequency: regs?.find(r => r.registration_renewal_frequency)?.registration_renewal_frequency || null,
     qa_testing_frequency: regs?.find(r => r.qa_testing_frequency)?.qa_testing_frequency || null,
+    equipment_performance_eval: regs?.some(r => r.equipment_performance_eval) || false,
+    equipment_training_records: regs?.some(r => r.equipment_training_records) || false,
+    floor_plan_req: regs?.some(r => r.floor_plan_req) || false,
+    digital_receptor_qa: regs?.some(r => r.digital_receptor_qa) || false,
+    device_stored_securely: regs?.some(r => r.device_stored_securely) || false,
+    business_license_req: regs?.some(r => r.business_license_req) || false,
+    annual_ceu_records: regs?.some(r => r.annual_ceu_records) || false,
+    dosimetry_notes: regs?.find(r => r.dosimetry_notes)?.dosimetry_notes || null,
+    imaging_plate_requirements: regs?.find(r => r.imaging_plate_requirements)?.imaging_plate_requirements || null,
+    facility_renewal_timeline: regs?.find(r => r.facility_renewal_timeline)?.facility_renewal_timeline || null,
   }
 
   const severityStyle = (s: string) => {
@@ -121,7 +131,20 @@ export default async function GuidePage() {
             </div>
           ) : (
             <div>
-              <RequirementRow label="Facility registration" value={agg.facility_registration_req} detail={agg.registration_renewal_frequency || undefined} />
+              {agg.equipment_performance_eval && (
+              <div style={{ margin: '0 0 16px', background: '#fefafb', border: '2px solid #931621', borderRadius: '10px', padding: '14px 18px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                <span style={{ fontSize: '20px', flexShrink: 0 }}>⚠️</span>
+                <div>
+                  <p style={{ fontSize: '13px', fontWeight: '600', color: '#931621', marginBottom: '5px' }}>
+                    Equipment Performance Evaluation Required
+                  </p>
+                  <p style={{ fontSize: '13px', color: '#1e1c1a', lineHeight: '1.7', margin: 0 }}>
+                    {facilityState} requires a qualified medical physicist perform an Equipment Performance Evaluation (EPE) upon installation, after major repairs, and annually for most radiographic equipment. Schedule your physicist and retain the written report on-site.
+                  </p>
+                </div>
+              </div>
+            )}
+            <RequirementRow label="Facility registration" value={agg.facility_registration_req}
               <RequirementRow label="Machine registration" value={agg.machine_registration_req} />
               <RequirementRow label="Radiation Safety Officer (RSO)" value={agg.rso_req} />
               <RequirementRow label="Radiation Protection Program (RPP/RSP)" value={agg.rpp_req} />
@@ -132,6 +155,21 @@ export default async function GuidePage() {
               <RequirementRow label="Radiation safety posting" value={agg.posting_requirements} />
               {agg.registration_renewal_frequency && (
                 <RequirementRow label="Registration renewal frequency" value={agg.registration_renewal_frequency} />
+              )}
+              {agg.facility_renewal_timeline && (
+                <RequirementRow label="Renewal timeline" value={agg.facility_renewal_timeline} />
+              )}
+              <RequirementRow label="Floor plan required" value={agg.floor_plan_req} />
+              <RequirementRow label="Business license required" value={agg.business_license_req} />
+              <RequirementRow label="Equipment training records" value={agg.equipment_training_records} />
+              <RequirementRow label="Annual CEU records required" value={agg.annual_ceu_records} />
+              <RequirementRow label="Digital receptor QA" value={agg.digital_receptor_qa} />
+              <RequirementRow label="Device stored securely" value={agg.device_stored_securely} />
+              {agg.imaging_plate_requirements && (
+                <RequirementRow label="Imaging plate requirements" value={agg.imaging_plate_requirements} />
+              )}
+              {agg.dosimetry_notes && (
+                <RequirementRow label="Dosimetry notes" value={agg.dosimetry_notes} />
               )}
             </div>
           )}

@@ -173,7 +173,18 @@ export default function HomePage() {
           <p style={{ fontSize: '11px', color: '#a8a39c', marginBottom: '4px' }}>
             {[reg.state_name, reg.facility_type_name, reg.modality_name].filter(Boolean).join(' · ')}
           </p>
-          {reg.post_install_requirements && (
+          {reg.equipment_performance_eval && (
+              <div style={{ background: '#fefafb', border: '2px solid #931621', borderRadius: '8px', padding: '12px 16px', marginBottom: '10px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                <span style={{ fontSize: '16px', flexShrink: 0 }}>⚠️</span>
+                <div>
+                  <p style={{ fontSize: '12px', fontWeight: '600', color: '#931621', marginBottom: '3px' }}>Equipment Performance Evaluation Required</p>
+                  <p style={{ fontSize: '12px', color: '#1e1c1a', lineHeight: '1.6', margin: 0 }}>
+                    {reg.state_name} requires an EPE by a qualified physicist upon installation, after major repairs, and annually. Full details in the State Compliance Guide.
+                  </p>
+                </div>
+              </div>
+            )}
+            {reg.post_install_requirements && (
             <p style={{ fontSize: '11px', color: '#2d6a4f', background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '20px', display: 'inline-block', padding: '2px 10px', marginBottom: '10px' }}>
               Applies to: {reg.post_install_requirements}
             </p>
