@@ -21,6 +21,150 @@ const lbl: React.CSSProperties = {
   marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '.07em'
 }
 
+function TeamSection({ orgId }: { orgId: string }) {
+  const [members, setMembers] = useState<any[]>([])
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteRole, setInviteRole] = useState('Manager')
+  const [inviting, setInviting] = useState(false)
+  const [inviteLink, setInviteLink] = useState('')
+  const [copied, setCopied] = useState(false)
+  const [removing, setRemoving] = useState<string | null>(null)
+
+  const inp2: React.CSSProperties = {
+    width: '100%', height: '40px', border: '1px solid #c2ddf0', borderRadius: '8px',
+    padding: '0 12px', fontSize: '13px', color: '#0d2d5e', background: '#fff',
+    outline: 'none', boxSizing: 'border-box', fontFamily: 'Inter, system-ui, sans-serif'
+  }
+
+  useEffect(() => {
+    if (!orgId) return
+    const supabase = createClient()
+    supabase.from('memberships')
+      .select('id, role, user_id, profiles:user_id(id, display_name)')
+      .eq('org_id', orgId)
+      .then(({ data }) => setMembers(data || []))
+  }, [orgId, inviteLink, removing])
+
+  const handleInvite = async () => {
+    if (!inviteEmail) return
+    setInviting(true)
+    const res = await fetch('/api/invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: inviteEmail, role: inviteRole })
+    })
+    const data = await res.json()
+    if (data.invite_url) {
+      setInviteLink(data.invite_url)
+      setInviteEmail('')
+    } else {
+      alert(data.error || 'Failed to create invite')
+    }
+    setInviting(false)
+  }
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(inviteLink)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2500)
+  }
+
+  const handleRemove = async (membershipId: string) => {
+    if (!confirm('Remove this team member? They will lose access immediately.')) return
+    setRemoving(membershipId)
+    await fetch('/api/invite', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ membership_id: membershipId })
+    })
+    setRemoving(null)
+  }
+
+  const ROLES: Record<string, { label: string; desc: string; color: string; bg: string; border: string }> = {
+    Admin: { label: 'Admin', desc: 'Full access including billing and team management', color: '#0d2d5e', bg: '#e8f3fb', border: '#c2ddf0' },
+    Manager: { label: 'Manager', desc: 'Full compliance access, no billing or team management', color: '#2d6a4f', bg: '#edfaf3', border: '#b8e8cc' },
+    Technician: { label: 'Technician', desc: 'View-only, can check Required Actions tasks', color: '#9a3510', bg: '#fff6e8', border: '#f0d4a0' },
+  }
+
+  return (
+    <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', padding: '24px', marginBottom: '20px' }}>
+      <div style={{ marginBottom: '16px' }}>
+        <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>Team members</p>
+        <p style={{ fontSize: '12px', color: '#827d76' }}>Professional accounts support up to 3 team members.</p>
+      </div>
+
+      {members.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
+          {members.map(m => {
+            const r = ROLES[m.role] || ROLES.Manager
+            return (
+              <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: '#f4f7fb', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#e8f3fb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '600', color: '#0d2d5e', flexShrink: 0 }}>
+                    {(m.profiles?.display_name || 'U').charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', margin: 0 }}>
+                      {m.profiles?.display_name || 'Team member'}
+                    </p>
+                    <span style={{ fontSize: '10px', fontWeight: '500', color: r.color, background: r.bg, border: `1px solid ${r.border}`, borderRadius: '20px', padding: '1px 7px' }}>{r.label}</span>
+                  </div>
+                </div>
+                {m.role !== 'Admin' && (
+                  <button onClick={() => handleRemove(m.id)} disabled={removing === m.id}
+                    style={{ fontSize: '11px', color: '#a8a39c', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px' }}>
+                    {removing === m.id ? 'Removing...' : 'Remove'}
+                  </button>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {members.length < 3 && (
+        <div>
+          <p style={{ fontSize: '11px', fontWeight: '500', color: '#4a6d8c', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: '10px' }}>Invite a team member</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '10px' }}>
+            <input style={inp2} type="email" placeholder="Their email address" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} />
+            <select style={inp2} value={inviteRole} onChange={e => setInviteRole(e.target.value)}>
+              <option value="Manager">Manager — full compliance access, no billing</option>
+              <option value="Technician">Technician — view only, can check tasks</option>
+            </select>
+            <button onClick={handleInvite} disabled={!inviteEmail || inviting}
+              style={{ height: '40px', background: (!inviteEmail || inviting) ? '#c2ddf0' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '500', cursor: 'pointer' }}>
+              {inviting ? 'Generating link...' : 'Generate invite link'}
+            </button>
+          </div>
+
+          {inviteLink && (
+            <div style={{ background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '8px', padding: '12px 14px' }}>
+              <p style={{ fontSize: '11px', fontWeight: '500', color: '#2d6a4f', marginBottom: '8px' }}>
+                ✓ Invite link ready — share this with your team member. Expires in 7 days.
+              </p>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <code style={{ fontSize: '11px', color: '#0d2d5e', background: '#fff', border: '1px solid #b8e8cc', borderRadius: '6px', padding: '6px 10px', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+                  {inviteLink}
+                </code>
+                <button onClick={handleCopy}
+                  style={{ height: '34px', padding: '0 14px', background: copied ? '#2d6a4f' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '500', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  {copied ? '✓ Copied' : 'Copy'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {members.length >= 3 && (
+        <div style={{ background: '#f4f7fb', borderRadius: '8px', padding: '12px 16px', fontSize: '13px', color: '#827d76', textAlign: 'center' }}>
+          Team is full (3 of 3 members). Upgrade to Enterprise for unlimited users.
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function SettingsPage() {
   const [org, setOrg] = useState<any>(null)
   const [spOrgs, setSpOrgs] = useState<any[]>([])
@@ -239,6 +383,9 @@ export default function SettingsPage() {
             </div>
           )}
         </div>
+
+        {/* ── TEAM ── */}
+        <TeamSection orgId={org?.id} />
 
         {/* ── DEALER ── */}
         <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', padding: '20px 24px', marginBottom: '20px' }}>
