@@ -82,6 +82,8 @@ export default async function DashboardPage() {
   const { data: org } = await supabase
     .from('organizations').select('*').eq('id', profile.org_id).single()
 
+  if (org?.org_type === 'enterprise') redirect('/dashboard/enterprise')
+    
   const { data: subCheck } = await supabase
     .from('subscriptions')
     .select('status')
@@ -91,11 +93,7 @@ export default async function DashboardPage() {
   const subActive = subCheck?.status === 'active' || subCheck?.status === 'trialing'
   if (!subActive) redirect('/subscribe')
 
-  if (org?.org_type === 'enterprise') {
-    redirect('/dashboard/enterprise')
-  }
-
-
+  
     return <SPDashboard org={org} user={user} />
   }
 
