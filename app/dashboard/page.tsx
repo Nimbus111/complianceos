@@ -91,7 +91,11 @@ export default async function DashboardPage() {
   const subActive = subCheck?.status === 'active' || subCheck?.status === 'trialing'
   if (!subActive) redirect('/subscribe')
 
-  if (org?.org_type === 'service_provider') {
+  if (org?.org_type === 'enterprise') {
+    redirect('/dashboard/enterprise')
+  }
+
+
     return <SPDashboard org={org} user={user} />
   }
 
