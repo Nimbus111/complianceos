@@ -83,7 +83,7 @@ function TeamSection({ orgId }: { orgId: string }) {
   const ROLES: Record<string, { label: string; desc: string; color: string; bg: string; border: string }> = {
     Admin: { label: 'Admin', desc: 'Full access including billing and team management', color: '#0d2d5e', bg: '#e8f3fb', border: '#c2ddf0' },
     Manager: { label: 'Manager', desc: 'Full compliance access, no billing or team management', color: '#2d6a4f', bg: '#edfaf3', border: '#b8e8cc' },
-    Technician: { label: 'Technician', desc: 'View-only, can check Required Actions tasks', color: '#9a3510', bg: '#fff6e8', border: '#f0d4a0' },
+    'X-ray Operator/RT': { label: 'X-ray Operator/RT', desc: 'View-only, can check Required Actions tasks', color: '#9a3510', bg: '#fff6e8', border: '#f0d4a0' },
   }
 
   return (
@@ -129,7 +129,7 @@ function TeamSection({ orgId }: { orgId: string }) {
             <input style={inp2} type="email" placeholder="Their email address" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} />
             <select style={inp2} value={inviteRole} onChange={e => setInviteRole(e.target.value)}>
               <option value="Manager">Manager — full compliance access, no billing</option>
-              <option value="Technician">Technician — view only, can check tasks</option>
+              <option value="X-ray Operator/RT">X-ray Operator/RT — view only, can check tasks</option>
             </select>
             <button onClick={handleInvite} disabled={!inviteEmail || inviting}
               style={{ height: '40px', background: (!inviteEmail || inviting) ? '#c2ddf0' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '500', cursor: 'pointer' }}>

@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     }
 
     const { email, role } = await request.json()
-    if (!email || !['Manager', 'Technician'].includes(role)) {
+    if (!email || !['Manager', 'X-ray Operator/RT'].includes(role)) {
       return NextResponse.json({ error: 'Valid email and role required' }, { status: 400 })
     }
 
@@ -69,7 +69,7 @@ export async function DELETE(request: Request) {
     const { membership_id } = await request.json()
     await admin()
       .from('memberships').delete()
-      .eq('id', membership_id).eq('org_id', profile.org_id)
+      .eq('id', membership_id).eq('org_id', profile?.org_id)
 
     return NextResponse.json({ success: true })
   } catch (e: any) {
