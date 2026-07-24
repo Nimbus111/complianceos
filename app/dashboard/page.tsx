@@ -156,7 +156,7 @@ if (org?.org_type === 'service_provider') {
   const inspectionReady = taskPct === 100
   const earnedBadgeIds = (userBadges || []).map((b: any) => b.badge_id)
 
-  const activityMap: Record<string, boolean> = {
+    const activityMap: Record<string, boolean> = {
     'Equipment & Safety': (equipment?.length || 0) > 0,
     'Document Repository': (documents?.length || 0) > 0,
     'Compliance Calendar': (events?.length || 0) > 0,
