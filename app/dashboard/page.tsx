@@ -7,17 +7,6 @@ import BadgesSection from '../components/BadgesSection'
 import WelcomeModal from '../components/WelcomeModal'
 import FeatureCards from '../components/FeatureCards'
 
-// Activity map — cards with content get a green highlight
-  const activityMap: Record<string, boolean> = {
-    'Equipment & Safety': (equipment?.length || 0) > 0,
-    'Document Repository': (documents?.length || 0) > 0,
-    'Compliance Calendar': (events?.length || 0) > 0,
-    'Keys to Success': (ktsCompleted || 0) > 0,
-    'State Compliance Guide': !!org?.facility_state,
-    'AI Assistant': false,
-    'RSP Builder': false,
-  }
-
   const features = [
   { name: 'Compliance calendar', desc: 'Track renewals, inspections, and QA deadlines', border: '#c2ddf0', href: '/dashboard/calendar' },
   { name: 'Document repository', desc: 'Store and organize all compliance documents', border: '#c2ddf0', href: '/dashboard/documents' },
