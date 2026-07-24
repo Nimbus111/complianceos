@@ -1,56 +1,138 @@
 'use client'
 
-export default function BadgesSection({ badges, earnedIds, facilityName }: {
-  badges: any[]
-  earnedIds: string[]
-  facilityName?: string
-}) {
-  if (!badges.length) return null
+import { useEffect, useState } from 'react'
 
-  const shareText = (badge: any) => {
-    const name = facilityName || 'Our facility'
-    return encodeURIComponent(`${name} just earned the "${badge.name}" compliance badge on ComplianceOS — ${badge.description} Managing x-ray compliance at app.theradiologycoach.com #RadiationSafety #XrayCompliance #TheRadiologyCoach`)
+interface Badge {
+  id: string
+  name: string
+  description: string
+  icon: string
+  unlock_condition?: string
+}
+
+function BadgeShield({ badge, earned, facilityName }: { badge: Badge; earned: boolean; facilityName?: string }) {
+  const shareText = encodeURIComponent(
+    `${facilityName || 'Our facility'} just earned the "${badge.name}" badge on ComplianceOS — ${badge.description}. Managing x-ray compliance at app.theradiologycoach.com #RadiationSafety #XrayCompliance`
+  )
+
+  const colors = {
+    earned: { bg: '#edfaf3', border: '#40916c', icon: '#2d6a4f', badge: '#40916c' },
+    locked: { bg: '#f4f7fb', border: '#dce8f5', icon: '#c2ddf0', badge: '#a8a39c' },
   }
+  const c = earned ? colors.earned : colors.locked
 
   return (
-    <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden', marginTop: '16px' }}>
-      <div style={{ padding: '14px 20px', borderBottom: '1px solid #eef3fb', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', margin: 0 }}>Compliance badges</p>
-        <span style={{ fontSize: '11px', color: '#a8a39c' }}>{earnedIds.length} of {badges.length} earned</span>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+      <div style={{ position: 'relative', width: '64px', height: '72px' }}>
+        {/* Shield SVG */}
+        <svg width="64" height="72" viewBox="0 0 64 72" fill="none">
+          <path d="M32 2L4 14V36C4 52 16 65 32 70C48 65 60 52 60 36V14L32 2Z"
+            fill={c.bg} stroke={c.border} strokeWidth={earned ? 2 : 1.5}
+            style={{ filter: earned ? 'drop-shadow(0 2px 4px rgba(64,145,108,.2))' : 'none' }} />
+          {earned ? (
+            <text x="32" y="44" textAnchor="middle" fontSize="24" dominantBaseline="middle"
+              style={{ filter: 'none' }}>
+              {badge.icon}
+            </text>
+          ) : (
+            <path d="M24 36l6 6 10-10" stroke={c.icon} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          )}
+        </svg>
+        {earned && (
+          <div style={{ position: 'absolute', top: -4, right: -4, width: '18px', height: '18px', background: '#40916c', borderRadius: '50%', border: '2px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ color: '#fff', fontSize: '10px', fontWeight: '500' }}>✓</span>
+          </div>
+        )}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', padding: '16px 20px' }}>
-        {badges.map(badge => {
-          const earned = earnedIds.includes(badge.id)
-          return (
-            <div key={badge.id} style={{ border: `1px solid ${earned ? '#b8e8cc' : '#e8e6e2'}`, background: earned ? '#edfaf3' : '#fafcff', borderRadius: '10px', padding: '14px', textAlign: 'center', opacity: earned ? 1 : 0.7 }}>
-              <p style={{ fontSize: '28px', marginBottom: '8px', filter: earned ? 'none' : 'grayscale(100%)', opacity: earned ? 1 : 0.5, lineHeight: 1 }}>{badge.icon}</p>
-              <p style={{ fontSize: '12px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>{badge.name}</p>
-              <p style={{ fontSize: '11px', color: '#827d76', lineHeight: '1.5', marginBottom: '8px' }}>{badge.description}</p>
-              {earned ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', alignItems: 'center' }}>
-                  <span style={{ fontSize: '10px', fontWeight: '500', color: '#2d6a4f', background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '20px', padding: '2px 8px', marginBottom: '4px' }}>✓ Earned</span>
-                  <div style={{ display: 'flex', gap: '4px' }}>
-                    <a href={`https://www.linkedin.com/sharing/share-offsite/?url=https://app.theradiologycoach.com&summary=${shareText(badge)}`}
-                      target="_blank" rel="noopener noreferrer"
-                      style={{ fontSize: '10px', color: '#0077b5', background: '#e8f4fd', border: '1px solid #bdddf0', borderRadius: '4px', padding: '2px 7px', textDecoration: 'none' }}>
-                      LinkedIn
-                    </a>
-                    <a href={`https://www.facebook.com/sharer/sharer.php?u=https://app.theradiologycoach.com`}
-                      target="_blank" rel="noopener noreferrer"
-                      style={{ fontSize: '10px', color: '#1877f2', background: '#e7f0fd', border: '1px solid #b8d0f8', borderRadius: '4px', padding: '2px 7px', textDecoration: 'none' }}>
-                      Facebook
-                    </a>
-                  </div>
-                </div>
-              ) : (
-                <span style={{ fontSize: '10px', fontWeight: '500', color: '#a8a39c', background: '#f4f7fb', border: '1px solid #e8e6e2', borderRadius: '20px', padding: '2px 8px' }}>Locked</span>
-              )}
-            </div>
-          )
-        })}
+      <p style={{ fontSize: '10px', fontWeight: '500', color: earned ? '#0d2d5e' : '#a8a39c', textAlign: 'center', lineHeight: '1.3', maxWidth: '72px', margin: 0 }}>
+        {badge.name}
+      </p>
+      {earned && (
+        <div style={{ display: 'flex', gap: '4px' }}>
+          <a href={`https://www.linkedin.com/sharing/share-offsite/?url=https://app.theradiologycoach.com&summary=${shareText}`}
+            target="_blank" rel="noopener noreferrer"
+            style={{ fontSize: '9px', color: '#0077b5', background: '#e8f4fd', border: '1px solid #bdddf0', borderRadius: '3px', padding: '1px 5px', textDecoration: 'none' }}>
+            in
+          </a>
+          <a href="https://www.facebook.com/sharer/sharer.php?u=https://app.theradiologycoach.com"
+            target="_blank" rel="noopener noreferrer"
+            style={{ fontSize: '9px', color: '#1877f2', background: '#e7f0fd', border: '1px solid #b8d0f8', borderRadius: '3px', padding: '1px 5px', textDecoration: 'none' }}>
+            fb
+          </a>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default function BadgesSection({ badges, earnedIds, facilityName, ktsComplete, techniqueAccessed }: {
+  badges: Badge[]
+  earnedIds: string[]
+  facilityName?: string
+  ktsComplete?: boolean
+  techniqueAccessed?: boolean
+}) {
+  const [localEarned, setLocalEarned] = useState<string[]>(earnedIds)
+
+  useEffect(() => {
+    setLocalEarned(earnedIds)
+  }, [earnedIds])
+
+  const earnedCount = localEarned.length + (ktsComplete ? 1 : 0) + (techniqueAccessed ? 1 : 0)
+  const totalCount = badges.length + 2
+
+  const specialBadges = [
+    {
+      id: 'kts_complete',
+      name: 'Training Complete',
+      description: 'All Keys to Success items checked',
+      icon: '🎓',
+      earned: ktsComplete || false,
+    },
+    {
+      id: 'technique_ready',
+      name: 'Technique Ready',
+      description: 'Technique chart accessed',
+      icon: '📐',
+      earned: techniqueAccessed || false,
+    },
+  ]
+
+  return (
+    <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden' }}>
+      <div style={{ padding: '12px 20px', borderBottom: '1px solid #eef3fb', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', margin: 0 }}>Compliance badges</p>
+        <span style={{ fontSize: '11px', color: '#a8a39c' }}>{earnedCount} of {totalCount} earned</span>
       </div>
-      <p style={{ fontSize: '11px', color: '#a8a39c', padding: '8px 20px 10px', borderTop: '1px solid #eef3fb', margin: 0, fontStyle: 'italic' }}>
-        Badges earned by completing real compliance milestones · Share your achievement on social media
+
+      {/* Progress strip */}
+      <div style={{ height: '2px', background: '#eef3fb' }}>
+        <div style={{ height: '100%', width: `${totalCount > 0 ? (earnedCount / totalCount) * 100 : 0}%`, background: '#40916c', transition: 'width .4s' }} />
+      </div>
+
+      <div style={{ padding: '20px', display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'center' }}>
+        {/* Regular badges */}
+        {badges.map(badge => (
+          <BadgeShield
+            key={badge.id}
+            badge={badge}
+            earned={localEarned.includes(badge.id)}
+            facilityName={facilityName}
+          />
+        ))}
+        {/* Special badges */}
+        {specialBadges.map(badge => (
+          <BadgeShield
+            key={badge.id}
+            badge={badge}
+            earned={badge.earned}
+            facilityName={facilityName}
+          />
+        ))}
+      </div>
+
+      <p style={{ fontSize: '11px', color: '#a8a39c', padding: '8px 20px 12px', borderTop: '1px solid #eef3fb', margin: 0, fontStyle: 'italic', textAlign: 'center' }}>
+        Earned by completing real compliance milestones · Share achievements on social media
       </p>
     </div>
   )
