@@ -167,6 +167,16 @@ if (org?.org_type === 'service_provider') {
   const inspectionReady = taskPct === 100
   const earnedBadgeIds = (userBadges || []).map((b: any) => b.badge_id)
 
+  const activityMap: Record<string, boolean> = {
+    'Equipment & Safety': (equipment?.length || 0) > 0,
+    'Document Repository': (documents?.length || 0) > 0,
+    'Compliance Calendar': (events?.length || 0) > 0,
+    'Keys to Success': (ktsCompleted || 0) > 0,
+    'State Compliance Guide': !!org?.facility_state,
+    'AI Assistant': false,
+    'RSP Builder': false,
+  }
+
   return (
     <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f4f7fb' }}>
       <nav style={{ background: '#0d2d5e', padding: '0 32px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
