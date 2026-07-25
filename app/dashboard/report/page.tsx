@@ -35,8 +35,6 @@ export default function InspectorReportPage() {
         supabase.from('lead_aprons').select('*').eq('org_id', orgId).order('created_at'),
         supabase.from('documents').select('*').eq('org_id', orgId).order('created_at', { ascending: false }),
         supabase.from('compliance_calendar').select('*').eq('org_id', orgId).is('completed_at', null).order('due_date'),
-        supabase.from('keys_to_success').select('id, topic, sort_order').order('sort_order'),
-        supabase.from('compliance_checklists').select('guidance_id').eq('org_id', orgId).eq('completed', true),
       ])
 
       setReportData({
@@ -45,9 +43,7 @@ export default function InspectorReportPage() {
         aprons: apronRes.data || [],
         documents: docRes.data || [],
         events: eventRes.data || [],
-        ktsItems: ktsRes.data || [],
-        ktsCompleted: new Set((checkRes.data || []).map((c: any) => c.guidance_id)),
-      })
+          })
     } catch (e: any) {
       setError(e.message || 'Failed to load report data')
     } finally {
@@ -96,7 +92,6 @@ export default function InspectorReportPage() {
   const overdueEvents = events.filter((e: any) => new Date(e.due_date) < today)
   const upcomingEvents = events.filter((e: any) => new Date(e.due_date) >= today).slice(0, 20)
   const generatedAt = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-const ktsPct = taskPct
   const th: React.CSSProperties = {
     background: '#0d2d5e', color: '#fff', fontSize: '11px', fontWeight: '500',
     padding: '8px 12px', textAlign: 'left', letterSpacing: '0.05em',
@@ -145,9 +140,7 @@ const ktsPct = taskPct
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '8px' }}>
           {[
-            { label: 'Compliance score', value: `${ktsPct}%`, color: ktsPct >= 90 ? '#40916c' : ktsPct >= 60 ? '#1a5fa8' : '#c44a1a' },
-            { label: 'Keys to Success', value: `${ktsCompleted.size} of ${ktsItems.length} complete`, color: '#0d2d5e' },
-            { label: 'Overdue items', value: String(overdueEvents.length), color: overdueEvents.length > 0 ? '#c44a1a' : '#40916c' },
+            { label: 'Compliance score'{ label: 'Overdue items', value: String(overdueEvents.length), color: overdueEvents.length > 0 ? '#c44a1a' : '#40916c' },
           ].map(m => (
             <div key={m.label} style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '8px', padding: '14px 16px' }}>
               <p style={{ fontSize: '11px', color: '#a8a39c', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{m.label}</p>
@@ -280,11 +273,9 @@ const ktsPct = taskPct
           </div>
         )}
 
-        <span style={sectionTitle}>6. Keys to Success — Compliance Checklist</span>
+        <span style={sectionTitle}>6.</span>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '4px' }}>
-          {ktsItems.map((item: any) => {
-            const done = ktsCompleted.has(item.id)
-            return (
+           return (
               <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 10px', background: done ? '#edfaf3' : '#fff', border: `1px solid ${done ? '#b8e8cc' : '#dce8f5'}`, borderRadius: '6px' }}>
                 <span style={{ fontSize: '13px', color: done ? '#40916c' : '#a8a39c', flexShrink: 0 }}>{done ? '✓' : '○'}</span>
                 <span style={{ fontSize: '12px', color: done ? '#1a4731' : '#4a6d8c', fontWeight: done ? '500' : '400' }}>{item.topic}</span>
