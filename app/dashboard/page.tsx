@@ -287,7 +287,7 @@ if (org?.org_type === 'service_provider') {
               badges={badges || []}
               earnedIds={earnedBadgeIds}
               facilityName={org?.name}
-              ktsComplete={ktsItems?.length > 0 && ktsCompleted === ktsItems.length}
+              ktsComplete={(ktsItems?.length || 0) > 0 && ktsCompleted === (ktsItems?.length || 0)}
               techniqueAccessed={org?.technique_chart_accessed || false}
             />
         <WelcomeModal facilityName={org?.name} />
