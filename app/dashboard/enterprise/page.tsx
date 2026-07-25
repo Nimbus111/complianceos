@@ -1,6 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
+
+function statusColors(pct: number) {
+  if (pct >= 90) return { border: '#b8e8cc', bg: '#f8fffe', bar: '#40916c', badge: '#edfaf3', badgeText: '#2d6a4f', badgeBorder: '#b8e8cc', label: 'Inspection ready' }
+  if (pct >= 50) return { border: '#f0d4a0', bg: '#fffdf8', bar: '#c44a1a', badge: '#fff6e8', badgeText: '#9a3510', badgeBorder: '#f0d4a0', label: 'Action needed' }
+  return { border: '#f5c6c9', bg: '#fefafb', bar: '#931621', badge: '#fefafb', badgeText: '#76121a', badgeBorder: '#f5c6c9', label: 'At risk' }
+}
 
 export default async function EnterpriseDashboard() {
   const supabase = await createClient()
@@ -13,33 +18,46 @@ export default async function EnterpriseDashboard() {
 
   const { data: org } = await supabase
     .from('organizations').select('*').eq('id', profile.org_id).single()
-
   if (org?.org_type !== 'enterprise') redirect('/dashboard')
 
-  // Fetch all linked sites with their compliance data
   const { data: siteLinks } = await supabase
     .from('enterprise_sites')
     .select('*, site:site_org_id(id, name, facility_state, facility_type_name, modality_names)')
     .eq('enterprise_org_id', profile.org_id)
 
   const sites = siteLinks || []
+  const siteIds = sites.map(s => s.site_org_id).filter(Boolean)
 
-  // Fetch task completion for each site
-  const siteIds = sites.map(s => s.site_org_id)
-  const { data: allTasks } = await supabase.from('facility_tasks').select('id')
+  const [
+    { data: allTasks },
+    { data: allCompletions },
+    { data: epeRegs },
+  ] = await Promise.all([
+    supabase.from('facility_tasks').select('id, task_name').order('sort_order'),
+    siteIds.length > 0
+      ? supabase.from('user_task_completions').select('org_id, task_id').in('org_id', siteIds)
+      : Promise.resolve({ data: [] }),
+    siteIds.length > 0
+      ? supabase.from('regulations').select('state_name').eq('equipment_performance_eval', true)
+      : Promise.resolve({ data: [] }),
+  ])
+
   const taskTotal = allTasks?.length || 8
+  const epeStates = new Set((epeRegs || []).map((r: any) => r.state_name))
 
-  const completionMap: Record<string, number> = {}
-  if (siteIds.length > 0) {
-    const { data: allCompletions } = await supabase
-      .from('user_task_completions')
-      .select('org_id, task_id')
-      .in('org_id', siteIds)
-    for (const siteId of siteIds) {
-      const count = (allCompletions || []).filter(c => c.org_id === siteId).length
-      completionMap[siteId] = taskTotal > 0 ? Math.round((count / taskTotal) * 100) : 0
-    }
-  }
+  const siteData = sites.map(link => {
+    const site = link.site as any
+    const siteCompletions = (allCompletions || []).filter((c: any) => c.org_id === link.site_org_id)
+    const completedIds = new Set(siteCompletions.map((c: any) => c.task_id))
+    const pct = taskTotal > 0 ? Math.round((siteCompletions.length / taskTotal) * 100) : 0
+    const incompleteTasks = (allTasks || []).filter((t: any) => !completedIds.has(t.id))
+    const completedTasks = (allTasks || []).filter((t: any) => completedIds.has(t.id))
+    return { link, site, pct, incompleteTasks, completedTasks, epeRequired: epeStates.has(site?.facility_state) }
+  }).sort((a, b) => a.pct - b.pct)
+
+  const readyCount = siteData.filter(s => s.pct >= 90).length
+  const atRiskCount = siteData.filter(s => s.pct < 50).length
+  const actionCount = siteData.filter(s => s.pct >= 50 && s.pct < 90).length
 
   return (
     <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f0f4f8' }}>
@@ -48,42 +66,28 @@ export default async function EnterpriseDashboard() {
           <span style={{ color: '#fff', fontSize: '17px', fontWeight: '500' }}>The Radiology Coach</span>
           <span style={{ background: 'rgba(255,255,255,0.1)', color: '#8bb4d4', fontSize: '11px', padding: '2px 8px', borderRadius: '4px', marginLeft: '10px' }}>ComplianceOS Enterprise</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <span style={{ color: '#8bb4d4', fontSize: '13px' }}>{org?.name}</span>
-          <a href="/dashboard/settings" style={{ color: '#8bb4d4', fontSize: '12px', textDecoration: 'none' }}>Settings</a>
-        </div>
+        <span style={{ color: '#8bb4d4', fontSize: '13px' }}>{org?.name}</span>
       </nav>
 
-      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 24px' }}>
+      <div style={{ maxWidth: '960px', margin: '0 auto', padding: '36px 24px' }}>
 
         {/* Header */}
-        <div style={{ marginBottom: '32px' }}>
-          <h1 style={{ fontSize: '26px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>
-            {org?.name}
-          </h1>
-          <p style={{ fontSize: '13px', color: '#827d76' }}>
-            Enterprise portfolio · {sites.length} site{sites.length !== 1 ? 's' : ''}
-          </p>
+        <div style={{ marginBottom: '28px' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>Compliance Portfolio</h1>
+          <p style={{ fontSize: '13px', color: '#827d76' }}>All facilities sorted by compliance level — sites needing attention appear first.</p>
         </div>
 
         {/* Summary metrics */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px', marginBottom: '32px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '28px' }}>
           {[
-            { label: 'Total sites', value: String(sites.length) },
-            {
-              label: 'Avg compliance',
-              value: sites.length > 0
-                ? `${Math.round(Object.values(completionMap).reduce((a, b) => a + b, 0) / sites.length)}%`
-                : '—'
-            },
-            {
-              label: 'Inspection ready',
-              value: String(Object.values(completionMap).filter(p => p === 100).length)
-            },
+            { label: 'Total sites', value: String(sites.length), color: '#0d2d5e' },
+            { label: 'Inspection ready', value: String(readyCount), color: '#2d6a4f' },
+            { label: 'Action needed', value: String(actionCount), color: '#9a3510' },
+            { label: 'At risk', value: String(atRiskCount), color: '#931621' },
           ].map(m => (
-            <div key={m.label} style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', padding: '20px 24px' }}>
-              <p style={{ fontSize: '11px', fontWeight: '500', color: '#a8a39c', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '8px' }}>{m.label}</p>
-              <p style={{ fontSize: '32px', fontWeight: '500', color: '#0d2d5e', lineHeight: 1 }}>{m.value}</p>
+            <div key={m.label} style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '10px', padding: '16px 20px' }}>
+              <p style={{ fontSize: '11px', fontWeight: '500', color: '#a8a39c', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: '6px' }}>{m.label}</p>
+              <p style={{ fontSize: '28px', fontWeight: '500', color: m.color, lineHeight: 1, margin: 0 }}>{m.value}</p>
             </div>
           ))}
         </div>
@@ -91,82 +95,95 @@ export default async function EnterpriseDashboard() {
         {/* Site cards */}
         {sites.length === 0 ? (
           <div style={{ background: '#fff', border: '1px dashed #c2ddf0', borderRadius: '12px', padding: '64px 24px', textAlign: 'center' }}>
-            <p style={{ fontSize: '16px', fontWeight: '500', color: '#0d2d5e', marginBottom: '8px' }}>No sites configured yet</p>
-            <p style={{ fontSize: '13px', color: '#a8a39c', maxWidth: '400px', margin: '0 auto' }}>
-              Contact The Radiology Coach to add your clinic locations to this enterprise account.
-            </p>
+            <p style={{ fontSize: '15px', fontWeight: '500', color: '#0d2d5e', marginBottom: '8px' }}>No sites configured yet</p>
+            <p style={{ fontSize: '13px', color: '#a8a39c' }}>Contact The Radiology Coach to add your clinic locations.</p>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '14px' }}>
-            {sites.map(link => {
-              const site = link.site
-              const pct = completionMap[link.site_org_id] || 0
-              const ready = pct === 100
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {siteData.map(({ link, site, pct, incompleteTasks, completedTasks, epeRequired }) => {
+              const c = statusColors(pct)
               return (
-                <Link key={link.id} href={`/dashboard?site=${link.site_org_id}`} style={{ textDecoration: 'none' }}>
-                  <div style={{ background: '#fff', border: `1px solid ${ready ? '#b8e8cc' : '#dce8f5'}`, borderRadius: '12px', padding: '22px 24px', cursor: 'pointer', transition: 'box-shadow .15s' }}
-                    onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 4px 16px rgba(13,45,94,.1)')}
-                    onMouseLeave={e => (e.currentTarget.style.boxShadow = 'none')}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
-                      <div>
-                        <p style={{ fontSize: '15px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>
+                <div key={link.id} style={{ background: c.bg, border: `1px solid ${c.border}`, borderRadius: '12px', overflow: 'hidden' }}>
+
+                  {/* Card header */}
+                  <div style={{ padding: '16px 20px 12px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px', flexWrap: 'wrap' }}>
+                        <p style={{ fontSize: '15px', fontWeight: '500', color: '#0d2d5e', margin: 0 }}>
                           {link.site_label || site?.name}
                         </p>
-                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                          {site?.facility_state && (
-                            <span style={{ fontSize: '11px', color: '#4a6d8c', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '1px 8px' }}>
-                              {site.facility_state}
-                            </span>
-                          )}
-                          {site?.facility_type_name && (
-                            <span style={{ fontSize: '11px', color: '#4a6d8c', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '1px 8px' }}>
-                              {site.facility_type_name}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                        <p style={{ fontSize: '28px', fontWeight: '500', color: ready ? '#2d6a4f' : '#0d2d5e', lineHeight: 1, marginBottom: '4px' }}>
-                          {pct}%
-                        </p>
-                        {ready && (
-                          <span style={{ fontSize: '10px', fontWeight: '500', color: '#2d6a4f', background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '20px', padding: '2px 8px' }}>
-                            Inspection Ready ✓
+                        <span style={{ fontSize: '10px', fontWeight: '500', color: c.badgeText, background: c.badge, border: `1px solid ${c.badgeBorder}`, borderRadius: '20px', padding: '2px 8px' }}>
+                          {c.label}
+                        </span>
+                        {epeRequired && (
+                          <span style={{ fontSize: '10px', fontWeight: '500', color: '#76121a', background: '#fefafb', border: '1px solid #f5c6c9', borderRadius: '20px', padding: '2px 8px' }}>
+                            ⚠ EPE Required
                           </span>
                         )}
                       </div>
-                    </div>
-
-                    {/* Compliance bar */}
-                    <div style={{ height: '4px', background: '#eef3fb', borderRadius: '4px', overflow: 'hidden', marginBottom: '14px' }}>
-                      <div style={{ height: '100%', width: `${pct}%`, background: ready ? '#40916c' : '#1a5fa8', borderRadius: '4px', transition: 'width .3s' }} />
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div style={{ display: 'flex', gap: '12px' }}>
-                        {(site?.modality_names || []).slice(0, 2).map((m: string) => (
-                          <span key={m} style={{ fontSize: '11px', color: '#827d76' }}>{m}</span>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        {site?.facility_state && <span style={{ fontSize: '11px', color: '#4a6d8c', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '1px 8px' }}>{site.facility_state}</span>}
+                        {site?.facility_type_name && <span style={{ fontSize: '11px', color: '#4a6d8c', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '1px 8px' }}>{site.facility_type_name}</span>}
+                        {(site?.modality_names || []).map((m: string) => (
+                          <span key={m} style={{ fontSize: '11px', color: '#4a6d8c', background: '#f4f7fb', border: '1px solid #dce8f5', borderRadius: '20px', padding: '1px 8px' }}>{m}</span>
                         ))}
-                        {(site?.modality_names || []).length > 2 && (
-                          <span style={{ fontSize: '11px', color: '#a8a39c' }}>+{(site?.modality_names || []).length - 2} more</span>
-                        )}
                       </div>
-                      <span style={{ fontSize: '12px', fontWeight: '500', color: '#1a5fa8' }}>View site →</span>
+                    </div>
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <p style={{ fontSize: '30px', fontWeight: '500', color: c.bar, lineHeight: 1, marginBottom: '2px' }}>{pct}%</p>
+                      <p style={{ fontSize: '11px', color: '#a8a39c', margin: 0 }}>{completedTasks.length}/{taskTotal} complete</p>
                     </div>
                   </div>
-                </Link>
+
+                  {/* Progress bar */}
+                  <div style={{ height: '4px', background: '#eef3fb', margin: '0 20px' }}>
+                    <div style={{ height: '100%', width: `${pct}%`, background: c.bar, borderRadius: '4px' }} />
+                  </div>
+
+                  {/* Task status grid */}
+                  <div style={{ padding: '12px 20px' }}>
+                    {incompleteTasks.length === 0 ? (
+                      <p style={{ fontSize: '12px', fontWeight: '500', color: '#2d6a4f', margin: 0 }}>✓ All required actions complete — inspection ready</p>
+                    ) : (
+                      <div>
+                        {incompleteTasks.length > 0 && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: completedTasks.length > 0 ? '6px' : '0' }}>
+                            {incompleteTasks.map((t: any) => (
+                              <span key={t.id} style={{ fontSize: '11px', color: '#9a3510', background: '#fff6e8', border: '1px solid #f0d4a0', borderRadius: '5px', padding: '2px 8px' }}>
+                                ⚠ {t.task_name?.replace(/^(Verify|Confirm|Complete or update your|Set up|Schedule or document|Inspect and document|Post|Maintain and file)\s+/i, '') || t.task_name}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {completedTasks.length > 0 && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                            {completedTasks.map((t: any) => (
+                              <span key={t.id} style={{ fontSize: '11px', color: '#2d6a4f', background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '5px', padding: '2px 8px' }}>
+                                ✓ {t.task_name?.replace(/^(Verify|Confirm|Complete or update your|Set up|Schedule or document|Inspect and document|Post|Maintain and file)\s+/i, '') || t.task_name}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Footer */}
+                  <div style={{ padding: '8px 20px 12px', display: 'flex', justifyContent: 'flex-end' }}>
+                    <a href={`/dashboard?site=${link.site_org_id}`}
+                      style={{ fontSize: '12px', fontWeight: '500', color: '#1a5fa8', textDecoration: 'none' }}>
+                      Open full dashboard →
+                    </a>
+                  </div>
+
+                </div>
               )
             })}
           </div>
         )}
 
-        <div style={{ marginTop: '24px', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '10px', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-          <p style={{ fontSize: '13px', color: '#0d2d5e', flex: 1, margin: 0 }}>
-            Need to add a new site or adjust enterprise settings?
-          </p>
-          <a href="mailto:hello@theradiologycoach.com" style={{ fontSize: '12px', fontWeight: '500', color: '#fff', background: '#0d2d5e', padding: '7px 16px', borderRadius: '8px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-            Contact support →
-          </a>
+        <div style={{ marginTop: '24px', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '10px', padding: '12px 20px', fontSize: '12px', color: '#4a6d8c', lineHeight: '1.6' }}>
+          <strong style={{ color: '#0d2d5e' }}>Sites are sorted by compliance level</strong> — lowest compliance first so the most urgent locations are always at the top. Click "Open full dashboard →" to drill into any site and work through its required actions.
         </div>
       </div>
     </div>
