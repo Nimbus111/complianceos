@@ -74,7 +74,7 @@ function SPDashboard({ org, user }: { org: any; user: any }) {
           <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>{org.name}</h1>
           <p style={{ fontSize: '13px', color: '#827d76' }}>Dealer / Service Provider · {org.facility_state}</p>
         </div>
-        <FeatureCards features={features} activityMap={activityMap} />
+        <FeatureCards features={features} />
       </div>
     </div>
   )
