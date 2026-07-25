@@ -120,7 +120,10 @@ if (org?.org_type === 'service_provider') {
     { data: completions },
     { data: badges },
     { data: userBadges },
-  ] = await Promise.all([
+  { count: equipmentCount },
+  { count: qaCount },
+  { count: calendarCount },
+] = await Promise.all([
     supabase.from('keys_to_success').select('id'),
     supabase.from('compliance_checklists').select('*', { count: 'exact', head: true }).eq('org_id', profile.org_id).eq('completed', true),
     supabase.from('equipment_contacts').select('company_name, contact_name, phone_primary, phone_support, contact_type').eq('org_id', profile.org_id).in('contact_type', ['dealer', 'manufacturer']),
@@ -129,6 +132,9 @@ if (org?.org_type === 'service_provider') {
     supabase.from('user_task_completions').select('task_id').eq('org_id', profile.org_id),
     supabase.from('badges').select('*').order('sort_order'),
     supabase.from('user_badges').select('badge_id').eq('org_id', profile.org_id),
+     supabase.from('equipment').select('id', { count: 'exact', head: true }).eq('org_id', profile.org_id),
+    supabase.from('equipment_qa').select('id', { count: 'exact', head: true }).eq('org_id', profile.org_id),
+    supabase.from('compliance_calendar').select('id', { count: 'exact', head: true }).eq('org_id', profile.org_id),
   ])
 
   const ktsPct = ktsItems?.length
@@ -157,9 +163,9 @@ if (org?.org_type === 'service_provider') {
   const earnedBadgeIds = (userBadges || []).map((b: any) => b.badge_id)
 
     const activityMap: Record<string, boolean> = {
-    'Equipment & Safety': false,
+    'Equipment & Safety': (equipmentCount || 0) > 0,
     'Document Repository': false,
-    'Compliance Calendar': false,
+    'Compliance Calendar': (calendarCount || 0) > 0,
     'Keys to Success': (ktsCompleted || 0) > 0,
     'Required Actions': (completions?.length || 0) > 0,
     'State Compliance Guide': !!org?.facility_state,
@@ -235,7 +241,19 @@ if (org?.org_type === 'service_provider') {
           </div>
         )}
 
-        <RequiredActions tasks={tasks || []} completedIds={completedTaskIds} />
+        {(equipmentCount || 0) > 0 && (qaCount || 0) === 0 && (
+              <div style={{ background: '#fff6e8', border: '1px solid #f0d4a0', borderRadius: '10px', padding: '12px 18px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '18px', flexShrink: 0 }}>⚙️</span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: '13px', fontWeight: '500', color: '#9a3510', margin: '0 0 2px' }}>Equipment QA procedures not set up</p>
+                  <p style={{ fontSize: '12px', color: '#9a3510', margin: 0 }}>You have equipment on file — add your manufacturer-recommended QA procedures to stay inspection ready.</p>
+                </div>
+                <a href="/dashboard/equipment-qa" style={{ fontSize: '12px', fontWeight: '500', color: '#fff', background: '#9a3510', padding: '6px 14px', borderRadius: '7px', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  Set up QA →
+                </a>
+              </div>
+            )}
+            <RequiredActions tasks={tasks || []} completedIds={completedTaskIds} />
 
         <div style={{ marginBottom: '28px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>
