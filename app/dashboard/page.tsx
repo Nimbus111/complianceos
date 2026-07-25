@@ -7,34 +7,23 @@ import BadgesSection from '../components/BadgesSection'
 import WelcomeModal from '../components/WelcomeModal'
 import FeatureCards from '../components/FeatureCards'
 
-  const features = [
-  { name: 'Compliance calendar', desc: 'Track renewals, inspections, and QA deadlines', border: '#c2ddf0', href: '/dashboard/calendar' },
-  { name: 'Document repository', desc: 'Store and organize all compliance documents', border: '#c2ddf0', href: '/dashboard/documents' },
-  { name: 'State Compliance Guide', desc: 'Your state\'s x-ray requirements with federal rules. Always current.', border: '#b8e8cc', href: '/dashboard/guide' },
-      { name: 'Equipment & Safety', desc: 'X-ray equipment, lead protection, and dosimetry monitoring.', border: '#b8e8cc', href: '/dashboard/equipment' },
-      { name: 'Equipment QA', desc: 'QA testing procedures, manufacturer schedules, and performance evaluations.', border: '#b8e8cc', href: '/dashboard/equipment-qa' },
-      { name: 'X-ray Operators', desc: 'Operator credentials, training records, and CEU certificates.', border: '#b8e8cc', href: '/dashboard/operators' },
-      { name: 'Document Repository', desc: 'Upload and store all compliance documents with expiry tracking.', border: '#c2ddf0', href: '/dashboard/repository' },
-      { name: 'RSP Builder', desc: 'Generate your Radiation Protection Program. Required in most states.', border: '#c2ddf0', href: '/dashboard/programs' },
-      { name: 'Compliance Calendar', desc: 'Renewal dates, QA deadlines, and inspection schedules.', border: '#c2ddf0', href: '/dashboard/calendar' },
-      { name: 'Inspector Report', desc: 'Printable compliance summary with your current score.', border: '#c2ddf0', href: '/dashboard/report' },
-      { name: 'Technique Charts', desc: 'The Last Technique Chart You\'ll Ever Need — download and customize.', border: '#c4b5fd', href: '/dashboard/technique-charts' },
-      { name: 'Keys to Success', desc: '21-step compliance checklist with guidance videos from The Radiology Coach.', border: '#c4b5fd', href: '/dashboard/keys' },
-      { name: 'AI Assistant', desc: 'Ask any compliance question. State-specific answers in seconds.', border: '#c4b5fd', href: '/dashboard/ai' },
-      { name: 'State Documents', desc: 'Forms, applications, and regulatory documents from your state agency.', border: '#dce8f5', href: '/dashboard/documents' },
-      { name: 'Video Training', desc: 'Expert tutorial videos from The Radiology Coach.', border: '#dce8f5', href: '/dashboard/training' },
-      { name: 'Preferred Partners', desc: 'PACS storage, radiology reading, and equipment partners.', border: '#dce8f5', href: '/dashboard/partners' },
-      { name: 'Account Settings', desc: 'Facility info, dealer contact, and subscription management.', border: '#dce8f5', href: '/dashboard/settings' },
-  { name: 'State Compliance Guide', desc: 'Your state\'s x-ray requirements — always accessible from your dashboard.', border: '#c2ddf0', href: '/dashboard/guide' },
-  { name: 'AI assistant', desc: 'Instant answers to state-specific compliance questions', border: '#c4b5fd', href: '/dashboard/ai' },
-  { name: 'Keys to Success', desc: 'Step-by-step compliance checklist for your state', border: '#b8e8cc', href: '/dashboard/keys' },
-  { name: 'RSP builder', desc: 'Generate your full Radiation Protection Program', border: '#c2ddf0', href: '/dashboard/rsp' },
-  { name: 'State documents', desc: 'Registration forms, rules, and regulatory documents by state.', border: '#c2ddf0', href: '/dashboard/stateforms' },
-  { name: 'Preferred Partners', desc: 'PACS, radiology reading, and compliance equipment partners.', border: '#c2ddf0', href: '/dashboard/partners' },
-{ name: 'Video Training', desc: 'Expert tutorials from The Radiology Coach on YouTube.', border: '#c2ddf0', href: '/dashboard/training' },
-{ name: 'Account Settings', desc: 'Update your dealer, account info, and preferences.', border: '#c2ddf0', href: '/dashboard/settings' },
-{ name: 'X-ray Operators', desc: 'Operator credentials, training records, and CEU tracking.', border: '#b8e8cc' },
-]
+ const features = [
+    { name: 'State Compliance Guide', desc: 'Your state\'s x-ray requirements with federal rules.', border: '#b8e8cc', href: '/dashboard/guide' },
+    { name: 'Equipment & Safety', desc: 'X-ray equipment, lead protection, and dosimetry monitoring.', border: '#b8e8cc', href: '/dashboard/equipment' },
+    { name: 'Equipment QA', desc: 'QA testing procedures, manufacturer schedules, and performance evaluations.', border: '#b8e8cc', href: '/dashboard/equipment-qa' },
+    { name: 'X-ray Operators', desc: 'Operator credentials, training records, and CEU certificates.', border: '#b8e8cc', href: '/dashboard/operators' },
+    { name: 'Document Repository', desc: 'Upload and store all compliance documents with expiry tracking.', border: '#c2ddf0', href: '/dashboard/repository' },
+    { name: 'RSP Builder', desc: 'Generate your Radiation Protection Program. Required in most states.', border: '#c2ddf0', href: '/dashboard/programs' },
+    { name: 'Compliance Calendar', desc: 'Renewal dates, QA deadlines, and inspection schedules.', border: '#c2ddf0', href: '/dashboard/calendar' },
+    { name: 'Inspector Report', desc: 'Printable compliance summary with your current score.', border: '#c2ddf0', href: '/dashboard/report' },
+    { name: 'Technique Charts', desc: 'The Last Technique Chart You\'ll Ever Need — download and customize.', border: '#c4b5fd', href: '/dashboard/technique-charts' },
+    { name: 'Keys to Success', desc: '21-step compliance checklist with guidance from The Radiology Coach.', border: '#c4b5fd', href: '/dashboard/keys' },
+    { name: 'AI Assistant', desc: 'Ask any compliance question. State-specific answers in seconds.', border: '#c4b5fd', href: '/dashboard/ai' },
+    { name: 'State Documents', desc: 'Forms, applications, and regulatory documents from your state agency.', border: '#dce8f5', href: '/dashboard/documents' },
+    { name: 'Video Training', desc: 'Expert tutorial videos from The Radiology Coach.', border: '#dce8f5', href: '/dashboard/training' },
+    { name: 'Preferred Partners', desc: 'PACS storage, radiology reading, and equipment partners.', border: '#dce8f5', href: '/dashboard/partners' },
+    { name: 'Account Settings', desc: 'Facility info, dealer contact, and subscription management.', border: '#dce8f5', href: '/dashboard/settings' },
+  ]
 
 function SPDashboard({ org, user }: { org: any; user: any }) {
   const spFeatures = [
