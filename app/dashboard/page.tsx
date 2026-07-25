@@ -161,6 +161,7 @@ if (org?.org_type === 'service_provider') {
     'Document Repository': false,
     'Compliance Calendar': false,
     'Keys to Success': (ktsCompleted || 0) > 0,
+    'Required Actions': (completions?.length || 0) > 0,
     'State Compliance Guide': !!org?.facility_state,
     'AI Assistant': false,
     'RSP Builder': false,
