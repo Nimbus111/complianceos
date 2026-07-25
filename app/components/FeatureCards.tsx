@@ -81,7 +81,7 @@ export default function FeatureCards({ features, activityMap = {} }: { features:
           return (
             <div key={f.name} style={{ position: 'relative' }}>
               {f.href ? (
-                <a href={f.href} style={{ textDecoration: 'none', display: 'block' }}>
+                <a href={f.href} style={{ textDecoration: 'none', display: 'block' }} onClick={() => sessionStorage.setItem('dashScrollY', String(window.scrollY))}>
                   <div style={{ background: activityMap[f.name] ? '#f8fffe' : '#fff', border: `1px solid ${activityMap[f.name] ? '#40916c' : f.border}`, borderRadius: '12px', padding: '20px', transition: 'border-color .2s' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
                       <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', margin: 0 }}>{f.name}</p>

@@ -6,6 +6,7 @@ import RequiredActions from '../components/RequiredActions'
 import BadgesSection from '../components/BadgesSection'
 import WelcomeModal from '../components/WelcomeModal'
 import FeatureCards from '../components/FeatureCards'
+import ScrollRestorer from '../components/ScrollRestorer'
 
  const features = [
     { name: 'State Compliance Guide', desc: 'Your state\'s x-ray requirements with federal rules.', border: '#b8e8cc', href: '/dashboard/guide' },
@@ -281,6 +282,7 @@ if (org?.org_type === 'service_provider') {
               techniqueAccessed={org?.technique_chart_accessed || false}
             />
         <WelcomeModal facilityName={org?.name} />
+            <ScrollRestorer />
 
       </div>
     </div>
