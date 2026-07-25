@@ -157,9 +157,9 @@ if (org?.org_type === 'service_provider') {
   const earnedBadgeIds = (userBadges || []).map((b: any) => b.badge_id)
 
     const activityMap: Record<string, boolean> = {
-    'Equipment & Safety': (equipment?.length || 0) > 0,
-    'Document Repository': (documents?.length || 0) > 0,
-    'Compliance Calendar': (events?.length || 0) > 0,
+    'Equipment & Safety': false,
+    'Document Repository': false,
+    'Compliance Calendar': false,
     'Keys to Success': (ktsCompleted || 0) > 0,
     'State Compliance Guide': !!org?.facility_state,
     'AI Assistant': false,
