@@ -157,7 +157,6 @@ if (org?.org_type === 'service_provider') {
     )
 
   const completedTaskIds = (completions || []).map((c: any) => c.task_id)
-  const completedTaskIds = (completions || []).map((c: any) => c.task_id)
 
   const filteredTasks = (tasks || []).filter((task: any) => {
     if (!task.regulation_column) return true
