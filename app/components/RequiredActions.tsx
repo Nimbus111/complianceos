@@ -10,6 +10,7 @@ interface Task {
   urgency: string
   sort_order: number
   link_to?: string | null
+  modality_flags?: string[]
 }
 
 interface Props {
@@ -113,6 +114,15 @@ export default function RequiredActions({ tasks, completedIds, facilityState }: 
                         <p style={{ fontSize: '13px', fontWeight: done ? '400' : '500', color: done ? '#a8a39c' : '#0d2d5e', margin: 0, textDecoration: done ? 'line-through' : 'none', flex: 1 }}>
                           {task.task_text}
                         </p>
+                        {task.modality_flags && task.modality_flags.length > 0 && (
+                          <div style={{ display: 'flex', gap: '4px', marginTop: '3px', flexWrap: 'wrap' }}>
+                            {task.modality_flags.map((mod: string) => (
+                              <span key={mod} style={{ fontSize: '10px', fontWeight: '500', color: '#9a3510', background: '#fff6e8', border: '1px solid #f0d4a0', borderRadius: '20px', padding: '1px 7px' }}>
+                                {mod} only
+                              </span>
+                            ))}
+                          </div>
+                        )}
                         {task.link_to && !done && (
                           <a href={task.link_to}
                             style={{ fontSize: '10px', color: '#1a5fa8', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '1px 8px', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>

@@ -145,12 +145,63 @@ if (org?.org_type === 'service_provider') {
   const trialEnd = subscription?.current_period_end ? new Date(subscription.current_period_end) : null
   const daysLeft = trialEnd ? Math.max(0, Math.ceil((trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : null
 
+  const modalities = (org?.modality_names || []) as string[]
+  const { data: regs } = await supabase
+    .from('regulations')
+    .select('*')
+    .eq('state_name', org?.facility_state || '')
+    .or(
+      modalities.length > 0
+        ? modalities.map((m: string) => `modality_name.ilike.%${m}%`).join(',')
+        : 'modality_name.ilike.%%'
+    )
+
   const completedTaskIds = (completions || []).map((c: any) => c.task_id)
-  const taskPct = (tasks?.length || 0) > 0
-    ? Math.round((completedTaskIds.length / (tasks?.length || 1)) * 100)
+  const taskPct = (filteredTasks?.length || 0) > 0
+    ? Math.round((completedFilteredTaskIds.length / (filteredTasks?.length || 1)) * 100)
     : 0
   const inspectionReady = taskPct === 100
   const earnedBadgeIds = (userBadges || []).map((b: any) => b.badge_id)
+
+  const filteredTasks = (tasks || []).filter((task: any) => {
+    if (!task.regulation_column) return true
+    if (!regs || regs.length === 0) return true
+    return (regs as any[]).some((reg: any) => {
+      const val = reg[task.regulation_column]
+      if (task.regulation_type === 'text_non_null') {
+        return val !== null && val !== undefined && String(val).trim().length > 0
+      }
+      return Boolean(val)
+    })
+  }).map((task: any) => {
+    const allMods = (org?.modality_names || []) as string[]
+    const applicableRegs = (regs as any[] || []).filter((reg: any) => {
+      const val = reg[task.regulation_column]
+      if (task.regulation_type === 'text_non_null') {
+        return val !== null && val !== undefined && String(val).trim().length > 0
+      }
+      return Boolean(val)
+    })
+    const applicableModalities = [...new Set(
+      applicableRegs.map((r: any) => r.modality_name).filter(Boolean)
+    )] as string[]
+    const universalMods = allMods.filter((m: string) =>
+      applicableRegs.some((r: any) =>
+        r.modality_name?.toLowerCase().includes(m.toLowerCase())
+      )
+    )
+    const isUniversal = allMods.length === 0 || universalMods.length === allMods.length
+    const detailReg = applicableRegs.find((r: any) => task.detail_column && r[task.detail_column])
+    return {
+      ...task,
+      detail_text: task.detail_column && detailReg ? detailReg[task.detail_column] || null : null,
+      modality_flags: isUniversal ? [] : applicableModalities,
+    }
+  })
+
+  const completedFilteredTaskIds = completedTaskIds.filter((id: string) =>
+    (filteredTasks as any[]).some((t: any) => t.id === id)
+  )
 
     const activityMap: Record<string, boolean> = {
     'Equipment & Safety': (equipmentCount || 0) > 0,
@@ -243,7 +294,7 @@ if (org?.org_type === 'service_provider') {
                 </a>
               </div>
             )}
-            <RequiredActions tasks={tasks || []} completedIds={completedTaskIds} facilityState={org?.facility_state} />
+            <RequiredActions tasks={filteredTasks || []} completedIds={completedFilteredTaskIds} facilityState={org?.facility_state} />
 
         <div style={{ marginBottom: '28px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>
