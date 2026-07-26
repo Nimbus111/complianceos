@@ -29,7 +29,7 @@ export default function InspectorReportPage() {
 
       const orgId = profile.org_id
 
-      const [orgRes, equipRes, apronRes, docRes, eventRes, ktsRes, checkRes] = await Promise.all([
+      const [orgRes, equipRes, apronRes, docRes, eventRes] = await Promise.all([
         supabase.from('organizations').select('*').eq('id', orgId).single(),
         supabase.from('equipment').select('*').eq('org_id', orgId).neq('status', 'retired').order('created_at'),
         supabase.from('lead_aprons').select('*').eq('org_id', orgId).order('created_at'),
@@ -272,7 +272,7 @@ export default function InspectorReportPage() {
               </tbody>
             </table>
           </div>
-        )}
+        )}git add <div className=""></div>
 
         <span style={sectionTitle}>6.</span>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '4px' }}>
