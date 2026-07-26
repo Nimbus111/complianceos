@@ -15,9 +15,10 @@ interface Task {
 interface Props {
   tasks: Task[]
   completedIds: string[]
+  facilityState?: string
 }
 
-export default function RequiredActions({ tasks, completedIds }: Props) {
+export default function RequiredActions({ tasks, completedIds, facilityState }: Props) {
   const [checked, setChecked] = useState<Set<string>>(new Set(completedIds))
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
 
@@ -39,9 +40,13 @@ export default function RequiredActions({ tasks, completedIds }: Props) {
     setExpanded(next)
   }
 
+  const [showOngoing, setShowOngoing] = useState(false)
+
+  const immeditateTasks = tasks.filter(t => t.urgency === 'Immediate')
+  const ongoingTasks = tasks.filter(t => t.urgency === 'Ongoing')
   const groups = [
-    { label: 'Immediate', color: '#931621', bg: '#fefafb', border: '#f5c6c9', tasks: tasks.filter(t => t.urgency === 'Immediate') },
-    { label: 'Ongoing', color: '#1a5fa8', bg: '#e8f3fb', border: '#c2ddf0', tasks: tasks.filter(t => t.urgency === 'Ongoing') },
+    { label: 'Immediate', color: '#931621', bg: '#fefafb', border: '#f5c6c9', leftBorder: '#931621', tasks: immeditateTasks },
+    { label: 'Ongoing', color: '#1a5fa8', bg: '#f4f7fb', border: '#c2ddf0', leftBorder: '#c2ddf0', tasks: ongoingTasks },
   ].filter(g => g.tasks.length > 0)
 
   const totalApplicable = tasks.length
@@ -80,7 +85,7 @@ export default function RequiredActions({ tasks, completedIds }: Props) {
 
       {/* Task groups */}
       <div style={{ padding: '12px 0' }}>
-        {groups.map(group => (
+        {groups.filter(g => g.label === 'Immediate' || showOngoing).map(group => (
           <div key={group.label} style={{ marginBottom: '8px' }}>
             <div style={{ padding: '6px 20px 4px' }}>
               <span style={{ fontSize: '10px', fontWeight: '500', color: group.color, background: group.bg, border: `1px solid ${group.border}`, borderRadius: '20px', padding: '2px 10px', textTransform: 'uppercase', letterSpacing: '.07em' }}>
@@ -95,7 +100,7 @@ export default function RequiredActions({ tasks, completedIds }: Props) {
 
               return (
                 <div key={task.id} style={{ borderBottom: '1px solid #f4f7fb' }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '9px 20px', background: done ? '#f8fffe' : '#fff' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '9px 16px 9px 20px', background: done ? '#f8fffe' : '#fff', borderLeft: `3px solid ${done ? '#b8e8cc' : (task.urgency === 'Immediate' ? '#f5c6c9' : '#dce8f5')}` }}>
 
                     {/* Checkbox */}
                     <button onClick={() => toggle(task.id)}
@@ -111,7 +116,7 @@ export default function RequiredActions({ tasks, completedIds }: Props) {
                         {task.link_to && !done && (
                           <a href={task.link_to}
                             style={{ fontSize: '10px', color: '#1a5fa8', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '1px 8px', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                            Manage →
+                            Open →
                           </a>
                         )}
                         {hasDetail && (
@@ -146,6 +151,16 @@ export default function RequiredActions({ tasks, completedIds }: Props) {
           </div>
         ))}
       </div>
+
+      {ongoingTasks.length > 0 && (
+        <button onClick={() => setShowOngoing(!showOngoing)}
+          style={{ width: '100%', padding: '10px 20px', background: '#f4f7fb', border: 'none', borderTop: '1px solid #eef3fb', cursor: 'pointer', fontSize: '12px', color: '#4a6d8c', fontWeight: '500', textAlign: 'left', fontFamily: 'Inter, system-ui, sans-serif', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>{showOngoing ? '▲ Hide' : '▾ Show'} {ongoingTasks.length} ongoing compliance items</span>
+          <span style={{ fontSize: '10px', color: '#a8a39c', fontWeight: '400' }}>
+            {ongoingTasks.filter(t => checked.has(t.id)).length} of {ongoingTasks.length} complete
+          </span>
+        </button>
+      )}
 
       {pct === 100 && (
         <div style={{ padding: '12px 20px', background: '#edfaf3', borderTop: '1px solid #b8e8cc', textAlign: 'center' }}>
