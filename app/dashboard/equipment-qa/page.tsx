@@ -177,6 +177,16 @@ export default function EquipmentQAPage() {
           <p style={{ fontSize: '13px', color: '#827d76' }}>Quality assurance procedures, manufacturer schedules, and performance evaluations for each device.</p>
         </div>
 
+        <div style={{ background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '10px', padding: '14px 20px', marginBottom: '20px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+          <span style={{ fontSize: '20px', flexShrink: 0 }}>📖</span>
+          <div>
+            <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>How to complete your Equipment QA</p>
+            <p style={{ fontSize: '12px', color: '#4a6d8c', lineHeight: '1.65', margin: 0 }}>
+              For each device, refer to the <strong>manufacturer's user manual</strong> to identify required maintenance, calibration, and QA procedures — then log them here. If you no longer have your manual, contact your x-ray dealer or the manufacturer directly. Your physicist or service provider can also help identify required procedures for your specific equipment.
+            </p>
+          </div>
+        </div>
+
         {equipment.length === 0 ? (
           <div style={{ background: '#fff', border: '1px dashed #c2ddf0', borderRadius: '12px', padding: '64px 24px', textAlign: 'center' }}>
             <p style={{ fontSize: '15px', fontWeight: '500', color: '#0d2d5e', marginBottom: '8px' }}>No equipment on file</p>
