@@ -140,7 +140,8 @@ export default function InspectorReportPage() {
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '8px' }}>
           {[
-            { label: 'Compliance score'{ label: 'Overdue items', value: String(overdueEvents.length), color: overdueEvents.length > 0 ? '#c44a1a' : '#40916c' },
+            { label: 'Compliance score', value: `${taskPct}%` },
+            { label: 'Overdue items', value: String(overdueEvents.length), color: overdueEvents.length > 0 ? '#c44a1a' : '#40916c' },
           ].map(m => (
             <div key={m.label} style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '8px', padding: '14px 16px' }}>
               <p style={{ fontSize: '11px', color: '#a8a39c', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{m.label}</p>
