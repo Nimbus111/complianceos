@@ -157,11 +157,7 @@ if (org?.org_type === 'service_provider') {
     )
 
   const completedTaskIds = (completions || []).map((c: any) => c.task_id)
-  const taskPct = (filteredTasks?.length || 0) > 0
-    ? Math.round((completedFilteredTaskIds.length / (filteredTasks?.length || 1)) * 100)
-    : 0
-  const inspectionReady = taskPct === 100
-  const earnedBadgeIds = (userBadges || []).map((b: any) => b.badge_id)
+  const completedTaskIds = (completions || []).map((c: any) => c.task_id)
 
   const filteredTasks = (tasks || []).filter((task: any) => {
     if (!task.regulation_column) return true
@@ -202,8 +198,13 @@ if (org?.org_type === 'service_provider') {
   const completedFilteredTaskIds = completedTaskIds.filter((id: string) =>
     (filteredTasks as any[]).some((t: any) => t.id === id)
   )
+  const taskPct = (filteredTasks?.length || 0) > 0
+    ? Math.round((completedFilteredTaskIds.length / (filteredTasks?.length || 1)) * 100)
+    : 0
+  const inspectionReady = taskPct === 100
+  const earnedBadgeIds = (userBadges || []).map((b: any) => b.badge_id)
 
-    const activityMap: Record<string, boolean> = {
+      const activityMap: Record<string, boolean> = {
     'Equipment & Safety': (equipmentCount || 0) > 0,
     'Document Repository': false,
     'Compliance Calendar': (calendarCount || 0) > 0,
