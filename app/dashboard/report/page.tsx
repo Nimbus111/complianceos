@@ -281,8 +281,6 @@ export default function InspectorReportPage() {
                 <span style={{ fontSize: '13px', color: done ? '#40916c' : '#a8a39c', flexShrink: 0 }}>{done ? '✓' : '○'}</span>
                 <span style={{ fontSize: '12px', color: done ? '#1a4731' : '#4a6d8c', fontWeight: done ? '500' : '400' }}>{item.topic}</span>
               </div>
-            )
-          )}
         </div>
 
         <div style={{ marginTop: '40px', paddingTop: '20px', borderTop: '2px solid #0d2d5e' }}>
