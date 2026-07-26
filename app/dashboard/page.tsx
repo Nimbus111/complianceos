@@ -243,7 +243,7 @@ if (org?.org_type === 'service_provider') {
                 </a>
               </div>
             )}
-            <RequiredActions tasks={filteredTasks || []} completedIds={completedTaskIds} facilityState={org?.facility_state} />
+            <RequiredActions tasks={tasks || []} completedIds={completedTaskIds} facilityState={org?.facility_state} />
 
         <div style={{ marginBottom: '28px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>
