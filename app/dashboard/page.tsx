@@ -164,7 +164,9 @@ if (org?.org_type === 'service_provider') {
     return (regs as any[]).some((reg: any) => {
       const val = reg[task.regulation_column]
       if (task.regulation_type === 'text_non_null') {
-        return val !== null && val !== undefined && String(val).trim().length > 0
+        if (val === null || val === undefined) return false
+        const s = String(val).trim().toLowerCase()
+        return s.length > 0 && s !== 'n/a' && s !== 'na' && s !== 'none' && s !== 'not applicable' && s !== 'no'
       }
       return Boolean(val)
     })
@@ -173,7 +175,9 @@ if (org?.org_type === 'service_provider') {
     const applicableRegs = (regs as any[] || []).filter((reg: any) => {
       const val = reg[task.regulation_column]
       if (task.regulation_type === 'text_non_null') {
-        return val !== null && val !== undefined && String(val).trim().length > 0
+        if (val === null || val === undefined) return false
+        const s = String(val).trim().toLowerCase()
+        return s.length > 0 && s !== 'n/a' && s !== 'na' && s !== 'none' && s !== 'not applicable' && s !== 'no'
       }
       return Boolean(val)
     })
