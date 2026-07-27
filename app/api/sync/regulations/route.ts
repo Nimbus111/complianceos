@@ -100,6 +100,20 @@ function mapRecord(record: any) {
       ?? (getBool(f['Notify State When Removing X-ray Unit']) ? 'Required' : null),
     termination_notes: getStr(f['Theft/Vandalism Reporting']),
 
+    rpp_req: getBool(f['RPP required?']),
+    rpp_annual_review: getBool(f['Annual RPP Review']),
+    rpp_notes: getStr(f["RPP Req'd Notes"]),
+    posting_requirements: getStr(f["Posting Req's"]),
+    written_safety_procedures: getBool(f['Written Safety Procedures']),
+    floor_plan_req: getBool(f["Floor Plan Req'd"]),
+    business_license_req: getBool(f['Business License Req']),
+    patient_log: getBool(f['Patient Log']),
+    technique_chart_qa: getBool(f['Technique Chart QA']),
+    keep_receipts_docs: getBool(f['Keep Receipts and Equipment Docs']),
+    state_correspondence_records: getBool(f['State Correspondence Records']),
+    annual_ceu_records: getBool(f['Annual CEU Records']),
+    device_stored_securely: getBool(f['Device Stored Securely']),
+
     plain_language_summary: getStr(f['Regulation Summary (AI)']),
 
     updated_at: new Date().toISOString(),
