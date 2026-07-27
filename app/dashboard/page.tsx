@@ -70,7 +70,7 @@ function SPDashboard({ org, user }: { org: any; user: any }) {
   )
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams: { site?: string } }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -95,7 +95,14 @@ export default async function DashboardPage() {
   const subActive = subCheck?.status === 'active' || subCheck?.status === 'trialing'
   if (!subActive) redirect('/subscribe')
 
-  if (org?.org_type === 'enterprise') redirect('/dashboard/enterprise')
+  if (org?.org_type === 'enterprise' && !searchParams?.site) redirect('/dashboard/enterprise')
+
+
+  const { data: siteOrg } = org?.org_type === 'enterprise' && searchParams?.site
+    ? await supabase.from('organizations').select('*').eq('id', searchParams.site).single()
+    : { data: org }
+
+  const activeOrg = siteOrg || org
 
 if (org?.org_type === 'service_provider') {
     return <SPDashboard org={org} user={user} />
@@ -149,7 +156,7 @@ if (org?.org_type === 'service_provider') {
   const { data: regs } = await supabase
     .from('regulations')
     .select('*')
-    .eq('state_name', org?.facility_state || '')
+    .eq('state_name', activeOrg?.facility_state || '')
     .or(
       modalities.length > 0
         ? modalities.map((m: string) => `modality_name.ilike.%${m}%`).join(',')
@@ -213,7 +220,7 @@ if (org?.org_type === 'service_provider') {
     'Compliance Calendar': (calendarCount || 0) > 0,
     'Keys to Success': (ktsCompleted || 0) > 0,
     'Required Actions': (completions?.length || 0) > 0,
-    'State Compliance Guide': !!org?.facility_state,
+    'State Compliance Guide': !!activeOrg?.facility_state,
     'AI Assistant': false,
     'RSP Builder': false,
   }
@@ -298,14 +305,14 @@ if (org?.org_type === 'service_provider') {
                 </a>
               </div>
             )}
-            <RequiredActions tasks={filteredTasks || []} completedIds={completedFilteredTaskIds} facilityState={org?.facility_state} />
+            <RequiredActions tasks={filteredTasks || []} completedIds={completedFilteredTaskIds} facilityState={activeOrg?.facility_state} />
 
         <div style={{ marginBottom: '28px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>
-            {org?.name || 'Your facility'}
+            {activeOrg?.name || 'Your facility'}
           </h1>
           <p style={{ fontSize: '13px', color: '#827d76' }}>
-            {[org?.facility_type_name, org?.facility_state, ...(org?.modality_names || [])].filter(Boolean).join(' · ')}
+            {[org?.facility_type_name, activeOrg?.facility_state, ...(org?.modality_names || [])].filter(Boolean).join(' · ')}
           </p>
         </div>
 
@@ -332,11 +339,11 @@ if (org?.org_type === 'service_provider') {
         <BadgesSection
               badges={badges || []}
               earnedIds={earnedBadgeIds}
-              facilityName={org?.name}
+              facilityName={activeOrg?.name}
               ktsComplete={(ktsItems?.length || 0) > 0 && ktsCompleted === (ktsItems?.length || 0)}
               techniqueAccessed={org?.technique_chart_accessed || false}
             />
-        <WelcomeModal facilityName={org?.name} />
+        <WelcomeModal facilityName={activeOrg?.name} />
             <ScrollRestorer />
 
       </div>
