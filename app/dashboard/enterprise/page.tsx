@@ -66,7 +66,13 @@ export default async function EnterpriseDashboard() {
           <span style={{ color: '#fff', fontSize: '17px', fontWeight: '500' }}>The Radiology Coach</span>
           <span style={{ background: 'rgba(255,255,255,0.1)', color: '#8bb4d4', fontSize: '11px', padding: '2px 8px', borderRadius: '4px', marginLeft: '10px' }}>ComplianceOS Enterprise</span>
         </div>
-        <span style={{ color: '#8bb4d4', fontSize: '13px' }}>{org?.name}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <span style={{ color: '#8bb4d4', fontSize: '13px' }}>{org?.name}</span>
+          <a href="/dashboard/settings" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>Settings</a>
+          <form action="/auth/signout" method="post">
+            <button type="submit" style={{ color: '#8bb4d4', fontSize: '13px', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'Inter, system-ui, sans-serif' }}>Sign out</button>
+          </form>
+        </div>
       </nav>
 
       <div style={{ maxWidth: '960px', margin: '0 auto', padding: '36px 24px' }}>
@@ -142,7 +148,7 @@ export default async function EnterpriseDashboard() {
 
                   {/* Task status grid */}
                   <div style={{ padding: '12px 20px' }}>
-                    {incompleteTasks.length === 0 ? (
+                    {incompleteTasks.length === 0 && completedTasks.length > 0 ? (
                       <p style={{ fontSize: '12px', fontWeight: '500', color: '#2d6a4f', margin: 0 }}>✓ All required actions complete — inspection ready</p>
                     ) : (
                       <div>
