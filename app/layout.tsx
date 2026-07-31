@@ -25,8 +25,6 @@ export const metadata: Metadata = {
     description: 'State-specific x-ray compliance for medical facilities.',
     images: ['https://static.wixstatic.com/media/487e4d_169ce6cab6fa4ea19587c7e22a0fc0e5~mv2_d_3448_4808_s_4_2.jpg/v1/crop/x_400,y_50,w_2648,h_1386/fill/w_1200,h_627,al_t,q_85,enc_jpg,quality_85/Greg_OG.jpg'],
   },
-  title: 'ComplianceOS — The Radiology Coach',
-  description: 'X-ray compliance management for medical facilities and x-ray service providers.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
