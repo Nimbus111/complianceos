@@ -4,6 +4,7 @@ import Footer from './components/Footer'
 export const metadata: Metadata = {
   title: 'The Radiology Coach Compliance Hub',
   description: 'State-specific x-ray compliance requirements for medical facilities. Find your Required Actions, build your RPP, track equipment QA, and stay inspection-ready.',
+  authors: [{ name: 'Greg Turner', url: 'https://www.theradiologycoach.com/about' }],
   openGraph: {
     title: 'The Radiology Coach Compliance Hub',
     description: 'State-specific x-ray compliance for medical facilities. Stay inspection-ready.',
