@@ -89,7 +89,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
   const { data: subCheck } = await supabase
     .from('subscriptions')
     .select('status')
-    .eq('org_id', profile.org_id)
+    .eq('org_id', queryOrgId)
     .single()
 
   const subActive = subCheck?.status === 'active' || subCheck?.status === 'trialing'
@@ -103,6 +103,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
     : { data: org }
 
   const activeOrg = siteOrg || org
+  const queryOrgId = (org?.org_type === 'enterprise' && searchParams?.site)
+    ? searchParams.site
+    : profile.org_id
 
 if (org?.org_type === 'service_provider') {
     return <SPDashboard org={org} user={user} />
@@ -122,16 +125,16 @@ if (org?.org_type === 'service_provider') {
   { count: calendarCount },
 ] = await Promise.all([
     supabase.from('keys_to_success').select('id'),
-    supabase.from('compliance_checklists').select('*', { count: 'exact', head: true }).eq('org_id', profile.org_id).eq('completed', true),
-    supabase.from('equipment_contacts').select('company_name, contact_name, phone_primary, phone_support, contact_type').eq('org_id', profile.org_id).in('contact_type', ['dealer', 'manufacturer']),
-    supabase.from('subscriptions').select('status, current_period_end, cancel_at_period_end').eq('org_id', profile.org_id).single(),
+    supabase.from('compliance_checklists').select('*', { count: 'exact', head: true }).eq('org_id', queryOrgId).eq('completed', true),
+    supabase.from('equipment_contacts').select('company_name, contact_name, phone_primary, phone_support, contact_type').eq('org_id', queryOrgId).in('contact_type', ['dealer', 'manufacturer']),
+    supabase.from('subscriptions').select('status, current_period_end, cancel_at_period_end').eq('org_id', queryOrgId).single(),
     supabase.from('facility_tasks').select('*').order('sort_order'),
-    supabase.from('user_task_completions').select('task_id').eq('org_id', profile.org_id),
+    supabase.from('user_task_completions').select('task_id').eq('org_id', queryOrgId),
     supabase.from('badges').select('*').order('sort_order'),
-    supabase.from('user_badges').select('badge_id').eq('org_id', profile.org_id),
-     supabase.from('equipment').select('id', { count: 'exact', head: true }).eq('org_id', profile.org_id),
-    supabase.from('equipment_qa').select('id', { count: 'exact', head: true }).eq('org_id', profile.org_id),
-    supabase.from('compliance_calendar').select('id', { count: 'exact', head: true }).eq('org_id', profile.org_id),
+    supabase.from('user_badges').select('badge_id').eq('org_id', queryOrgId),
+     supabase.from('equipment').select('id', { count: 'exact', head: true }).eq('org_id', queryOrgId),
+    supabase.from('equipment_qa').select('id', { count: 'exact', head: true }).eq('org_id', queryOrgId),
+    supabase.from('compliance_calendar').select('id', { count: 'exact', head: true }).eq('org_id', queryOrgId),
   ])
 
   const ktsPct = ktsItems?.length
@@ -234,7 +237,10 @@ if (org?.org_type === 'service_provider') {
         </div>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           <span style={{ color: '#8bb4d4', fontSize: '13px' }}>{user.email}</span>
-          <SignOutButton />
+          {searchParams?.site && (
+                <a href="/dashboard/enterprise" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>← Portfolio</a>
+              )}
+              <SignOutButton />
         </div>
       </nav>
 
@@ -343,7 +349,17 @@ if (org?.org_type === 'service_provider') {
               ktsComplete={(ktsItems?.length || 0) > 0 && ktsCompleted === (ktsItems?.length || 0)}
               techniqueAccessed={org?.technique_chart_accessed || false}
             />
-        <WelcomeModal facilityName={activeOrg?.name} />
+        {searchParams?.site && activeOrg && (
+              <div style={{ background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '10px', padding: '10px 18px', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: '500', color: '#4a6d8c', textTransform: 'uppercase', letterSpacing: '.08em' }}>Viewing site</span>
+                  <span style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e' }}>{activeOrg.name}</span>
+                  {activeOrg.facility_state && <span style={{ fontSize: '11px', color: '#8bb4d4', background: '#0d2d5e', padding: '2px 8px', borderRadius: '4px' }}>{activeOrg.facility_state}</span>}
+                </div>
+                <a href="/dashboard/enterprise" style={{ fontSize: '12px', color: '#1a5fa8', textDecoration: 'none' }}>← Back to portfolio</a>
+              </div>
+            )}
+            <WelcomeModal facilityName={activeOrg?.name} />
             <ScrollRestorer />
 
       </div>
