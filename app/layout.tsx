@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     siteName: 'The Radiology Coach Compliance Hub',
     images: [
       {
-        url: 'https://static.wixstatic.com/media/487e4d_169ce6cab6fa4ea19587c7e22a0fc0e5~mv2_d_3448_4808_s_4_2.jpg/v1/crop/x_400,y_50,w_2648,h_1386/fill/w_1200,h_627,al_t,q_85,enc_jpg,quality_85/Greg_OG.jpg',
+        url: 'https://static.wixstatic.com/media/487e4d_169ce6cab6fa4ea19587c7e22a0fc0e5~mv2_d_3448_4808_s_4_2.jpg/v1/crop/x_400,y_50,w_2648,h_1386/fill/w_1200,h_627,al_t,q_95,usm_0.66_1.00_0.01,enc_jpg/Greg_OG.jpg',
         width: 1200,
         height: 627,
         alt: 'Greg Turner — The Radiology Coach Compliance Hub',
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'The Radiology Coach Compliance Hub',
     description: 'State-specific x-ray compliance for medical facilities.',
-    images: ['https://static.wixstatic.com/media/487e4d_169ce6cab6fa4ea19587c7e22a0fc0e5~mv2_d_3448_4808_s_4_2.jpg/v1/crop/x_400,y_50,w_2648,h_1386/fill/w_1200,h_627,al_t,q_85,enc_jpg,quality_85/Greg_OG.jpg'],
+    images: ['https://static.wixstatic.com/media/487e4d_169ce6cab6fa4ea19587c7e22a0fc0e5~mv2_d_3448_4808_s_4_2.jpg/v1/crop/x_400,y_50,w_2648,h_1386/fill/w_1200,h_627,al_t,q_95,usm_0.66_1.00_0.01,enc_jpg/Greg_OG.jpg'],
   },
 }
 
