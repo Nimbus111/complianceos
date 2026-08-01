@@ -89,7 +89,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
   const { data: subCheck } = await supabase
     .from('subscriptions')
     .select('status')
-    .eq('org_id', queryOrgId)
+    .eq('org_id', profile.org_id)
     .single()
 
   const subActive = subCheck?.status === 'active' || subCheck?.status === 'trialing'
