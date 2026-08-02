@@ -121,7 +121,7 @@ export default async function EnterpriseDashboard() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {siteData.map(({ link, site, pct, incompleteTasks, completedTasks, epeRequired }) => {
+            {siteData.map(({ link, site, pct, incompleteTasks, completedTasks, epeRequired, hasPending }) => {
               const c = statusColors(pct)
               return (
                 <div key={link.id} style={{ background: c.bg, border: `1px solid ${c.border}`, borderRadius: '12px', overflow: 'hidden' }}>
