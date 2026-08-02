@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import SignOutButton from '../components/SignOutButton'
+import AcknowledgeButton from '../components/AcknowledgeButton'
 import UpgradeButton from '../components/UpgradeButton'
 import RequiredActions from '../components/RequiredActions'
 import BadgesSection from '../components/BadgesSection'
@@ -165,6 +166,16 @@ if (org?.org_type === 'service_provider') {
         ? modalities.map((m: string) => `modality_name.ilike.%${m}%`).join(',')
         : 'modality_name.ilike.%%'
     )
+
+  const { data: activeNotifications } = await supabase
+    .from('enterprise_notifications')
+    .select('id, message, created_at')
+    .eq('site_org_id', profile.org_id)
+    .is('acknowledged_at', null)
+    .order('created_at', { ascending: false })
+    .limit(1)
+
+  const activeNotification = activeNotifications?.[0] || null
 
   const completedTaskIds = (completions || []).map((c: any) => c.task_id)
 
@@ -357,6 +368,18 @@ if (org?.org_type === 'service_provider') {
                   {activeOrg.facility_state && <span style={{ fontSize: '11px', color: '#8bb4d4', background: '#0d2d5e', padding: '2px 8px', borderRadius: '4px' }}>{activeOrg.facility_state}</span>}
                 </div>
                 <a href="/dashboard/enterprise" style={{ fontSize: '12px', color: '#1a5fa8', textDecoration: 'none' }}>← Back to portfolio</a>
+              </div>
+            )}
+            {activeNotification && (
+              <div style={{ background: '#fff6e8', border: '1px solid #f0d4a0', borderRadius: '10px', padding: '14px 20px', marginBottom: '16px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                  <span style={{ fontSize: '20px', flexShrink: 0 }}>🔔</span>
+                  <div>
+                    <p style={{ fontSize: '13px', fontWeight: '500', color: '#9a3510', marginBottom: '3px' }}>Action requested by your administrator</p>
+                    <p style={{ fontSize: '12px', color: '#4a6d8c', margin: 0 }}>{activeNotification.message}</p>
+                  </div>
+                </div>
+                <AcknowledgeButton notificationId={activeNotification.id} />
               </div>
             )}
             <WelcomeModal facilityName={activeOrg?.name} />
