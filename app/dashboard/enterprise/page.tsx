@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import SendReminderButton from '../../components/SendReminderButton'
 
 function statusColors(pct: number) {
   if (pct >= 90) return { border: '#b8e8cc', bg: '#f8fffe', bar: '#40916c', badge: '#edfaf3', badgeText: '#2d6a4f', badgeBorder: '#b8e8cc', label: 'Inspection ready' }
@@ -28,6 +29,14 @@ export default async function EnterpriseDashboard() {
   const sites = siteLinks || []
   const siteIds = sites.map(s => s.site_org_id).filter(Boolean)
 
+  const { data: notifications } = siteIds.length > 0
+    ? await supabase
+        .from('enterprise_notifications')
+        .select('site_org_id, acknowledged_at')
+        .eq('enterprise_org_id', profile.org_id)
+        .in('site_org_id', siteIds)
+    : { data: [] }
+
   const [
     { data: allTasks },
     { data: allCompletions },
@@ -52,7 +61,10 @@ export default async function EnterpriseDashboard() {
     const pct = taskTotal > 0 ? Math.round((siteCompletions.length / taskTotal) * 100) : 0
     const incompleteTasks = (allTasks || []).filter((t: any) => !completedIds.has(t.id))
     const completedTasks = (allTasks || []).filter((t: any) => completedIds.has(t.id))
-    return { link, site, pct, incompleteTasks, completedTasks, epeRequired: epeStates.has(site?.facility_state) }
+    const hasPending = (notifications || []).some(
+      n => n.site_org_id === link.site_org_id && !n.acknowledged_at
+    )
+    return { link, site, pct, incompleteTasks, completedTasks, epeRequired: epeStates.has(site?.facility_state), hasPending }
   }).sort((a, b) => a.pct - b.pct)
 
   const readyCount = siteData.filter(s => s.pct >= 90).length
@@ -178,12 +190,23 @@ export default async function EnterpriseDashboard() {
                   </div>
 
                   {/* Footer */}
-                  <div style={{ padding: '8px 20px 12px', display: 'flex', justifyContent: 'flex-end' }}>
+                  <div style={{ padding: '8px 20px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <SendReminderButton
+                    siteOrgId={link.site_org_id}
+                    enterpriseOrgId={profile.org_id}
+                    hasPending={hasPending}
+                  />
+                  <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                    <a href={`/dashboard/report?site=${link.site_org_id}`}
+                      style={{ fontSize: '12px', fontWeight: '500', color: '#4a6d8c', textDecoration: 'none' }}>
+                      Report →
+                    </a>
                     <a href={`/dashboard?site=${link.site_org_id}`}
                       style={{ fontSize: '12px', fontWeight: '500', color: '#1a5fa8', textDecoration: 'none' }}>
-                      Open full dashboard →
+                      Open dashboard →
                     </a>
                   </div>
+                </div>
 
                 </div>
               )
