@@ -21,20 +21,17 @@ export async function POST(request: Request) {
     current_period_end: expiry
   })
 
-  const { data: user } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('id', (await supabase.auth.admin.getUserByEmail ? 
-      (await (supabase as any).auth.admin.listUsers()).data?.users?.find((u: any) => u.email === adminEmail)?.id
-      : null))
-    .maybeSingle()
+  const { error: assignErr } = await supabase.rpc('assign_user_to_org', {
+    p_email: adminEmail,
+    p_org_id: org.id
+  })
 
-  const { data: authUser } = await (supabase as any).rpc('get_user_id_by_email', { email: adminEmail })
-  
-  if (authUser) {
-    await supabase.from('profiles')
-      .update({ org_id: org.id, onboarding_completed: true })
-      .eq('id', authUser)
+  if (assignErr) {
+    return NextResponse.json({
+      status: 'partial',
+      orgId: org.id,
+      warning: `Enterprise created but could not assign admin — user may not be registered yet. Org ID: ${org.id}`
+    })
   }
 
   return NextResponse.json({ status: 'created', orgId: org.id })
