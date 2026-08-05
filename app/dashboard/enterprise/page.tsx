@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import SendReminderButton from '../../components/SendReminderButton'
+import InviteManagerButton from '../../components/InviteManagerButton'
 
 function statusColors(pct: number) {
   if (pct >= 90) return { border: '#b8e8cc', bg: '#f8fffe', bar: '#40916c', badge: '#edfaf3', badgeText: '#2d6a4f', badgeBorder: '#b8e8cc', label: 'Inspection ready' }
@@ -191,10 +192,17 @@ export default async function EnterpriseDashboard() {
 
                   {/* Footer */}
                   <div style={{ padding: '8px 20px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <SendReminderButton
-                    siteOrgId={link.site_org_id}
-                    enterpriseOrgId={profile.org_id}
-                    hasPending={hasPending}
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <SendReminderButton
+                      siteOrgId={link.site_org_id}
+                      enterpriseOrgId={profile.org_id}
+                      hasPending={hasPending}
+                    />
+                    <InviteManagerButton
+                      siteOrgId={link.site_org_id}
+                      siteName={site?.name || link.site_label || ''}
+                    />
+                  </div>
                   />
                   <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                     <a href={`/dashboard/report?site=${link.site_org_id}`}
