@@ -203,8 +203,8 @@ export default async function EnterpriseDashboard() {
                       siteName={site?.name || link.site_label || ''}
                     />
                   </div>
-                  />
-                  <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                  
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                     <a href={`/dashboard/report?site=${link.site_org_id}`}
                       style={{ fontSize: '12px', fontWeight: '500', color: '#4a6d8c', textDecoration: 'none' }}>
                       Report →
