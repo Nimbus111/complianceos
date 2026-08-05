@@ -222,8 +222,12 @@ if (org?.org_type === 'service_provider') {
   const completedFilteredTaskIds = completedTaskIds.filter((id: string) =>
     (filteredTasks as any[]).some((t: any) => t.id === id)
   )
-  const taskPct = (filteredTasks?.length || 0) > 0
-    ? Math.round((completedFilteredTaskIds.length / (filteredTasks?.length || 1)) * 100)
+   const nonAdvisoryCount = (tasks || []).filter((t: any) => t.urgency !== 'Advisory').length
+  const completedNonAdvisory = completedTaskIds.filter((id: string) =>
+    (tasks || []).some((t: any) => t.id === id && t.urgency !== 'Advisory')
+  ).length
+  const taskPct = nonAdvisoryCount > 0
+  ? Math.round((completedNonAdvisory / nonAdvisoryCount) * 100)  
     : 0
   const inspectionReady = taskPct === 100
   const earnedBadgeIds = (userBadges || []).map((b: any) => b.badge_id)

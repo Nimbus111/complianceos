@@ -82,7 +82,7 @@ export default async function EnterpriseDashboard() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <span style={{ color: '#8bb4d4', fontSize: '13px' }}>{org?.name}</span>
           <a href="#" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none', opacity: '.6', cursor: 'not-allowed' }} title="Coming soon">Clinic Reports</a>
-          <a href="#" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none', opacity: '.6', cursor: 'not-allowed' }} title="Coming soon">Enterprise Report</a>
+          <a href="#" style={{ color: '#8bb4d4', fontSize: '13px', <a href="/dashboard/enterprise/report" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>Enterprise Report</a>
           <a href="mailto:hello@theradiologycoach.com" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>Platform Assistance</a>
           <a href="/dashboard/settings" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>Settings</a>
           <form action="/auth/signout" method="post">
