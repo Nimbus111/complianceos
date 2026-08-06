@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import SendReminderButton from '../../components/SendReminderButton'
 import InviteManagerButton from '../../components/InviteManagerButton'
+import EnterpriseActivityTracker from '../../components/EnterpriseActivityTracker'
 
 function statusColors(pct: number) {
   if (pct >= 90) return { border: '#b8e8cc', bg: '#f8fffe', bar: '#40916c', badge: '#edfaf3', badgeText: '#2d6a4f', badgeBorder: '#b8e8cc', label: 'Inspection ready' }
@@ -29,6 +30,22 @@ export default async function EnterpriseDashboard() {
 
   const sites = siteLinks || []
   const siteIds = sites.map(s => s.site_org_id).filter(Boolean)
+
+  const actNow = new Date()
+  const currentMonth = `${actNow.getFullYear()}-${String(actNow.getMonth() + 1).padStart(2, '0')}`
+  const past6Months = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date(actNow.getFullYear(), actNow.getMonth() - i, 1)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+  })
+  const past3Years = Array.from({ length: 3 }, (_, i) => String(actNow.getFullYear() - i))
+  const allPeriods = [...past6Months, ...past3Years]
+
+  const { data: activityCompletions } = siteIds.length > 0
+    ? await supabase.from('site_activity_completions')
+        .select('org_id, activity_type, period')
+        .in('org_id', siteIds)
+        .in('period', allPeriods)
+    : { data: [] }
 
   const { data: notifications } = siteIds.length > 0
     ? await supabase
@@ -122,7 +139,12 @@ export default async function EnterpriseDashboard() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {siteData.map(({ link, site, pct, incompleteTasks, completedTasks, epeRequired, hasPending }) => {
+            <EnterpriseActivityTracker
+          sites={(siteLinks || []).map((l: any) => ({ site_org_id: l.site_org_id, name: l.organizations?.name || l.site_label }))}
+          completions={activityCompletions || []}
+        />
+
+        {siteData.map(({ link, site, pct, incompleteTasks, completedTasks, epeRequired, hasPending }) => {
               const c = statusColors(pct)
               return (
                 <div key={link.id} style={{ background: c.bg, border: `1px solid ${c.border}`, borderRadius: '12px', overflow: 'hidden' }}>

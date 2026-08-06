@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import SignOutButton from '../components/SignOutButton'
 import AcknowledgeButton from '../components/AcknowledgeButton'
+import ActivityLog from '../components/ActivityLog'
 import UpgradeButton from '../components/UpgradeButton'
 import RequiredActions from '../components/RequiredActions'
 import BadgesSection from '../components/BadgesSection'
@@ -177,6 +178,16 @@ if (org?.org_type === 'service_provider') {
 
   const activeNotification = activeNotifications?.[0] || null
 
+  const now = new Date()
+  const monthPeriod = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  const yearPeriod = String(now.getFullYear())
+
+  const { data: activityCompletions } = await supabase
+    .from('site_activity_completions')
+    .select('activity_type, period')
+    .eq('org_id', profile.org_id)
+    .in('period', [monthPeriod, yearPeriod])
+
   const completedTaskIds = (completions || []).map((c: any) => c.task_id)
 
   const filteredTasks = (tasks || []).filter((task: any) => {
@@ -326,7 +337,8 @@ if (org?.org_type === 'service_provider') {
                 </a>
               </div>
             )}
-            <RequiredActions tasks={filteredTasks || []} completedIds={completedFilteredTaskIds} facilityState={activeOrg?.facility_state} />
+            <ActivityLog completedActivities={activityCompletions || []} />
+      <RequiredActions tasks={filteredTasks || []} completedIds={completedFilteredTaskIds} facilityState={activeOrg?.facility_state} />
 
         <div style={{ marginBottom: '28px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px' }}>
