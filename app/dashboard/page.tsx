@@ -107,7 +107,7 @@ const isSP = org?.org_type === 'service_provider'
         supabase.from('fees').select('*').order('state_name'),
          ])
     : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }]
-    
+
     if (org?.org_type === 'service_provider') {
     return <SPDashboard org={org} user={user}
         forms={spForms?.data}
@@ -173,9 +173,6 @@ const isSP = org?.org_type === 'service_provider'
     )
 
   
-      ])
-    : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }]
-
 
   const { data: activeNotifications } = await supabase
     .from('enterprise_notifications')
