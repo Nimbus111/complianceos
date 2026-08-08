@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import SignOutButton from '../components/SignOutButton'
 import AcknowledgeButton from '../components/AcknowledgeButton'
 import ActivityLog from '../components/ActivityLog'
+import SPDashboardClient from '../components/SPDashboardClient'
 import UpgradeButton from '../components/UpgradeButton'
 import RequiredActions from '../components/RequiredActions'
 import BadgesSection from '../components/BadgesSection'
@@ -28,46 +29,32 @@ import ScrollRestorer from '../components/ScrollRestorer'
     { name: 'Account Settings', desc: 'Facility info, dealer contact, and subscription management.', border: '#dce8f5', href: '/dashboard/settings' },
   ]
 
-function SPDashboard({ org, user }: { org: any; user: any }) {
-  const spFeatures = [
-    { name: 'State Registrations', desc: 'Manage your state x-ray service registration numbers.', border: '#b8e8cc', href: '/dashboard/registrations' },
-    { name: 'Client Facilities', desc: 'ComplianceOS accounts linked through your referral code.', border: '#b8e8cc', href: '/dashboard/clients' },
-    { name: 'Quarterly Reports', desc: 'Build and track your state installation reports.', border: '#c2ddf0', href: '/dashboard/reports' },
-    { name: 'Revenue', desc: 'Track your referral commissions and subscription credits.', border: '#c2ddf0', href: '/dashboard/revenue' },
-    { name: 'State documents', desc: 'Registration forms, rules, and regulatory documents.', border: '#c2ddf0', href: '/dashboard/stateforms' },
-    { name: 'Compliance calendar', desc: 'Track state reporting deadlines and renewal dates.', border: '#c2ddf0', href: '/dashboard/calendar' },
-    { name: 'Document repository', desc: 'Store your company compliance documents.', border: '#c2ddf0', href: '/dashboard/documents' },
-      { name: 'Account Settings', desc: 'Set your commission payout method and manage account preferences.', border: '#b8e8cc', href: '/dashboard/sp-settings' },
-  ]
+function SPDashboard({ org, user, forms, rules, states, contacts, fees }: any) {
   return (
-    <div style={{ minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', background: '#f4f7fb' }}>
-      <nav style={{ background: '#0d2d5e', padding: '0 32px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ color: '#fff', fontSize: '17px', fontWeight: '500' }}>The Radiology Coach</span>
-          <span style={{ background: 'rgba(255,255,255,0.1)', color: '#8bb4d4', fontSize: '11px', padding: '2px 8px', borderRadius: '4px', fontWeight: '500', marginLeft: '10px' }}>ComplianceOS</span>
+    <div style={{ minHeight: '100vh', background: '#f0f4f8', fontFamily: 'Inter, system-ui, sans-serif' }}>
+      <div style={{ background: '#0d2d5e', padding: '14px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <img src="https://static.wixstatic.com/media/487e4d_3b2132b097974e8baf3409ee0c63b7e1~mv2_d_3840_2160_s_2.png" alt="The Radiology Coach" style={{ height: '38px' }} />
+          <span style={{ background: 'rgba(255,255,255,0.12)', color: '#8bb4d4', fontSize: '11px', padding: '2px 8px', borderRadius: '4px', letterSpacing: '.06em' }}>SERVICE PROVIDER</span>
         </div>
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          <span style={{ color: '#8bb4d4', fontSize: '13px' }}>{user.email}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <span style={{ color: '#8bb4d4', fontSize: '13px' }}>{org?.name}</span>
+          <a href="/dashboard/settings" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>Settings</a>
           <SignOutButton />
         </div>
-      </nav>
-      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 24px' }}>
-        <div style={{ background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '10px', padding: '14px 20px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-          <div>
-            <p style={{ fontSize: '10px', fontWeight: '500', color: '#2d6a4f', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '2px' }}>Your referral link</p>
-            <p style={{ fontSize: '16px', fontWeight: '500', color: '#0d2d5e', letterSpacing: '0.06em', margin: '0 0 6px' }}>{org.referral_code}</p>
-            <p style={{ fontSize: '12px', color: '#2d6a4f', margin: 0 }}>app.theradiologycoach.com/signup?ref={org.referral_code}</p>
-          </div>
-          <p style={{ fontSize: '12px', color: '#2d6a4f', maxWidth: '320px', margin: 0, lineHeight: '1.6' }}>
-            Share this link with your clinic clients. When they sign up, they appear in your Client Facilities list and you earn a commission.
-          </p>
-        </div>
-        <div style={{ marginBottom: '28px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>{org.name}</h1>
-          <p style={{ fontSize: '13px', color: '#827d76' }}>Dealer / Service Provider · {org.facility_state}</p>
-        </div>
-        <FeatureCards features={features} />
       </div>
+      <div style={{ background: '#fff', borderBottom: '1px solid #dce8f5', padding: '16px 32px' }}>
+        <h1 style={{ fontSize: '18px', fontWeight: '600', color: '#0d2d5e', margin: 0 }}>Welcome, {org?.name}</h1>
+      </div>
+      <SPDashboardClient
+        forms={forms || []}
+        spRules={rules || []}
+        states={states || []}
+        contacts={contacts || []}
+        fees={fees || []}
+        revenue={null}
+        org={org}
+      />
     </div>
   )
 }
@@ -109,8 +96,25 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
     ? searchParams.site
     : profile.org_id
 
-if (org?.org_type === 'service_provider') {
-    return <SPDashboard org={org} user={user} />
+const isSP = org?.org_type === 'service_provider'
+
+  const [spForms, spRules, spStates, spContacts, spFees] = isSP
+    ? await Promise.all([
+        supabase.from('state_forms').select('*').order('state_name'),
+        supabase.from('sp_state_rules').select('*').order('state_name'),
+        supabase.from('states_directory').select('*').order('state_name'),
+        supabase.from('state_contacts').select('*').order('state_name'),
+        supabase.from('fees').select('*').order('state_name'),
+         ])
+    : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }]
+    
+    if (org?.org_type === 'service_provider') {
+    return <SPDashboard org={org} user={user}
+        forms={spForms?.data}
+        rules={spRules?.data}
+        states={spStates?.data}
+        contacts={spContacts?.data}
+        fees={spFees?.data} />
   }
 
   const [
@@ -167,6 +171,11 @@ if (org?.org_type === 'service_provider') {
         ? modalities.map((m: string) => `modality_name.ilike.%${m}%`).join(',')
         : 'modality_name.ilike.%%'
     )
+
+  
+      ])
+    : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }, { data: [] }]
+
 
   const { data: activeNotifications } = await supabase
     .from('enterprise_notifications')
