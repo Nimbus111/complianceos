@@ -134,31 +134,54 @@ export default function SPDashboardClient({ forms, spRules, states, contacts, fe
 
           {/* STATE FORMS */}
           {resourceTab === 'forms' && (
-            <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-                <thead>
-                  <tr style={{ background: '#0d2d5e' }}>
-                    {['State', 'Form Name', 'Classification', 'Form Type', 'Link'].map(h => (
-                      <th key={h} style={{ padding: '10px 14px', textAlign: 'left', color: 'rgba(255,255,255,.82)', fontWeight: '500', fontSize: '11px', letterSpacing: '.04em' }}>{h}</th>
+            <div>
+              {!search ? (
+                <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', padding: '40px', textAlign: 'center' }}>
+                  <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', marginBottom: '8px' }}>Select a state to view its forms</p>
+                  <p style={{ fontSize: '12px', color: '#4a6d8c', marginBottom: '20px' }}>Type a state name in the filter box above</p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center', maxWidth: '600px', margin: '0 auto' }}>
+                    {[...new Set(forms.map((f: any) => f.state_name).filter(Boolean))].sort().map((state: any) => (
+                      <button key={state} onClick={() => setSearch(state)}
+                        style={{ fontSize: '11px', padding: '4px 12px', borderRadius: '20px', border: '1px solid #c2ddf0', background: '#f0f4f8', color: '#0d2d5e', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif' }}>
+                        {state}
+                      </button>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filter(forms).map((f, i) => (
-                    <tr key={f.id} style={{ borderBottom: '1px solid #f4f7fb', background: i % 2 === 0 ? '#fff' : '#fafcff' }}>
-                      <td style={{ padding: '10px 14px', fontWeight: '500', color: '#0d2d5e' }}>{f.state_name}</td>
-                      <td style={{ padding: '10px 14px', color: '#1e1c1a' }}>{f.form_name}</td>
-                      <td style={{ padding: '10px 14px', color: '#4a6d8c' }}>{f.classification || '—'}</td>
-                      <td style={{ padding: '10px 14px', color: '#4a6d8c' }}>{f.form_type || '—'}</td>
-                      <td style={{ padding: '10px 14px' }}>
-                        {f.form_link
-                          ? <a href={f.form_link} target="_blank" rel="noopener" style={{ fontSize: '11px', color: '#1a5fa8', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '2px 10px', textDecoration: 'none' }}>Open →</a>
-                          : <span style={{ fontSize: '11px', color: '#a8a39c' }}>No link</span>}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden' }}>
+                  <div style={{ padding: '12px 16px', background: '#f0f4f8', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e' }}>Forms for {search}</span>
+                    <button onClick={() => setSearch('')} style={{ fontSize: '11px', color: '#4a6d8c', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif' }}>← All states</button>
+                  </div>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                    <thead>
+                      <tr style={{ background: '#0d2d5e' }}>
+                        {['Form Name', 'Classification', 'Form Type', 'Link'].map(h => (
+                          <th key={h} style={{ padding: '10px 14px', textAlign: 'left', color: 'rgba(255,255,255,.82)', fontWeight: '500', fontSize: '11px', letterSpacing: '.04em' }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filter(forms).map((f: any, i: number) => (
+                        <tr key={f.id} style={{ borderBottom: '1px solid #f4f7fb', background: i % 2 === 0 ? '#fff' : '#fafcff' }}>
+                          <td style={{ padding: '10px 14px', color: '#1e1c1a' }}>{f.form_name}</td>
+                          <td style={{ padding: '10px 14px', color: '#4a6d8c' }}>{f.classification || '—'}</td>
+                          <td style={{ padding: '10px 14px', color: '#4a6d8c' }}>{f.form_type || '—'}</td>
+                          <td style={{ padding: '10px 14px' }}>
+                            {f.form_link
+                              ? <a href={f.form_link} target="_blank" rel="noopener" style={{ fontSize: '11px', color: '#1a5fa8', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '2px 10px', textDecoration: 'none' }}>Open →</a>
+                              : <span style={{ fontSize: '11px', color: '#a8a39c' }}>No link</span>}
+                          </td>
+                        </tr>
+                      ))}
+                      {filter(forms).length === 0 && (
+                        <tr><td colSpan={4} style={{ padding: '20px', textAlign: 'center', color: '#a8a39c', fontSize: '13px' }}>No forms found for {search}</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
 
