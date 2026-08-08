@@ -27,7 +27,7 @@ export async function GET() {
     const f = r.fields
     return {
       airtable_id: r.id,
-      state_name: getStr(f['Name'] || f['State']),
+      state_name: getStr(f['State Name'] || f['Name'] || f['State']),
       program_name: getStr(f['Program Name'] || f['Agency Name'] || f['Department']),
       website: getStr(f['Website'] || f['State Website'] || f['URL']),
       address: getStr(f['Address'] || f['Mailing Address']),
