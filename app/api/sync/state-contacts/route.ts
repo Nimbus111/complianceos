@@ -40,7 +40,7 @@ export async function GET() {
       sp_contact_email: getStr(f['Service Provider email'] || f['Service Provider Email']),
       updated_at: new Date().toISOString()
     }
-  }).filter(r => r.state_name)
+  }).filter(r => r.airtable_id)
 
   const { error } = await supabase.from('state_contacts')
     .upsert(rows, { onConflict: 'airtable_id' })

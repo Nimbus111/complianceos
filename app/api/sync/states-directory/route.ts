@@ -28,13 +28,14 @@ export async function GET() {
     return {
       airtable_id: r.id,
       state_name: getStr(f['State Name'] || f['Name'] || f['State']),
-      program_name: getStr(f['Program Name'] || f['Agency Name'] || f['Department']),
-      website: getStr(f['Website'] || f['State Website'] || f['URL']),
+      abbreviation: getStr(f['Abbreviation']),
+      program_name: getStr(f['Regulatory Agency'] || f['Program Name'] || f['Agency Name']),
+      website: getStr(f['Agency URL'] || f['Agency Website'] || f['Website'] || f['URL']),
       address: getStr(f['Address'] || f['Mailing Address']),
       phone: getStr(f['Phone'] || f['Phone Number']),
       updated_at: new Date().toISOString()
     }
-  }).filter(r => r.state_name)
+  }).filter(r => r.airtable_id)
 
   const { error } = await supabase.from('states_directory')
     .upsert(rows, { onConflict: 'airtable_id' })
