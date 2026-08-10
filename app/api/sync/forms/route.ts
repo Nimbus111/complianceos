@@ -28,7 +28,7 @@ async function fetchAll(table: string) {
 
 export async function GET() {
   const supabase = await createClient()
-  const records = await fetchAll('Forms')
+  const records = await fetchAll('State Forms')
 
   const rows = records.map((r: any) => {
     const f = r.fields

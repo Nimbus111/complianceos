@@ -11,7 +11,7 @@ export async function GET() {
     tests: {}
   }
 
-  const tables = ['States', 'State Contacts', 'State Forms', 'X-ray Service Provider State Rules']
+  const tables = ['State Forms', 'X-ray Service Provider State Rules', 'X-Ray Service Provider State Rules', 'Service Provider State Rules']
 
   for (const table of tables) {
     const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${encodeURIComponent(table)}?maxRecords=1`
