@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID!
-const AIRTABLE_KEY = process.env.AIRTABLE_API_KEY!
+const AIRTABLE_KEY = process.env.AIRTABLE_PAT!
 
 export async function GET() {
   const results: any = {
