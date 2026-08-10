@@ -152,12 +152,10 @@ export default function SPDashboardClient({ forms, spRules, states, contacts, fe
                 </table>
               </div>
             </div>
-          )}
-
-            </div>
-                </div>
+           </div>
               )}
             </div>
+          )}
 
 
           {resourceTab === 'forms' && (
