@@ -263,7 +263,7 @@ export default function CalendarPage() {
         <a href="/dashboard" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>← Dashboard</a>
       </nav>
 
-       <div style={{ maxWidth: '1080px', margin: '0 auto', display: 'flex', gap: '24px', alignItems: 'flex-start', padding: '40px 24px' }}>
+       <div style={{ maxWidth: '760px', margin: '0 auto', padding: '40px 24px' }}>
         
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px' }}>
           <div>
