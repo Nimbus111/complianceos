@@ -72,8 +72,30 @@ export default function SPDashboardClient({ forms, spRules, states, contacts, fe
 
           {/* SP RULES */}
           {resourceTab === 'sp-rules' && (
-            <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden' }}>
-              <div style={{ overflowX: 'auto' }}>
+            <div>
+              {!search ? (
+                <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', padding: '32px', textAlign: 'center' }}>
+                  <p style={{ fontSize: '20px', marginBottom: '8px' }}>📋</p>
+                  <p style={{ fontSize: '15px', fontWeight: '600', color: '#0d2d5e', marginBottom: '6px' }}>X-ray Service Provider State Rules</p>
+                  <p style={{ fontSize: '13px', color: '#4a6d8c', marginBottom: '6px', lineHeight: '1.6' }}>Registration requirements, application fees, renewal schedules, floor plan privileges, dosimetry requirements, out-of-state reciprocity rules, and leasing protocols — one state at a time.</p>
+                  <p style={{ fontSize: '12px', color: '#a8a39c', marginBottom: '20px' }}>Select a state below or type in the filter box above</p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center', maxWidth: '700px', margin: '0 auto' }}>
+                    {[...new Set(spRules.map((r: any) => r.state_name).filter(Boolean))].sort().map((state: any) => (
+                      <button key={state} onClick={() => setSearch(state)}
+                        style={{ fontSize: '11px', padding: '4px 12px', borderRadius: '20px', border: '1px solid #c2ddf0', background: '#f0f4f8', color: '#0d2d5e', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif' }}>
+                        {state}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div style={{ padding: '12px 16px', background: '#f0f4f8', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '12px 12px 0 0', border: '1px solid #dce8f5', borderBottom: 'none' }}>
+                    <span style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e' }}>SP Rules — {search}</span>
+                    <button onClick={() => { setSearch(''); setExpandedRule(null) }} style={{ fontSize: '11px', color: '#4a6d8c', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif' }}>← All states</button>
+                  </div>
+                  <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '0 0 12px 12px', overflow: 'hidden' }}>
+                    <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                   <thead>
                     <tr style={{ background: '#0d2d5e' }}>
@@ -132,7 +154,12 @@ export default function SPDashboardClient({ forms, spRules, states, contacts, fe
             </div>
           )}
 
-          {/* STATE FORMS */}
+            </div>
+                </div>
+              )}
+            </div>
+
+
           {resourceTab === 'forms' && (
             <div>
               {!search ? (
@@ -229,7 +256,9 @@ export default function SPDashboardClient({ forms, spRules, states, contacts, fe
                 <tbody>
                   {filter(contacts).map((c, i) => (
                     <tr key={c.id} style={{ borderBottom: '1px solid #f4f7fb', background: i % 2 === 0 ? '#fff' : '#fafcff' }}>
-                      <td style={{ padding: '10px 14px', fontWeight: '500', color: '#0d2d5e' }}>{c.state_name}</td>
+                      <td style={{ padding: '10px 14px', fontWeight: '500', color: '#0d2d5e' }}>
+                        {c.state_name && !/^rec[A-Za-z0-9]{10,}$/.test(c.state_name) ? c.state_name : <span style={{ color: '#a8a39c' }}>—</span>}
+                      </td>
                       <td style={{ padding: '10px 14px', color: '#1e1c1a' }}>{c.director || '—'}</td>
                       <td style={{ padding: '10px 14px' }}>
                         {c.registration_email
