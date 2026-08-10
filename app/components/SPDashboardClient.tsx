@@ -257,7 +257,7 @@ export default function SPDashboardClient({ forms, spRules, states, contacts, fe
                   {filter(contacts).map((c, i) => (
                     <tr key={c.id} style={{ borderBottom: '1px solid #f4f7fb', background: i % 2 === 0 ? '#fff' : '#fafcff' }}>
                       <td style={{ padding: '10px 14px', fontWeight: '500', color: '#0d2d5e' }}>
-                        {c.state_name && !/^rec[A-Za-z0-9]{10,}$/.test(c.state_name) ? c.state_name : <span style={{ color: '#a8a39c' }}>—</span>}
+                        {c.state_name && !c.state_name.startsWith('rec') ? c.state_name : <span style={{ color: '#a8a39c' }}>—</span>}
                       </td>
                       <td style={{ padding: '10px 14px', color: '#1e1c1a' }}>{c.director || '—'}</td>
                       <td style={{ padding: '10px 14px' }}>
