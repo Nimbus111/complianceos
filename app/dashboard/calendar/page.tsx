@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import CalendarGuideSidebar from '../../components/CalendarGuideSidebar'
+
 
 const CATEGORIES: Record<string, { label: string; color: string; bg: string; border: string }> = {
   registration_licensing: { label: 'Registration & licensing', color: '#0d2d5e', bg: '#e8f3fb', border: '#c2ddf0' },
@@ -223,7 +223,7 @@ export default function CalendarPage() {
     const isOverdue = due < today
     return (
       <div style={{ background: '#fff', border: `1px solid ${isOverdue ? '#f5c6c9' : '#c2ddf0'}`, borderRadius: '10px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
+        
           <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '4px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e' }}>{event.title}</span>
             <span style={{ fontSize: '10px', fontWeight: '500', color: cat.color, background: cat.bg, border: `1px solid ${cat.border}`, borderRadius: '20px', padding: '1px 7px' }}>{cat.label}</span>
@@ -361,8 +361,6 @@ export default function CalendarPage() {
     </div>
     <YearCalendar events={events} />
 )}
-   </div>
-          <CalendarGuideSidebar events={events} />
     </div>
   )
 }
