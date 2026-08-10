@@ -37,7 +37,7 @@ export async function GET() {
       airtable_id: r.id,
       state_name: getLinked(f['State']),
       rule_title: getStr(f['Name']),
-      vendor_registration_req: getBool(f["Vendor Registration Req'd"]),
+      vendor_registration_req: getBool(f["Vendor Registration Req'd?"]),
       agency_issues_cert: getBool(f['Agency Issues Registration Certificate']),
       application_fee: getStr(f['Application Fee']),
       renewal_frequency: getStr(f['Renewal Frequency']),
@@ -54,7 +54,7 @@ export async function GET() {
       leasing_equipment_rules: getStr(f['Leasing Equipment Rules']),
       updated_at: new Date().toISOString()
     }
-  }).filter(r => r.state_name)
+  }).filter(r => r.airtable_id)
 
   const { error } = await supabase.from('sp_state_rules')
     .upsert(rows, { onConflict: 'airtable_id' })
