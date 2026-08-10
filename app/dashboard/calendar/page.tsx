@@ -360,10 +360,9 @@ export default function CalendarPage() {
       </div>
     </div>
     <YearCalendar events={events} />
-  </div>
-          <CalendarGuideSidebar events={events} />
- </div>
 )}
+   </div>
+          <CalendarGuideSidebar events={events} />
     </div>
   )
 }
