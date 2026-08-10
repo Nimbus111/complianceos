@@ -221,7 +221,7 @@ export default function DocumentsPage() {
             <button
               key={k}
               onClick={() => setActiveCategory(k)}
-              style={{ padding: '5px 12px', borderRadius: '20px', border: `1px solid ${activeCategory === k ? v.border : '#e8e6e2'}`, background: activeCategory === k ? v.bg : '#fff', color: activeCategory === k ? v.color : '#827d76', fontSize: '11px', fontWeight: '500', cursor: 'pointer' }}
+              style={{ padding: '5px 12px', borderRadius: '20px', border: `1px solid ${activeCategory === k ? v.color : '#e8e6e2'}`, background: activeCategory === k ? v.bg : '#fff', color: activeCategory === k ? v.color : '#827d76', fontSize: '11px', fontWeight: '500', cursor: 'pointer' }}
             >
               {v.label}
               {k !== 'all' && <span style={{ marginLeft: '4px', color: activeCategory === k ? v.color : '#a8a39c' }}>·{docs.filter(d => d.category === k).length}</span>}
