@@ -1,18 +1,22 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import DocumentGuideSidebar from '../../components/DocumentGuideSidebar'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
-const CATEGORIES: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  all:                   { label: 'All documents',           color: '#0d2d5e', bg: '#e8f3fb',  border: '#c2ddf0' },
-  compliance_programs:   { label: 'Compliance programs',     color: '#2d6a4f', bg: '#edfaf3',  border: '#b8e8cc' },
-  registrations_licenses:{ label: 'Registrations & licenses',color: '#0d2d5e', bg: '#e8f3fb',  border: '#c2ddf0' },
-  inspection_reports:    { label: 'Inspection reports',      color: '#9a3510', bg: '#fff6e8',  border: '#f0d4a0' },
-  equipment_records:     { label: 'Equipment records',       color: '#4c1d95', bg: '#f5f3ff',  border: '#c4b5fd' },
-  personnel_records:     { label: 'Personnel records',       color: '#1a5fa8', bg: '#e8f3fb',  border: '#c2ddf0' },
-  dosimetry_reports:     { label: 'Dosimetry reports',       color: '#7a2a10', bg: '#fff6e8',  border: '#f0d4a0' },
-  correspondence_forms:  { label: 'Correspondence & forms',  color: '#827d76', bg: '#f4f7fb',  border: '#e8e6e2' },
+const CATEGORIES: Record<string, { label: string; color: string }> = {
+  all:                          { label: 'All documents',                           color: '#4a6d8c' },
+  state_equipment_registration: { label: 'State Equipment Registration Form',        color: '#1a5fa8' },
+  state_facility_registration:  { label: 'State Facility Registration Form',         color: '#1a5fa8' },
+  equipment_receipts:           { label: 'Machine and Accessories Receipts',         color: '#0d2d5e' },
+  user_manuals:                 { label: 'Manufacturer User Manuals',                color: '#0d2d5e' },
+  calibration_records:          { label: 'Performance and Calibration Records',      color: '#2d6a4f' },
+  operator_credentials:         { label: 'Operator Credentials and Training',        color: '#2d6a4f' },
+  warranty_docs:                { label: 'Warranty Documentation',                   color: '#9a3510' },
+  service_contracts:            { label: 'Service Contracts',                        color: '#9a3510' },
+  communications:               { label: 'Communications',                           color: '#4a6d8c' },
+  decommissioned:               { label: 'Decommissioned Machine Documentation',     color: '#827d76' },
 }
 
 export default function DocumentsPage() {
@@ -29,6 +33,26 @@ export default function DocumentsPage() {
   const [category, setCategory] = useState('')
   const [expirationDate, setExpirationDate] = useState('')
   const [customName, setCustomName] = useState('')
+  const [hiddenCategories, setHiddenCategories] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('doc_hidden_categories') || '[]') }
+    catch { return [] }
+  })
+
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    docs.forEach((doc: any) => {
+      if (doc.category) counts[doc.category] = (counts[doc.category] || 0) + 1
+    })
+    return counts
+  }, [docs])
+
+  const toggleHideCategory = (key: string) => {
+    setHiddenCategories(prev => {
+      const next = prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+      localStorage.setItem('doc_hidden_categories', JSON.stringify(next))
+      return next
+    })
+  }
 
   const fetchDocs = useCallback(async () => {
     const supabase = createClient()
@@ -131,7 +155,8 @@ export default function DocumentsPage() {
         <a href="/dashboard" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>← Dashboard</a>
       </nav>
 
-      <div style={{ maxWidth: '860px', margin: '0 auto', padding: '40px 24px' }}>
+      <div style={{ maxWidth: '1140px', margin: '0 auto', display: 'flex', gap: '24px', alignItems: 'flex-start', padding: '40px 24px' }}>
+        <div style={{ flex: 1, minWidth: 0 }}></div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
           <div>
             <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>Document repository</h1>
@@ -254,7 +279,12 @@ export default function DocumentsPage() {
             })}
           </div>
         )}
-      </div>
+          </div>
+      <DocumentGuideSidebar
+          categoryCounts={categoryCounts}
+          hiddenCategories={hiddenCategories}
+          onToggleHide={toggleHideCategory}
+        />
     </div>
   )
 }
