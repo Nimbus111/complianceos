@@ -5,18 +5,18 @@ import DocumentGuideSidebar from '../../components/DocumentGuideSidebar'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
-const CATEGORIES: Record<string, { label: string; color: string }> = {
-  all:                          { label: 'All documents',                           color: '#4a6d8c' },
-  state_equipment_registration: { label: 'State Equipment Registration Form',        color: '#1a5fa8' },
-  state_facility_registration:  { label: 'State Facility Registration Form',         color: '#1a5fa8' },
-  equipment_receipts:           { label: 'Machine and Accessories Receipts',         color: '#0d2d5e' },
-  user_manuals:                 { label: 'Manufacturer User Manuals',                color: '#0d2d5e' },
-  calibration_records:          { label: 'Performance and Calibration Records',      color: '#2d6a4f' },
-  operator_credentials:         { label: 'Operator Credentials and Training',        color: '#2d6a4f' },
-  warranty_docs:                { label: 'Warranty Documentation',                   color: '#9a3510' },
-  service_contracts:            { label: 'Service Contracts',                        color: '#9a3510' },
-  communications:               { label: 'Communications',                           color: '#4a6d8c' },
-  decommissioned:               { label: 'Decommissioned Machine Documentation',     color: '#827d76' },
+const CATEGORIES: Record<string, { label: string; color: string; bg: string; border: string }> = {
+  all:                          { label: 'All documents',                           color: '#4a6d8c', bg: '#f0f4f8',  border: '#c2ddf0' },
+  state_equipment_registration: { label: 'State Equipment Registration Form',        color: '#1a5fa8', bg: '#e8f3fb',  border: '#c2ddf0' },
+  state_facility_registration:  { label: 'State Facility Registration Form',         color: '#1a5fa8', bg: '#e8f3fb',  border: '#c2ddf0' },
+  equipment_receipts:           { label: 'Machine and Accessories Receipts',         color: '#0d2d5e', bg: '#e8f3fb',  border: '#c2ddf0' },
+  user_manuals:                 { label: 'Manufacturer User Manuals',                color: '#0d2d5e', bg: '#e8f3fb',  border: '#c2ddf0' },
+  calibration_records:          { label: 'Performance and Calibration Records',      color: '#2d6a4f', bg: '#edfaf3',  border: '#b8e8cc' },
+  operator_credentials:         { label: 'Operator Credentials and Training',        color: '#2d6a4f', bg: '#edfaf3',  border: '#b8e8cc' },
+  warranty_docs:                { label: 'Warranty Documentation',                   color: '#9a3510', bg: '#fff6e8',  border: '#f0d4a0' },
+  service_contracts:            { label: 'Service Contracts',                        color: '#9a3510', bg: '#fff6e8',  border: '#f0d4a0' },
+  communications:               { label: 'Communications',                           color: '#4a6d8c', bg: '#f0f4f8',  border: '#c2ddf0' },
+  decommissioned:               { label: 'Decommissioned Machine Documentation',     color: '#827d76', bg: '#f4f7fb',  border: '#e8e6e2' },
 }
 
 export default function DocumentsPage() {
