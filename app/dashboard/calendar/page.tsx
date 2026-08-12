@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
-
 const CATEGORIES: Record<string, { label: string; color: string; bg: string; border: string }> = {
   registration_licensing: { label: 'Registration & licensing', color: '#0d2d5e', bg: '#e8f3fb', border: '#c2ddf0' },
   equipment_qa:           { label: 'Equipment QA',             color: '#2d6a4f', bg: '#edfaf3', border: '#b8e8cc' },
@@ -223,7 +222,7 @@ export default function CalendarPage() {
     const isOverdue = due < today
     return (
       <div style={{ background: '#fff', border: `1px solid ${isOverdue ? '#f5c6c9' : '#c2ddf0'}`, borderRadius: '10px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-        
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '4px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e' }}>{event.title}</span>
             <span style={{ fontSize: '10px', fontWeight: '500', color: cat.color, background: cat.bg, border: `1px solid ${cat.border}`, borderRadius: '20px', padding: '1px 7px' }}>{cat.label}</span>
@@ -263,8 +262,7 @@ export default function CalendarPage() {
         <a href="/dashboard" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>← Dashboard</a>
       </nav>
 
-       <div style={{ maxWidth: '760px', margin: '0 auto', padding: '40px 24px' }}>
-        
+      <div style={{ maxWidth: '760px', margin: '0 auto', padding: '40px 24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px' }}>
           <div>
             <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>Compliance calendar</h1>
@@ -360,6 +358,7 @@ export default function CalendarPage() {
       </div>
     </div>
     <YearCalendar events={events} />
+  </div>
 )}
     </div>
   )
