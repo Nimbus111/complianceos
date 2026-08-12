@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import CalendarGuideSidebar from '../../components/CalendarGuideSidebar'
 
 const CATEGORIES: Record<string, { label: string; color: string; bg: string; border: string }> = {
   registration_licensing: { label: 'Registration & licensing', color: '#0d2d5e', bg: '#e8f3fb', border: '#c2ddf0' },
@@ -261,6 +262,7 @@ export default function CalendarPage() {
         </div>
         <a href="/dashboard" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>← Dashboard</a>
       </nav>
+      <CalendarGuideSidebar events={events} />
 
       <div style={{ maxWidth: '760px', margin: '0 auto', padding: '40px 24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px' }}>

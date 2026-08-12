@@ -45,7 +45,7 @@ export default function CalendarGuideSidebar({ events }: Props) {
   const filledCount = GUIDE_CATEGORIES.filter(c => hasEvents(c)).length
 
   return (
-    <div style={{ width: '272px', flexShrink: 0, fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div style={{ position: 'fixed', right: '24px', top: '80px', width: '272px', zIndex: 50, fontFamily: 'Inter, system-ui, sans-serif', maxHeight: 'calc(100vh - 100px)', overflowY: 'auto' }}>
       <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden', position: 'sticky', top: '20px' }}>
 
         <button onClick={() => setCollapsed(!collapsed)} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', fontFamily: 'Inter, system-ui, sans-serif', display: 'block' }}>
