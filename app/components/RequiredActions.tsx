@@ -5,6 +5,7 @@ import { useState } from 'react'
 interface Task {
   id: string
   task_text: string
+  kts_item_id?: string | null
   task_category?: string
   detail_text?: string | null
   urgency: string
