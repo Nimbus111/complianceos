@@ -31,7 +31,8 @@ export default function DocumentGuideSidebar({ categoryCounts, hiddenCategories,
   const categoriesComplete = DOC_CATEGORIES.filter(c => (categoryCounts[c.key] || 0) > 0).length
 
   return (
-    <div style={{ width: '280px', flexShrink: 0, fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div style={{ position: 'fixed', right: '24px', top: '80px', width: '272px', zIndex: 50, fontFamily: 'Inter, system-ui, sans-serif', maxHeight: 'calc(100vh - 100px)', overflowY: 'auto' }}>
+
       <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden', position: 'sticky', top: '20px' }}>
 
         {/* Header */}

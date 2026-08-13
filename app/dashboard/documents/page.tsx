@@ -155,8 +155,8 @@ export default function DocumentsPage() {
         <a href="/dashboard" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>← Dashboard</a>
       </nav>
 
-      <div style={{ maxWidth: '1140px', margin: '0 auto', display: 'flex', gap: '24px', alignItems: 'flex-start', padding: '40px 24px' }}>
-        <div style={{ flex: 1, minWidth: 0 }}></div>
+      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 24px' }}>
+        
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
           <div>
             <h1 style={{ fontSize: '24px', fontWeight: '500', color: '#0d2d5e', marginBottom: '4px' }}>Document repository</h1>
