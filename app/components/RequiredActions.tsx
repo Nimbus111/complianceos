@@ -123,7 +123,13 @@ export default function RequiredActions({ tasks, completedIds, facilityState }: 
                             ))}
                           </div>
                         )}
-                        {task.link_to && !done && (
+                        {task.kts_item_id && !done && (
+              <a href={`/dashboard/keys?item=${task.kts_item_id}`}
+                style={{ fontSize: '10px', color: '#2d6a4f', background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '20px', padding: '2px 8px', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                Learn More →
+              </a>
+            )}
+            {task.link_to && !done && (
                           <a href={task.link_to}
                             style={{ fontSize: '10px', color: '#1a5fa8', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '1px 8px', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
                             Open →
