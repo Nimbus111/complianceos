@@ -34,8 +34,8 @@ export async function GET() {
     const f = r.fields
     return {
       airtable_id: r.id,
-      state_name: getLinked(f['State']),
-      form_name: getStr(f['Name']),
+      state_name: getStr(f['State Name (from State Record)']),
+      form_name: getStr(f['Form Name']),
       form_link: getStr(f['Form Link']),
       classification: getStr(f['Classification']),
       form_type: getStr(f['Form Type']),
