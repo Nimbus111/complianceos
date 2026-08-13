@@ -30,6 +30,24 @@ export default function SPDashboardClient({ forms, spRules, states, contacts, fe
   const [search, setSearch] = useState('')
   const [expandedRule, setExpandedRule] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [stateList, setStateList] = useState<string[]>([])
+  const [stateForms, setStateForms] = useState<any[]>([])
+  const [formsLoading, setFormsLoading] = useState(false)
+
+  const loadStates = async () => {
+    if (stateList.length > 0) return
+    const res = await fetch('/api/sp/forms')
+    const data = await res.json()
+    setStateList(data.states || [])
+  }
+
+  const loadForms = async (state: string) => {
+    setFormsLoading(true)
+    const res = await fetch(`/api/sp/forms?state=${encodeURIComponent(state)}`)
+    const data = await res.json()
+    setStateForms(data)
+    setFormsLoading(false)
+  }
 
   const filter = (items: any[], key = 'state_name') =>
     items.filter(i => !search || (i[key] || '').toLowerCase().includes(search.toLowerCase()))
@@ -81,7 +99,7 @@ export default function SPDashboardClient({ forms, spRules, states, contacts, fe
                   <p style={{ fontSize: '12px', color: '#a8a39c', marginBottom: '20px' }}>Select a state below or type in the filter box above</p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center', maxWidth: '700px', margin: '0 auto' }}>
                     {[...new Set(spRules.map((r: any) => r.state_name).filter(Boolean))].sort().map((state: any) => (
-                      <button key={state} onClick={() => setSearch(state)}
+                      <button key={state} onClick={() => { setSearch(state); loadForms(state) }}
                         style={{ fontSize: '11px', padding: '4px 12px', borderRadius: '20px', border: '1px solid #c2ddf0', background: '#f0f4f8', color: '#0d2d5e', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif' }}>
                         {state}
                       </button>
@@ -161,12 +179,15 @@ export default function SPDashboardClient({ forms, spRules, states, contacts, fe
           {resourceTab === 'forms' && (
             <div>
               {!search ? (
+            <div onMouseEnter={loadStates}>
                 <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', padding: '40px', textAlign: 'center' }}>
                   <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', marginBottom: '8px' }}>Select a state to view its forms</p>
                   <p style={{ fontSize: '12px', color: '#4a6d8c', marginBottom: '20px' }}>Type a state name in the filter box above</p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center', maxWidth: '600px', margin: '0 auto' }}>
-                    {[...new Set(forms.map((f: any) => f.state_name).filter(Boolean))].sort().map((state: any) => (
-                      <button key={state} onClick={() => setSearch(state)}
+                    {stateList.length === 0
+                      ? <span style={{ fontSize: '12px', color: '#a8a39c' }}>Loading states...</span>
+                      : stateList.map((state: any) => (
+                      <button key={state} onClick={() => { setSearch(state); loadForms(state) }}
                         style={{ fontSize: '11px', padding: '4px 12px', borderRadius: '20px', border: '1px solid #c2ddf0', background: '#f0f4f8', color: '#0d2d5e', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif' }}>
                         {state}
                       </button>
@@ -188,7 +209,9 @@ export default function SPDashboardClient({ forms, spRules, states, contacts, fe
                       </tr>
                     </thead>
                     <tbody>
-                      {filter(forms).map((f: any, i: number) => (
+                      {formsLoading ? (
+                        <tr><td colSpan={4} style={{ padding: '20px', textAlign: 'center', color: '#a8a39c', fontSize: '13px' }}>Loading forms...</td></tr>
+                      ) : stateForms.map((f: any, i: number) => (
                         <tr key={f.id} style={{ borderBottom: '1px solid #f4f7fb', background: i % 2 === 0 ? '#fff' : '#fafcff' }}>
                           <td style={{ padding: '10px 14px', color: '#1e1c1a' }}>{f.form_name}</td>
                           <td style={{ padding: '10px 14px', color: '#4a6d8c' }}>{f.classification || '—'}</td>
@@ -200,7 +223,7 @@ export default function SPDashboardClient({ forms, spRules, states, contacts, fe
                           </td>
                         </tr>
                       ))}
-                      {filter(forms).length === 0 && (
+                      {stateForms.length === 0 && !formsLoading && (
                         <tr><td colSpan={4} style={{ padding: '20px', textAlign: 'center', color: '#a8a39c', fontSize: '13px' }}>No forms found for {search}</td></tr>
                       )}
                     </tbody>
