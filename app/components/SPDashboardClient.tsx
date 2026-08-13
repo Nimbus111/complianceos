@@ -194,6 +194,7 @@ export default function SPDashboardClient({ forms, spRules, states, contacts, fe
                     ))}
                   </div>
                 </div>
+              </div>
               ) : (
                 <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden' }}>
                   <div style={{ padding: '12px 16px', background: '#f0f4f8', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
