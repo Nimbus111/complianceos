@@ -48,7 +48,7 @@ export default function StateFormsPage() {
     const { data } = await supabase
       .from('state_forms')
       .select('*')
-      .order('sort_order', { ascending: true })
+      .order('state_name', { ascending: true })
 
     setForms(data || [])
     setLoading(false)
