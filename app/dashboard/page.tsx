@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import SignOutButton from '../components/SignOutButton'
 import AcknowledgeButton from '../components/AcknowledgeButton'
+import GettingStartedPanel from '../components/GettingStartedPanel'
 import ActivityLog from '../components/ActivityLog'
 import SPDashboardClient from '../components/SPDashboardClient'
 import UpgradeButton from '../components/UpgradeButton'
@@ -66,7 +67,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('onboarding_completed, org_id, display_name')
+    .select('onboarding_completed, org_id, display_name, onboarding_dismissed')
     .eq('id', user.id)
     .single()
 
@@ -129,6 +130,9 @@ const isSP = org?.org_type === 'service_provider'
   { count: equipmentCount },
   { count: qaCount },
   { count: calendarCount },
+  { count: rspCount },
+      { count: operatorCount },
+      { count: docCount },
 ] = await Promise.all([
     supabase.from('keys_to_success').select('id'),
     supabase.from('compliance_checklists').select('*', { count: 'exact', head: true }).eq('org_id', queryOrgId).eq('completed', true),
@@ -141,6 +145,9 @@ const isSP = org?.org_type === 'service_provider'
      supabase.from('equipment').select('id', { count: 'exact', head: true }).eq('org_id', queryOrgId),
     supabase.from('equipment_qa').select('id', { count: 'exact', head: true }).eq('org_id', queryOrgId),
     supabase.from('compliance_calendar').select('id', { count: 'exact', head: true }).eq('org_id', queryOrgId),
+    supabase.from('rsp_programs').select('id', { count: 'exact', head: true }).eq('org_id', queryOrgId),
+      supabase.from('xray_operators').select('id', { count: 'exact', head: true }).eq('org_id', queryOrgId),
+      supabase.from('documents').select('id', { count: 'exact', head: true }).eq('org_id', queryOrgId),
   ])
 
   const ktsPct = ktsItems?.length
@@ -391,6 +398,17 @@ const isSP = org?.org_type === 'service_provider'
                 </div>
                 <a href="/dashboard/enterprise" style={{ fontSize: '12px', color: '#1a5fa8', textDecoration: 'none' }}>← Back to portfolio</a>
               </div>
+            )}
+            {org?.org_type !== 'enterprise' && !activeOrg?.org_type && (
+              <GettingStartedPanel
+                facilityState={activeOrg?.facility_state || null}
+                completedTaskCount={completedTaskIds.length}
+                rspCount={rspCount || 0}
+                equipmentCount={equipmentCount || 0}
+                operatorCount={operatorCount || 0}
+                docCount={docCount || 0}
+                dismissed={profile?.onboarding_dismissed || false}
+              />
             )}
             {activeNotification && (
               <div style={{ background: '#fff6e8', border: '1px solid #f0d4a0', borderRadius: '10px', padding: '14px 20px', marginBottom: '16px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
