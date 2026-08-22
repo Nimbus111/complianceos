@@ -28,8 +28,8 @@ const STEPS = [
     title: 'Your Radiation Protection Program',
     emoji: '📄',
     content: [
-      "Every facility that operates x-ray equipment is required by state law to have a written Radiation Protection Program — also called an RPP or RSP depending on your state. Think of it as your x-ray safety manual.",
-      "It documents your safety procedures, your equipment, your team's qualifications, and how you handle radiation safety day-to-day. Inspectors will ask for it — and it needs to be updated annually.",
+      "Many states require facilities that operate x-ray equipment to have a written Radiation Protection Program — also called an RPP or RSP depending on your state. Think of it as your x-ray safety manual.",
+      "It documents your safety procedures, your equipment, your team's qualifications, and how you handle radiation safety day-to-day. If your state requires it, inspectors will ask for it — and it needs to be updated annually. Check your Required Actions to see if an RPP/RSP is mandated for your state.",
       "We've built an RPP/RSP builder right into the platform. It walks you through each section and generates a document you can print or save."
     ],
     links: [
@@ -40,7 +40,7 @@ const STEPS = [
     title: 'Your Radiation Safety Officer',
     emoji: '🧑‍⚕️',
     content: [
-      "Your state requires you to designate a Radiation Safety Officer — known as an RSO. This is the person responsible for overseeing your facility's radiation safety program.",
+      "Many states require facilities to designate a Radiation Safety Officer — known as an RSO. Check your Required Actions to confirm whether your state has this requirement. This is the person responsible for overseeing your facility's radiation safety program.",
       "In many small practices, this is the physician or a licensed radiologic technologist. The RSO doesn't need to be on-site every day, but they must be identified in your Radiation Protection Program and available to answer questions during an inspection.",
       "Your RSO's name and contact information should appear in your RPP and be posted in your x-ray area along with other required notices."
     ],
