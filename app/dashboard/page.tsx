@@ -401,12 +401,6 @@ const isSP = org?.org_type === 'service_provider'
             )}
             {org?.org_type === 'facility' && (
               <GettingStartedPanel
-                facilityState={activeOrg?.facility_state || null}
-                completedTaskCount={completedTaskIds.length}
-                rspCount={rspCount || 0}
-                equipmentCount={equipmentCount || 0}
-                operatorCount={operatorCount || 0}
-                docCount={docCount || 0}
                 dismissed={profile?.onboarding_dismissed || false}
               />
             )}
