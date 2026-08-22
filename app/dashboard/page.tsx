@@ -399,7 +399,7 @@ const isSP = org?.org_type === 'service_provider'
                 <a href="/dashboard/enterprise" style={{ fontSize: '12px', color: '#1a5fa8', textDecoration: 'none' }}>← Back to portfolio</a>
               </div>
             )}
-            {org?.org_type !== 'enterprise' && !activeOrg?.org_type && (
+            {org?.org_type === 'facility' && (
               <GettingStartedPanel
                 facilityState={activeOrg?.facility_state || null}
                 completedTaskCount={completedTaskIds.length}
