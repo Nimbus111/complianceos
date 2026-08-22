@@ -97,10 +97,19 @@ export default function GettingStartedPanel({
     setIsDismissed(true)
   }
 
-  if (isDismissed) return null
+ if (isDismissed) return null
+
+  if (!expanded) return (
+    <div style={{ position: 'fixed', left: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 50, fontFamily: 'Inter, system-ui, sans-serif' }}>
+      <button onClick={toggleExpanded}
+        style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', background: allComplete ? '#2d6a4f' : '#0d2d5e', color: '#fff', border: 'none', padding: '16px 10px', cursor: 'pointer', borderRadius: '0 8px 8px 0', fontSize: '12px', fontWeight: '500', fontFamily: 'Inter, system-ui, sans-serif', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '2px 0 8px rgba(0,0,0,.15)' }}>
+        {allComplete ? '✅' : '🚀'} Getting Started · {completedCount}/7
+      </button>
+    </div>
+  )
 
   return (
-    <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden', marginBottom: '20px', fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div style={{ position: 'fixed', left: 0, top: '80px', width: '280px', zIndex: 50, fontFamily: 'Inter, system-ui, sans-serif', maxHeight: 'calc(100vh - 80px)', overflowY: 'auto', boxShadow: '2px 0 12px rgba(0,0,0,.08)' }}>
 
       {/* Header */}
       <div style={{ padding: '14px 20px', background: allComplete ? '#edfaf3' : '#f8fbfe', borderBottom: expanded ? '1px solid #dce8f5' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -128,7 +137,7 @@ export default function GettingStartedPanel({
           )}
           <button onClick={toggleExpanded}
             style={{ fontSize: '13px', color: '#4a6d8c', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', fontFamily: 'Inter, system-ui, sans-serif' }}>
-            {expanded ? '▲' : '▼'}
+            {expanded ? '◀' : '▶'}
           </button>
         </div>
       </div>
