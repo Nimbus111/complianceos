@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter , useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 const inp: React.CSSProperties = {
   width: '100%', height: '38px', border: '1px solid #c2ddf0', borderRadius: '8px',
@@ -74,7 +74,7 @@ export default function EquipmentPage() {
   const [orgId, setOrgId] = useState<string | null>(null)
   const [equipment, setEquipment] = useState<any[]>([])
   const searchParams = useSearchParams()
-  const machineId = searchParams.get('machine')
+  const machineId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('machine') : null
   const [contacts, setContacts] = useState<any[]>([])
   const [garments, setGarments] = useState<any[]>([])
   const [apronVendor, setApronVendor] = useState<any>(null)
