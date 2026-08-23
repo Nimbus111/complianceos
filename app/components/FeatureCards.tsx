@@ -20,7 +20,7 @@ const info: Record<string, string> = {
   'Account Settings': 'Update facility info, dealer contact, team members, and subscription.',
 }
 
-interface Feature { name: string; desc: string; border: string; href?: string }
+interface Feature { name: string; desc: string; border: string; href?: string; section?: string }
 
 export default function FeatureCards({ features, activityMap = {} }: {
   features: Feature[]
@@ -60,6 +60,29 @@ export default function FeatureCards({ features, activityMap = {} }: {
   }
 
   const saveScroll = () => sessionStorage.setItem('dashScrollY', String(window.scrollY))
+
+  const SECTION_ORDER = [
+    'Compliance Essentials',
+    'Equipment & Maintenance',
+    'Records & Documents',
+    'Compliance Toolkit',
+    'Education & Training',
+    'Practice & Support'
+  ]
+
+  const SECTION_META: Record<string, { icon: string; color: string }> = {
+    'Compliance Essentials':  { icon: '✓', color: '#1a5fa8' },
+    'Equipment & Maintenance': { icon: '🔧', color: '#2d6a4f' },
+    'Records & Documents':    { icon: '📁', color: '#0d2d5e' },
+    'Compliance Toolkit':     { icon: '🛠️', color: '#9a3510' },
+    'Education & Training':   { icon: '📚', color: '#6b46c1' },
+    'Practice & Support':     { icon: '⚙️', color: '#4a6d8c' },
+  }
+
+  const grouped = SECTION_ORDER.reduce((acc, section) => {
+    acc[section] = features.filter((f: any) => f.section === section)
+    return acc
+  }, {} as Record<string, typeof features>)
 
   return (
     <div ref={containerRef}>
@@ -106,8 +129,22 @@ export default function FeatureCards({ features, activityMap = {} }: {
 
       {/* ── FULL VIEW ── */}
       {!dense && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-          {features.map(f => {
+        <div>
+          {SECTION_ORDER.map(sectionName => {
+            const sectionFeatures = grouped[sectionName]
+            if (!sectionFeatures?.length) return null
+            const meta = SECTION_META[sectionName]
+            return (
+              <div key={sectionName} style={{ marginBottom: '32px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+                  <span style={{ fontSize: '13px' }}>{meta.icon}</span>
+                  <h3 style={{ fontSize: '11px', fontWeight: '700', color: meta.color, textTransform: 'uppercase', letterSpacing: '.1em', margin: 0 }}>
+                    {sectionName}
+                  </h3>
+                  <div style={{ flex: 1, height: '1px', background: '#e8f0f8' }} />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                  {sectionFeatures.map((f: any) => {
             const isActive = activityMap[f.name] || false
             const desc = info[f.name]
             const isOpen = activeInfo === f.name
@@ -161,6 +198,10 @@ export default function FeatureCards({ features, activityMap = {} }: {
                 )}
                 <Popover />
               </div>
+            )
+          })}
+        </div>
+       </div>
             )
           })}
         </div>

@@ -13,21 +13,21 @@ import FeatureCards from '../components/FeatureCards'
 import ScrollRestorer from '../components/ScrollRestorer'
 
  const features = [
-    { name: 'State Compliance Guide', desc: 'Your state\'s x-ray requirements with federal rules.', border: '#b8e8cc', href: '/dashboard/guide' },
-    { name: 'Equipment & Safety', desc: 'X-ray equipment, lead protection, and dosimetry monitoring.', border: '#b8e8cc', href: '/dashboard/equipment' },
-    { name: 'Equipment QA', desc: 'QA testing procedures, manufacturer schedules, and performance evaluations.', border: '#b8e8cc', href: '/dashboard/equipment-qa' },
-    { name: 'X-ray Operators', desc: 'Operator credentials, training records, and CEU certificates.', border: '#b8e8cc', href: '/dashboard/operators' },
-    { name: 'Document Repository', desc: 'Upload and store all compliance documents with expiry tracking.', border: '#c2ddf0', href: '/dashboard/documents' },
-    { name: 'RSP Builder', desc: 'Generate your Radiation Protection Program. Required in most states.', border: '#c2ddf0', href: '/dashboard/rsp' },
-    { name: 'Compliance Calendar', desc: 'Renewal dates, QA deadlines, and inspection schedules.', border: '#c2ddf0', href: '/dashboard/calendar' },
-    { name: 'Inspector Report', desc: 'Printable compliance summary with your current score.', border: '#c2ddf0', href: '/dashboard/report' },
-    { name: 'Technique Charts', desc: 'The Last Technique Chart You\'ll Ever Need — download and customize.', border: '#c4b5fd', href: '/dashboard/technique-charts' },
-    { name: 'Keys to Success', desc: '21-step compliance checklist with guidance from The Radiology Coach.', border: '#c4b5fd', href: '/dashboard/keys' },
-    { name: 'AI Assistant', desc: 'Ask any compliance question. State-specific answers in seconds.', border: '#c4b5fd', href: '/dashboard/ai' },
-    { name: 'State Documents', desc: 'Forms, applications, and regulatory documents from your state agency.', border: '#dce8f5', href: '/dashboard/stateforms' },
-    { name: 'Video Training', desc: 'Expert tutorial videos from The Radiology Coach.', border: '#dce8f5', href: '/dashboard/training' },
-    { name: 'Preferred Partners', desc: 'PACS storage, radiology reading, and equipment partners.', border: '#dce8f5', href: '/dashboard/partners' },
-    { name: 'Account Settings', desc: 'Facility info, dealer contact, and subscription management.', border: '#dce8f5', href: '/dashboard/settings' },
+    { name: 'State Compliance Guide', section: 'Compliance Essentials', desc: 'Your state\'s x-ray requirements with federal rules.', border: '#b8e8cc', href: '/dashboard/guide' },
+    { name: 'Equipment & Safety', section: 'Equipment & Maintenance', desc: 'X-ray equipment, lead protection, and dosimetry monitoring.', border: '#b8e8cc', href: '/dashboard/equipment' },
+    { name: 'Equipment QA', section: 'Equipment & Maintenance', desc: 'QA testing procedures, manufacturer schedules, and performance evaluations.', border: '#b8e8cc', href: '/dashboard/equipment-qa' },
+    { name: 'X-ray Operators', section: 'Records & Documents', desc: 'Operator credentials, training records, and CEU certificates.', border: '#b8e8cc', href: '/dashboard/operators' },
+    { name: 'Document Repository', section: 'Records & Documents', desc: 'Upload and store all compliance documents with expiry tracking.', border: '#c2ddf0', href: '/dashboard/documents' },
+    { name: 'RSP Builder', section: 'Compliance Toolkit', desc: 'Generate your Radiation Protection Program. Required in most states.', border: '#c2ddf0', href: '/dashboard/rsp' },
+    { name: 'Compliance Calendar', section: 'Compliance Essentials', desc: 'Renewal dates, QA deadlines, and inspection schedules.', border: '#c2ddf0', href: '/dashboard/calendar' },
+    { name: 'Inspector Report', section: 'Compliance Essentials', desc: 'Printable compliance summary with your current score.', border: '#c2ddf0', href: '/dashboard/report' },
+    { name: 'Technique Charts', section: 'Compliance Toolkit', desc: 'The Last Technique Chart You\'ll Ever Need — download and customize.', border: '#c4b5fd', href: '/dashboard/technique-charts' },
+    { name: 'Keys to Success', section: 'Education & Training', desc: '21-step compliance checklist with guidance from The Radiology Coach.', border: '#c4b5fd', href: '/dashboard/keys' },
+    { name: 'AI Assistant', section: 'Education & Training', desc: 'Ask any compliance question. State-specific answers in seconds.', border: '#c4b5fd', href: '/dashboard/ai' },
+    { name: 'State Documents', section: 'Records & Documents', desc: 'Forms, applications, and regulatory documents from your state agency.', border: '#dce8f5', href: '/dashboard/stateforms' },
+    { name: 'Video Training', section: 'Education & Training', desc: 'Expert tutorial videos from The Radiology Coach.', border: '#dce8f5', href: '/dashboard/training' },
+    { name: 'Preferred Partners',  section: 'Practice & Support', desc: 'PACS storage, radiology reading, and equipment partners.', border: '#dce8f5', href: '/dashboard/partners' },
+    { name: 'Account Settings', section: 'Practice & Support', desc: 'Facility info, dealer contact, and subscription management.', border: '#dce8f5', href: '/dashboard/settings' },
   ]
 
 function SPDashboard({ org, user, forms, rules, states, contacts, fees }: any) {
