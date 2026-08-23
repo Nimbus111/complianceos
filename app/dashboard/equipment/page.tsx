@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useRouter , useSearchParams } from 'next/navigation'
 
 const inp: React.CSSProperties = {
   width: '100%', height: '38px', border: '1px solid #c2ddf0', borderRadius: '8px',
@@ -73,6 +73,8 @@ export default function EquipmentPage() {
   const [tab, setTab] = useState<'equipment' | 'protection' | 'dosimetry'>('equipment')
   const [orgId, setOrgId] = useState<string | null>(null)
   const [equipment, setEquipment] = useState<any[]>([])
+  const searchParams = useSearchParams()
+  const machineId = searchParams.get('machine')
   const [contacts, setContacts] = useState<any[]>([])
   const [garments, setGarments] = useState<any[]>([])
   const [apronVendor, setApronVendor] = useState<any>(null)
@@ -98,7 +100,7 @@ export default function EquipmentPage() {
     if (!profile?.org_id) { router.push('/onboarding'); return }
     setOrgId(profile.org_id)
     const [{ data: eq }, { data: ct }, { data: gm }, { data: av }, { data: bd }, { data: dv }] = await Promise.all([
-      supabase.from('equipment').select('*').eq('org_id', profile.org_id).order('created_at'),
+      machineId ? supabase.from('equipment').select('*').eq('org_id', profile.org_id).eq('id', machineId).single().then(r => ({ data: r.data ? [r.data] : [] })) : supabase.from('equipment').select('*').eq('org_id', profile.org_id).order('created_at'),
       supabase.from('equipment_contacts').select('*').eq('org_id', profile.org_id),
       supabase.from('lead_aprons').select('*').eq('org_id', profile.org_id).order('created_at'),
       supabase.from('apron_vendor').select('*').eq('org_id', profile.org_id).single(),

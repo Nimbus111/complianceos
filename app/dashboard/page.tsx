@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import SignOutButton from '../components/SignOutButton'
 import AcknowledgeButton from '../components/AcknowledgeButton'
 import GettingStartedPanel from '../components/GettingStartedPanel'
+import DashboardMachineView from '../components/DashboardMachineView'
 import ActivityLog from '../components/ActivityLog'
 import SPDashboardClient from '../components/SPDashboardClient'
 import UpgradeButton from '../components/UpgradeButton'
@@ -131,6 +132,7 @@ const isSP = org?.org_type === 'service_provider'
   { count: qaCount },
   { count: calendarCount },
   { count: rspCount },
+      { data: equipmentList },
       { count: operatorCount },
       { count: docCount },
 ] = await Promise.all([
@@ -146,6 +148,7 @@ const isSP = org?.org_type === 'service_provider'
     supabase.from('equipment_qa').select('id', { count: 'exact', head: true }).eq('org_id', queryOrgId),
     supabase.from('compliance_calendar').select('id', { count: 'exact', head: true }).eq('org_id', queryOrgId),
     supabase.from('rsp_programs').select('id', { count: 'exact', head: true }).eq('org_id', queryOrgId),
+      supabase.from('equipment').select('id, manufacturer, model, type').eq('org_id', queryOrgId).order('created_at').limit(6),
       supabase.from('xray_operators').select('id', { count: 'exact', head: true }).eq('org_id', queryOrgId),
       supabase.from('documents').select('id', { count: 'exact', head: true }).eq('org_id', queryOrgId),
   ])
@@ -380,7 +383,7 @@ const isSP = org?.org_type === 'service_provider'
           </div>
         </div>
 
-        <FeatureCards features={features} activityMap={activityMap} />
+        <DashboardMachineView equipment={equipmentList || []} features={features} activityMap={activityMap} />
 
         <BadgesSection
               badges={badges || []}
