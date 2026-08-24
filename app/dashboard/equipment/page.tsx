@@ -73,7 +73,7 @@ export default function EquipmentPage() {
   const [tab, setTab] = useState<'equipment' | 'protection' | 'dosimetry'>('equipment')
   const [orgId, setOrgId] = useState<string | null>(null)
   const [equipment, setEquipment] = useState<any[]>([])
-  const searchParams = useSearchParams()
+  
   const machineId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('machine') : null
   const [contacts, setContacts] = useState<any[]>([])
   const [garments, setGarments] = useState<any[]>([])
