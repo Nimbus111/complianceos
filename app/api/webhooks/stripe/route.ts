@@ -60,7 +60,56 @@ if (upsertError) {
 await admin.from('organizations').update({
   subscription_tier: plan === 'service_provider' ? 'service_provider' : 'professional'
 }).eq('id', orgId)
+// HubSpot sync — create contact and deal for new subscriber
+        try {
+          if (process.env.HUBSPOT_API_KEY) {
+            const stripeCustomer = await stripe.customers.retrieve(session.customer as string)
+            const email = (stripeCustomer as any).email
+            const { data: org } = await admin
+              .from('organizations')
+              .select('name, facility_state')
+              .eq('id', orgId)
+              .single()
 
+            if (email) {
+              const hubHeaders = {
+                'Authorization': `Bearer ${process.env.HUBSPOT_API_KEY}`,
+                'Content-Type': 'application/json'
+              }
+              const amount = plan === 'service_provider' ? '149' : '49'
+
+              await fetch('https://api.hubapi.com/crm/v3/objects/contacts', {
+                method: 'POST',
+                headers: hubHeaders,
+                body: JSON.stringify({
+                  properties: {
+                    email,
+                    company: org?.name || '',
+                    lifecyclestage: 'customer',
+                    hs_lead_status: 'CONNECTED',
+                    state: org?.facility_state || '',
+                  }
+                })
+              })
+
+              await fetch('https://api.hubapi.com/crm/v3/objects/deals', {
+                method: 'POST',
+                headers: hubHeaders,
+                body: JSON.stringify({
+                  properties: {
+                    dealname: `${org?.name || email} — ComplianceOS ${plan === 'service_provider' ? 'SP Plan' : 'Professional'}`,
+                    amount,
+                    closedate: new Date().toISOString(),
+                    dealstage: 'closedwon',
+                    pipeline: 'default'
+                  }
+                })
+              })
+            }
+          }
+        } catch (hubErr: any) {
+          console.error('HubSpot sync error (non-fatal):', hubErr.message)
+        }
         break
       }
 
