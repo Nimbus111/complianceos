@@ -85,16 +85,17 @@ export default function PricingPage() {
           </div>
 
           {/* Enterprise */}
-          <div style={{ background: '#fff', border: '1px dashed #c2ddf0', borderRadius: '14px', padding: '24px', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ background: '#fff', border: '2px solid #0d2d5e', borderRadius: '14px', padding: '24px', display: 'flex', flexDirection: 'column' }}>
             <p style={{ fontSize: '11px', fontWeight: '500', color: '#a8a39c', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Enterprise</p>
             <p style={{ fontSize: '32px', fontWeight: '500', color: '#a8a39c', marginBottom: '4px' }}>Custom</p>
             <p style={{ fontSize: '12px', color: '#a8a39c', marginBottom: '16px' }}>per month</p>
             <p style={{ fontSize: '13px', color: '#4a6d8c', lineHeight: '1.6', marginBottom: '20px', flex: 1 }}>
-              For facilities with 4+ x-ray machines or multiple locations. Custom pricing, dedicated support, and volume licensing.
+              Multi-location compliance management — portfolio dashboard, per-site tracking, invite managers, enterprise reporting, and activity monitoring across all facilities. Starting at $1,100/month. support, and volume licensing.
             </p>
-            <span style={{ display: 'block', textAlign: 'center', padding: '9px', border: '1px solid #c2ddf0', borderRadius: '8px', fontSize: '13px', fontWeight: '500', color: '#a8a39c' }}>
-              Coming soon
-            </span>
+            <a href="mailto:info@theradiologycoach.com?subject=Enterprise Demo Request"
+                  style={{ display: 'block', textAlign: 'center', padding: '10px 16px', background: '#0d2d5e', color: '#fff', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: '500', fontFamily: 'Inter, system-ui, sans-serif' }}>
+                  Request a Demo →
+                </a>
           </div>
 
         </div>

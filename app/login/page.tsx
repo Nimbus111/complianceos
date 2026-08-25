@@ -75,6 +75,9 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
+      <p style={{ textAlign: 'center', fontSize: '12px', color: '#a8a39c', marginTop: '20px', fontFamily: 'Inter, system-ui, sans-serif' }}>
+  Questions? <a href="mailto:info@theradiologycoach.com" style={{ color: '#1a5fa8', textDecoration: 'none' }}>info@theradiologycoach.com</a>
+</p>
     </div>
   )
 }

@@ -82,6 +82,9 @@ export default async function SubscribePage() {
           <p style={{ fontSize: '12px', color: '#a8a39c', textAlign: 'center', lineHeight: '1.6' }}>
             By subscribing you agree to our terms of service. Your card will be charged {price}/month after your 14-day trial unless you cancel.
           </p>
+          <p style={{ fontSize: '12px', color: '#a8a39c', textAlign: 'center', marginTop: '12px', fontFamily: 'Inter, system-ui, sans-serif' }}>
+              Questions before subscribing? <a href="mailto:info@theradiologycoach.com" style={{ color: '#1a5fa8', textDecoration: 'none' }}>info@theradiologycoach.com</a>
+            </p>
 
         </div>
       </div>
