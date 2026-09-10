@@ -20,11 +20,26 @@ interface Props {
   equipment: Machine[]
   features: any[]
   activityMap: Record<string, boolean>
+  machineLimit?: number
 }
 
-export default function DashboardMachineView({ equipment, features, activityMap }: Props) {
+export default function DashboardMachineView({ equipment, features, activityMap, machineLimit }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const atLimit = equipment.length >= 3
+  const [addingMachine, setAddingMachine] = useState(false)
+  const atLimit = equipment.length >= (machineLimit || 3)
+
+  const handleAddMachine = async () => {
+    if (!confirm('Add an additional machine for $25/month? This will be billed to your current subscription immediately.')) return
+    setAddingMachine(true)
+    const res = await fetch('/api/machines/add-addon', { method: 'POST' })
+    const data = await res.json()
+    if (data.error) {
+      alert(`Could not add machine: ${data.error}`)
+    } else {
+      window.location.href = '/dashboard/equipment'
+    }
+    setAddingMachine(false)
+  }
   const selectedMachine = equipment.find(e => e.id === selectedId)
 
   const activeFeatures = features.map(f => {
@@ -57,10 +72,10 @@ export default function DashboardMachineView({ equipment, features, activityMap 
             })}
 
             {atLimit ? (
-              <span title="Your plan includes 3 machines per site. Contact us to add more."
-                style={{ fontSize: '12px', padding: '6px 14px', borderRadius: '20px', border: '1px dashed #c2ddf0', color: '#a8a39c', cursor: 'not-allowed', fontFamily: 'Inter, system-ui, sans-serif' }}>
-                + Add Machine
-              </span>
+              <button onClick={handleAddMachine} disabled={addingMachine}
+              style={{ fontSize: '12px', fontWeight: '500', padding: '6px 14px', borderRadius: '20px', border: '1px dashed #1a5fa8', background: '#e8f3fb', color: '#1a5fa8', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif' }}>
+              {addingMachine ? 'Adding...' : '+ Add Machine ($25/mo)'}
+            </button>
             ) : (
               <a href="/dashboard/equipment"
                 style={{ fontSize: '12px', fontWeight: '500', padding: '6px 14px', borderRadius: '20px', border: '1px dashed #1a5fa8', background: '#fff', color: '#1a5fa8', textDecoration: 'none', fontFamily: 'Inter, system-ui, sans-serif' }}>

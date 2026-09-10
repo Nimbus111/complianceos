@@ -73,6 +73,24 @@ export default function EquipmentPage() {
   const [tab, setTab] = useState<'equipment' | 'protection' | 'dosimetry'>('equipment')
   const [orgId, setOrgId] = useState<string | null>(null)
   const [equipment, setEquipment] = useState<any[]>([])
+  const [removingId, setRemovingId] = useState<string | null>(null)
+
+  const handleRemoveMachine = async (equipmentId: string, make: string, model: string) => {
+    if (!confirm(`Remove ${make} ${model}? This cannot be undone. If you have more than 3 machines, your monthly bill will decrease by $25.`)) return
+    setRemovingId(equipmentId)
+    const res = await fetch('/api/machines/remove-addon', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ equipment_id: equipmentId })
+    })
+    const data = await res.json()
+    if (data.error) {
+      alert(`Could not remove machine: ${data.error}`)
+    } else {
+      fetchAll()
+    }
+    setRemovingId(null)
+  }
   
   const machineId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('machine') : null
   const [contacts, setContacts] = useState<any[]>([])
@@ -253,6 +271,12 @@ export default function EquipmentPage() {
                         </button>
                       )
                     })}
+                  <button
+                  onClick={() => handleRemoveMachine(eq.id, eq.manufacturer || '', eq.model || '')}
+                  disabled={removingId === eq.id}
+                  style={{ fontSize: '11px', color: '#931621', background: '#fefafb', border: '1px solid #f5c6c9', borderRadius: '20px', padding: '3px 10px', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif', marginTop: '4px' }}>
+                  {removingId === eq.id ? 'Removing...' : 'Remove machine'}
+                </button>
                   </div>
                 </div>
                 {openContact?.equipId === eq.id && (

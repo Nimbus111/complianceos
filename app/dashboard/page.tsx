@@ -383,7 +383,7 @@ const isSP = org?.org_type === 'service_provider'
           </div>
         </div>
 
-        <DashboardMachineView equipment={equipmentList || []} features={features} activityMap={activityMap} />
+        <DashboardMachineView equipment={equipmentList || []} features={features} activityMap={activityMap} machineLimit={org?.machine_limit || 3} />
 
         <BadgesSection
               badges={badges || []}
