@@ -138,7 +138,7 @@ export default function EquipmentPage() {
 
   const saveEquipment = async () => {
     const res = await fetch('/api/equipment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(equipForm) })
-    if (res.ok) { setShowAddEquip(false); setEquipForm({ device_name: '', manufacturer: '', model_number: '', serial_number: '', facility_registration_number: '', machine_registration_number: '', modality: '' }); fetchAll() }
+    if (res.ok) { setShowAddEquip(false); setEquipForm({ device_name: '', manufacturer: '', model_number: '', serial_number: '', facility_registration_number: '', machine_registration_number: '', modality: '', device_type: 'x-ray_machine' }); fetchAll() }
   }
 
   const saveContact = async () => {
