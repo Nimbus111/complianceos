@@ -223,7 +223,12 @@ export default function EquipmentPage() {
               <div style={{ background: '#fff', border: '1px solid #c2ddf0', borderRadius: '12px', padding: '20px', marginBottom: '16px' }}>
                 <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', marginBottom: '14px' }}>New X-ray device</p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
-                  <input style={inp} placeholder="Device name *" value={equipForm.device_name} onChange={e => setEquipForm(p => ({ ...p, device_name: e.target.value }))} />
+                  <select style={inp} value={equipForm.device_type || 'x-ray_machine'}
+                onChange={e => setEquipForm((p: any) => ({ ...p, device_type: e.target.value }))}>
+                <option value="x-ray_machine">X-ray Machine</option>
+                <option value="accessory">Accessory (laptop, imaging plate, computer, etc.)</option>
+              </select>
+              <input style={inp} placeholder="Device name *" value={equipForm.device_name} onChange={e => setEquipForm(p => ({ ...p, device_name: e.target.value }))} />
                   <input style={inp} placeholder="Modality (e.g. General Radiography)" value={equipForm.modality} onChange={e => setEquipForm(p => ({ ...p, modality: e.target.value }))} />
                   <input style={inp} placeholder="Manufacturer" value={equipForm.manufacturer} onChange={e => setEquipForm(p => ({ ...p, manufacturer: e.target.value }))} />
                   <input style={inp} placeholder="Model number" value={equipForm.model_number} onChange={e => setEquipForm(p => ({ ...p, model_number: e.target.value }))} />

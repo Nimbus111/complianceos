@@ -13,6 +13,12 @@ export async function POST() {
   const { data: profile } = await supabase
     .from('profiles').select('org_id').eq('id', user.id).single()
 
+  const { count: xrayCount } = await supabase
+    .from('equipment')
+    .select('id', { count: 'exact', head: true })
+    .eq('org_id', profile?.org_id)
+    .eq('device_type', 'x-ray_machine')
+
   const { data: org } = await supabase
     .from('organizations').select('machine_limit, org_type').eq('id', profile?.org_id).single()
 

@@ -19,6 +19,7 @@ export async function POST(request: Request) {
     .from('equipment')
     .select('id', { count: 'exact', head: true })
     .eq('org_id', profile?.org_id)
+    .eq('device_type', 'x-ray_machine')
 
   const { data: org } = await supabase
     .from('organizations').select('machine_limit').eq('id', profile?.org_id).single()

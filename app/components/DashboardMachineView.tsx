@@ -26,7 +26,8 @@ interface Props {
 export default function DashboardMachineView({ equipment, features, activityMap, machineLimit }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [addingMachine, setAddingMachine] = useState(false)
-  const atLimit = equipment.length >= (machineLimit || 3)
+  const xrayMachines = equipment.filter((e: any) => !e.device_type || e.device_type === 'x-ray_machine')
+  const atLimit = xrayMachines.length >= (machineLimit || 3)
 
   const handleAddMachine = async () => {
     if (!confirm('Add an additional machine for $25/month? This will be billed to your current subscription immediately.')) return
@@ -60,7 +61,7 @@ export default function DashboardMachineView({ equipment, features, activityMap,
               🖥️ All Machines
             </button>
 
-            {equipment.map(m => {
+            {xrayMachines.map(m => {
               const label = [m.manufacturer, m.model].filter(Boolean).join(' — ') || m.type || 'Machine'
               const isSelected = selectedId === m.id
               return (
