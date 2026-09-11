@@ -105,7 +105,7 @@ export default function EquipmentPage() {
   const [showAddEquip, setShowAddEquip] = useState(false)
   const [showAddGarment, setShowAddGarment] = useState(false)
   const [showAddBadge, setShowAddBadge] = useState(false)
-  const [equipForm, setEquipForm] = useState({ device_name: '', manufacturer: '', model_number: '', serial_number: '', facility_registration_number: '', machine_registration_number: '', modality: '' })
+  const [equipForm, setEquipForm] = useState({ device_name: '', manufacturer: '', model_number: '', device_type: 'x-ray_machine', serial_number: '', facility_registration_number: '', machine_registration_number: '', modality: '' })
   const [garmentForm, setGarmentForm] = useState({ garment_type: 'Lead Apron', garment_category: 'staff', size: '', condition: 'Good', last_inspection_date: '', notes: '' })
   const [badgeForm, setBadgeForm] = useState({ assigned_to: '', manufacturer: '', model_number: '', date_issued: '', reporting_date: '' })
   const router = useRouter()
