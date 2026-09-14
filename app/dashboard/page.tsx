@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import SignOutButton from '../components/SignOutButton'
 import AcknowledgeButton from '../components/AcknowledgeButton'
 import GettingStartedPanel from '../components/GettingStartedPanel'
+import InstallationPacketBanner from '../components/InstallationPacketBanner'
 import DashboardMachineView from '../components/DashboardMachineView'
 import ActivityLog from '../components/ActivityLog'
 import SPDashboardClient from '../components/SPDashboardClient'
@@ -183,6 +184,12 @@ const isSP = org?.org_type === 'service_provider'
     )
 
   
+
+  const { data: pendingPackets } = await supabase
+    .from('sp_installation_packets')
+    .select('*')
+    .eq('clinic_org_id', queryOrgId)
+    .eq('status', 'pending')
 
   const { data: activeNotifications } = await supabase
     .from('enterprise_notifications')
@@ -402,6 +409,12 @@ const isSP = org?.org_type === 'service_provider'
                 </div>
                 <a href="/dashboard/enterprise" style={{ fontSize: '12px', color: '#1a5fa8', textDecoration: 'none' }}>← Back to portfolio</a>
               </div>
+            )}
+            {pendingPackets && pendingPackets.length > 0 && (
+              <InstallationPacketBanner
+                packets={pendingPackets}
+                spName="Your service provider"
+              />
             )}
             {org?.org_type === 'facility' && (
               <GettingStartedPanel

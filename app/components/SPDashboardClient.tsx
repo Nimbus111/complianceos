@@ -4,7 +4,7 @@ import { useState } from 'react'
 const TEACHABLE_URL = 'https://g-turner-consultants.teachable.com/p/x-ray-positioning-and-techniques-for-the-basic-operator1?coupon_code=COMPHUB&product_id=6645011'
 
 type Tab = 'forms' | 'sp-rules' | 'states' | 'contacts' | 'fees'
-type MainTab = 'resources' | 'tools' | 'revenue'
+type MainTab = 'resources' | 'tools' | 'installations' | 'revenue'
 
 interface Props {
   forms: any[]
@@ -30,6 +30,52 @@ export default function SPDashboardClient({ forms, spRules, states, contacts, fe
   const [search, setSearch] = useState('')
   const [expandedRule, setExpandedRule] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [instForm, setInstForm] = useState({
+    clinic_email: '', manufacturer: '', model: '', serial_number: '',
+    type: 'General Radiography', modality: 'General Radiography',
+    purchase_date: '', warranty_expiry_date: '', room_location: '',
+    cal_calibration: '', cal_qa: '', cal_renewal: ''
+  })
+  const [instSending, setInstSending] = useState(false)
+  const [instSent, setInstSent] = useState(false)
+  const [instPackets, setInstPackets] = useState<any[]>([])
+  const [instLoaded, setInstLoaded] = useState(false)
+
+  const loadPackets = async () => {
+    if (instLoaded) return
+    const res = await fetch('/api/sp/installation')
+    const data = await res.json()
+    setInstPackets(data)
+    setInstLoaded(true)
+  }
+
+  const submitInstallation = async () => {
+    if (!instForm.clinic_email || !instForm.manufacturer || !instForm.model) {
+      alert('Please fill in clinic email, manufacturer, and model at minimum.')
+      return
+    }
+    setInstSending(true)
+    const calendarEvents = []
+    if (instForm.cal_calibration) calendarEvents.push({ type: 'calibration', date: instForm.cal_calibration, title: `${instForm.manufacturer} ${instForm.model} — annual calibration due` })
+    if (instForm.cal_qa) calendarEvents.push({ type: 'qa', date: instForm.cal_qa, title: `${instForm.manufacturer} ${instForm.model} — equipment QA due` })
+    if (instForm.cal_renewal) calendarEvents.push({ type: 'renewal', date: instForm.cal_renewal, title: `${instForm.manufacturer} ${instForm.model} — registration renewal due` })
+
+    const res = await fetch('/api/sp/installation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...instForm, calendar_events: calendarEvents })
+    })
+    const data = await res.json()
+    if (data.error) {
+      alert(`Error: ${data.error}`)
+    } else {
+      setInstSent(true)
+      setInstPackets(prev => [data.packet, ...prev])
+      setInstForm({ clinic_email: '', manufacturer: '', model: '', serial_number: '', type: 'General Radiography', modality: 'General Radiography', purchase_date: '', warranty_expiry_date: '', room_location: '', cal_calibration: '', cal_qa: '', cal_renewal: '' })
+      setTimeout(() => setInstSent(false), 4000)
+    }
+    setInstSending(false)
+  }
   const [stateList, setStateList] = useState<string[]>([])
   const [stateForms, setStateForms] = useState<any[]>([])
   const [formsLoading, setFormsLoading] = useState(false)
@@ -63,7 +109,8 @@ export default function SPDashboardClient({ forms, spRules, states, contacts, fe
 
       {/* Main tabs */}
       <div style={{ display: 'flex', gap: '6px', marginBottom: '24px', borderBottom: '1px solid #dce8f5', paddingBottom: '0' }}>
-        {([['resources', 'State Resources'], ['tools', 'Customer Tools'], ['revenue', 'Revenue']] as const).map(([t, label]) => (
+        {([['resources', 'State Resources'], ['tools', 'Customer Tools'],
+        ['installations', 'Installations'], ['revenue', 'Revenue']] as const).map(([t, label]) => (
           <button key={t} onClick={() => setMainTab(t as MainTab)}
             style={{ fontSize: '13px', fontWeight: '500', padding: '10px 18px', background: 'none', border: 'none', borderBottom: `2px solid ${mainTab === t ? '#0d2d5e' : 'transparent'}`, color: mainTab === t ? '#0d2d5e' : '#4a6d8c', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif', marginBottom: '-1px' }}>
             {label}
@@ -326,6 +373,107 @@ export default function SPDashboardClient({ forms, spRules, states, contacts, fe
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {/* INSTALLATIONS */}
+      {mainTab === 'installations' && (
+        <div onMouseEnter={loadPackets}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            {/* New Installation Form */}
+            <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden' }}>
+              <div style={{ padding: '14px 16px', background: '#0d2d5e' }}>
+                <p style={{ fontSize: '13px', fontWeight: '500', color: '#fff', margin: 0 }}>New installation</p>
+                <p style={{ fontSize: '11px', color: '#8bb4d4', margin: '2px 0 0' }}>Pre-fill a clinic's equipment and calendar data</p>
+              </div>
+              <div style={{ padding: '16px' }}>
+                {instSent && (
+                  <div style={{ padding: '10px 14px', background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '8px', fontSize: '13px', color: '#2d6a4f', marginBottom: '12px' }}>
+                    ✓ Installation packet sent — clinic will see it when they log in
+                  </div>
+                )}
+                {[
+                  { key: 'clinic_email', label: 'Clinic email address *', placeholder: 'manager@clinic.com', type: 'email' },
+                  { key: 'manufacturer', label: 'Manufacturer *', placeholder: 'GE Healthcare', type: 'text' },
+                  { key: 'model', label: 'Model *', placeholder: 'Discovery XR656', type: 'text' },
+                  { key: 'serial_number', label: 'Serial number', placeholder: 'GE-2024-88321', type: 'text' },
+                  { key: 'room_location', label: 'Room location', placeholder: 'Room 1', type: 'text' },
+                  { key: 'purchase_date', label: 'Purchase date', placeholder: '', type: 'date' },
+                  { key: 'warranty_expiry_date', label: 'Warranty expiry', placeholder: '', type: 'date' },
+                ].map(field => (
+                  <div key={field.key} style={{ marginBottom: '10px' }}>
+                    <label style={{ fontSize: '11px', fontWeight: '600', color: '#4a6d8c', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: '4px' }}>{field.label}</label>
+                    <input
+                      type={field.type}
+                      placeholder={field.placeholder}
+                      value={(instForm as any)[field.key]}
+                      onChange={e => setInstForm(p => ({ ...p, [field.key]: e.target.value }))}
+                      style={{ width: '100%', padding: '7px 10px', border: '1px solid #c2ddf0', borderRadius: '7px', fontSize: '13px', fontFamily: 'Inter, system-ui, sans-serif', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                ))}
+                <div style={{ marginTop: '14px', marginBottom: '10px', padding: '10px 12px', background: '#f8fbfe', borderRadius: '8px', border: '1px solid #dce8f5' }}>
+                  <p style={{ fontSize: '11px', fontWeight: '600', color: '#4a6d8c', textTransform: 'uppercase', letterSpacing: '.06em', margin: '0 0 10px' }}>Calendar events (optional)</p>
+                  {[
+                    { key: 'cal_calibration', label: 'Next calibration date' },
+                    { key: 'cal_qa', label: 'Next QA due date' },
+                    { key: 'cal_renewal', label: 'Registration renewal date' },
+                  ].map(field => (
+                    <div key={field.key} style={{ marginBottom: '8px' }}>
+                      <label style={{ fontSize: '11px', color: '#4a6d8c', display: 'block', marginBottom: '3px' }}>{field.label}</label>
+                      <input
+                        type="date"
+                        value={(instForm as any)[field.key]}
+                        onChange={e => setInstForm(p => ({ ...p, [field.key]: e.target.value }))}
+                        style={{ width: '100%', padding: '6px 10px', border: '1px solid #c2ddf0', borderRadius: '7px', fontSize: '13px', fontFamily: 'Inter, system-ui, sans-serif', boxSizing: 'border-box' }}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <button onClick={submitInstallation} disabled={instSending}
+                  style={{ width: '100%', padding: '10px', background: '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '500', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif', marginTop: '4px' }}>
+                  {instSending ? 'Sending...' : 'Send to clinic →'}
+                </button>
+              </div>
+            </div>
+
+            {/* Sent Packets List */}
+            <div style={{ background: '#fff', border: '1px solid #dce8f5', borderRadius: '12px', overflow: 'hidden' }}>
+              <div style={{ padding: '14px 16px', background: '#0d2d5e' }}>
+                <p style={{ fontSize: '13px', fontWeight: '500', color: '#fff', margin: 0 }}>Sent installations</p>
+                <p style={{ fontSize: '11px', color: '#8bb4d4', margin: '2px 0 0' }}>Track which clinics have accepted</p>
+              </div>
+              <div style={{ maxHeight: '520px', overflowY: 'auto' }}>
+                {instPackets.length === 0 ? (
+                  <div style={{ padding: '32px 16px', textAlign: 'center', color: '#a8a39c', fontSize: '13px' }}>
+                    No installations sent yet
+                  </div>
+                ) : instPackets.map((p: any) => (
+                  <div key={p.id} style={{ padding: '12px 16px', borderBottom: '1px solid #f4f7fb' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div>
+                        <p style={{ fontSize: '13px', fontWeight: '500', color: '#0d2d5e', margin: '0 0 2px' }}>
+                          {p.equipment_data?.manufacturer} {p.equipment_data?.model}
+                        </p>
+                        <p style={{ fontSize: '11px', color: '#4a6d8c', margin: 0 }}>{p.clinic_email}</p>
+                      </div>
+                      <span style={{
+                        fontSize: '11px', fontWeight: '500', padding: '2px 8px', borderRadius: '20px',
+                        background: p.status === 'accepted' ? '#edfaf3' : '#f0f4f8',
+                        color: p.status === 'accepted' ? '#2d6a4f' : '#4a6d8c',
+                        border: `1px solid ${p.status === 'accepted' ? '#b8e8cc' : '#c2ddf0'}`
+                      }}>
+                        {p.status === 'accepted' ? '✓ Accepted' : 'Pending'}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: '11px', color: '#a8a39c', margin: '4px 0 0' }}>
+                      {new Date(p.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
