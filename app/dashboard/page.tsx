@@ -249,9 +249,10 @@ const isSP = org?.org_type === 'service_provider'
   const completedFilteredTaskIds = completedTaskIds.filter((id: string) =>
     (filteredTasks as any[]).some((t: any) => t.id === id)
   )
-   const nonAdvisoryCount = (tasks || []).filter((t: any) => t.urgency !== 'Advisory').length
+   const scorableBase = (filteredTasks || tasks || []).filter((t: any) => t.urgency !== 'Advisory')
+  const nonAdvisoryCount = scorableBase.length
   const completedNonAdvisory = completedTaskIds.filter((id: string) =>
-    (tasks || []).some((t: any) => t.id === id && t.urgency !== 'Advisory')
+    scorableBase.some((t: any) => t.id === id)
   ).length
   const taskPct = nonAdvisoryCount > 0
   ? Math.round((completedNonAdvisory / nonAdvisoryCount) * 100)  
