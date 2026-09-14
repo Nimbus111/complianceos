@@ -47,17 +47,11 @@ export async function POST(request: Request) {
       sp_org_id: profile?.org_id,
       clinic_org_id: clinicOrg || null,
       clinic_email: body.clinic_email,
-      equipment_data: {
-        manufacturer: body.manufacturer,
-        model: body.model,
-        serial_number: body.serial_number,
-        type: body.type,
-        modality: body.modality,
-        purchase_date: body.purchase_date,
-        warranty_expiry_date: body.warranty_expiry_date,
-        room_location: body.room_location,
-        device_type: 'x-ray_machine'
+      equipment_data: body.equipment_list?.[0] ? { ...body.equipment_list[0], device_type: 'x-ray_machine' } : {
+        manufacturer: body.manufacturer, model: body.model, serial_number: body.serial_number,
+        type: body.type, device_type: 'x-ray_machine'
       },
+      equipment_list: body.equipment_list || null,
       calendar_events: body.calendar_events || [],
       status: 'pending'
     })

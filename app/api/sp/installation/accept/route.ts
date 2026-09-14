@@ -21,26 +21,29 @@ export async function POST(request: Request) {
 
   if (!packet) return NextResponse.json({ error: 'Packet not found' }, { status: 404 })
 
-  const eq = packet.equipment_data
+  const equipmentList = packet.equipment_list || [packet.equipment_data]
 
-  // Create equipment record
-  const { data: equipment, error: eqError } = await supabase
-    .from('equipment')
-    .insert({
-      org_id: profile?.org_id,
-      manufacturer: eq.manufacturer,
-      model: eq.model,
-      serial_number: eq.serial_number,
-      type: eq.type,
-      room_location: eq.room_location || null,
-      purchase_date: eq.purchase_date || null,
-      warranty_expiry_date: eq.warranty_expiry_date || null,
-      device_type: 'x-ray_machine'
-    })
-    .select()
-    .single()
-
-  if (eqError) return NextResponse.json({ error: eqError.message }, { status: 500 })
+  const insertedEquipment = []
+  for (const eq of equipmentList) {
+    const { data: equipment, error: eqError } = await supabase
+      .from('equipment')
+      .insert({
+        org_id: profile?.org_id,
+        manufacturer: eq.manufacturer,
+        model: eq.model,
+        serial_number: eq.serial_number || null,
+        type: eq.type || 'General Radiography',
+        room_location: eq.room_location || null,
+        purchase_date: eq.purchase_date || null,
+        warranty_expiry_date: eq.warranty_expiry_date || null,
+        device_type: 'x-ray_machine'
+      })
+      .select()
+      .single()
+    if (eqError) return NextResponse.json({ error: eqError.message }, { status: 500 })
+    insertedEquipment.push(equipment)
+  }
+  const equipment = insertedEquipment[0]
 
   // Create calendar events
   if (packet.calendar_events?.length > 0) {
