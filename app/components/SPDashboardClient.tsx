@@ -40,49 +40,39 @@ export default function SPDashboardClient({ forms, spRules, states, contacts, fe
   const [instSent, setInstSent] = useState(false)
   const [instPackets, setInstPackets] = useState<any[]>([])
   const [instLoaded, setInstLoaded] = useState(false)
-  const [machines, setMachines] = useState([{ manufacturer: '', model: '', serial_number: '', type: 'General Radiography', purchase_date: '', warranty_expiry_date: '', room_location: '' }])
-  const [calEvents, setCalEvents] = useState([{ type: 'calibration', date: '', title: '' }])
-  const [siteEmails, setSiteEmails] = useState([''])
 
   const loadPackets = async () => {
     if (instLoaded) return
     const res = await fetch('/api/sp/installation')
     const data = await res.json()
     setInstPackets(data)
-const submitInstallation = async () => {
-    const validEmails = siteEmails.filter(e => e.trim())
-    const validMachines = machines.filter(m => m.manufacturer && m.model)
-    if (validEmails.length === 0 || validMachines.length === 0) {
-      alert('Please add at least one site email and one machine.')
+    setInstLoaded(true)
+  }
+
+  const submitInstallation = async () => {
+    if (!instForm.clinic_email || !instForm.manufacturer || !instForm.model) {
+      alert('Please fill in clinic email, manufacturer, and model at minimum.')
       return
     }
     setInstSending(true)
-    const validCalEvents = calEvents.filter(e => e.date)
-    const results = await Promise.all(validEmails.map((email: string) =>
-      fetch('/api/sp/installation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          clinic_email: email.trim(),
-          equipment_list: validMachines,
-          calendar_events: validCalEvents
-        })
-      }).then((r: Response) => r.json())
-    ))
-    const errors = results.filter((r: any) => r.error)
-    if (errors.length > 0) {
-      alert(`Some submissions failed: ${errors.map((e: any) => e.error).join(', ')}`)
+    const calendarEvents = []
+    if (instForm.cal_calibration) calendarEvents.push({ type: 'calibration', date: instForm.cal_calibration, title: `${instForm.manufacturer} ${instForm.model} — annual calibration due` })
+    if (instForm.cal_qa) calendarEvents.push({ type: 'qa', date: instForm.cal_qa, title: `${instForm.manufacturer} ${instForm.model} — equipment QA due` })
+    if (instForm.cal_renewal) calendarEvents.push({ type: 'renewal', date: instForm.cal_renewal, title: `${instForm.manufacturer} ${instForm.model} — registration renewal due` })
+
+    const res = await fetch('/api/sp/installation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...instForm, calendar_events: calendarEvents })
+    })
+    const data = await res.json()
+    if (data.error) {
+      alert(`Error: ${data.error}`)
     } else {
       setInstSent(true)
-      const newPackets = results.map((r: any) => r.packet).filter(Boolean)
-      setInstPackets((prev: any[]) => [...newPackets, ...prev])
-      setMachines([{ manufacturer: '', model: '', serial_number: '', type: 'General Radiography', purchase_date: '', warranty_expiry_date: '', room_location: '' }])
-      setCalEvents([{ type: 'calibration', date: '', title: '' }])
-      setSiteEmails([''])
+      setInstPackets(prev => [data.packet, ...prev])
+      setInstForm({ clinic_email: '', manufacturer: '', model: '', serial_number: '', type: 'General Radiography', modality: 'General Radiography', purchase_date: '', warranty_expiry_date: '', room_location: '', cal_calibration: '', cal_qa: '', cal_renewal: '' })
       setTimeout(() => setInstSent(false), 4000)
-    }
-    setInstSending(false)
-  }
     }
     setInstSending(false)
   }
@@ -402,92 +392,47 @@ const submitInstallation = async () => {
                     ✓ Installation packet sent — clinic will see it when they log in
                   </div>
                 )}
-                {/* Site emails */}
-                <p style={{ fontSize: '11px', fontWeight: '600', color: '#4a6d8c', textTransform: 'uppercase', letterSpacing: '.06em', margin: '0 0 8px' }}>Clinic / site email(s) *</p>
-                {siteEmails.map((email: string, i: number) => (
-                  <div key={i} style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
-                    <input type="email" placeholder="manager@clinic.com" value={email}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSiteEmails((prev: string[]) => prev.map((v, idx) => idx === i ? e.target.value : v))}
-                      style={{ flex: 1, padding: '7px 10px', border: '1px solid #c2ddf0', borderRadius: '7px', fontSize: '13px', fontFamily: 'Inter, system-ui, sans-serif' }} />
-                    {siteEmails.length > 1 && (
-                      <button onClick={() => setSiteEmails((prev: string[]) => prev.filter((_, idx) => idx !== i))}
-                        style={{ padding: '7px 10px', background: '#fefafb', border: '1px solid #f5c6c9', borderRadius: '7px', color: '#931621', cursor: 'pointer', fontSize: '13px', fontFamily: 'Inter, system-ui, sans-serif' }}>✕</button>
-                    )}
+                {[
+                  { key: 'clinic_email', label: 'Clinic email address *', placeholder: 'manager@clinic.com', type: 'email' },
+                  { key: 'manufacturer', label: 'Manufacturer *', placeholder: 'GE Healthcare', type: 'text' },
+                  { key: 'model', label: 'Model *', placeholder: 'Discovery XR656', type: 'text' },
+                  { key: 'serial_number', label: 'Serial number', placeholder: 'GE-2024-88321', type: 'text' },
+                  { key: 'room_location', label: 'Room location', placeholder: 'Room 1', type: 'text' },
+                  { key: 'purchase_date', label: 'Purchase date', placeholder: '', type: 'date' },
+                  { key: 'warranty_expiry_date', label: 'Warranty expiry', placeholder: '', type: 'date' },
+                ].map(field => (
+                  <div key={field.key} style={{ marginBottom: '10px' }}>
+                    <label style={{ fontSize: '11px', fontWeight: '600', color: '#4a6d8c', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: '4px' }}>{field.label}</label>
+                    <input
+                      type={field.type}
+                      placeholder={field.placeholder}
+                      value={(instForm as any)[field.key]}
+                      onChange={e => setInstForm(p => ({ ...p, [field.key]: e.target.value }))}
+                      style={{ width: '100%', padding: '7px 10px', border: '1px solid #c2ddf0', borderRadius: '7px', fontSize: '13px', fontFamily: 'Inter, system-ui, sans-serif', boxSizing: 'border-box' }}
+                    />
                   </div>
                 ))}
-                <button onClick={() => setSiteEmails((prev: string[]) => [...prev, ''])}
-                  style={{ fontSize: '12px', color: '#1a5fa8', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '4px 12px', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif', marginBottom: '16px' }}>
-                  + Add another site
-                </button>
-
-                {/* Machines */}
-                <p style={{ fontSize: '11px', fontWeight: '600', color: '#4a6d8c', textTransform: 'uppercase', letterSpacing: '.06em', margin: '0 0 8px' }}>X-ray equipment *</p>
-                {machines.map((m: any, i: number) => (
-                  <div key={i} style={{ padding: '12px', background: '#f8fbfe', borderRadius: '8px', border: '1px solid #dce8f5', marginBottom: '10px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '12px', fontWeight: '500', color: '#0d2d5e' }}>Machine {i + 1}</span>
-                      {machines.length > 1 && (
-                        <button onClick={() => setMachines((prev: any[]) => prev.filter((_, idx) => idx !== i))}
-                          style={{ fontSize: '11px', color: '#931621', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif' }}>Remove</button>
-                      )}
+                <div style={{ marginTop: '14px', marginBottom: '10px', padding: '10px 12px', background: '#f8fbfe', borderRadius: '8px', border: '1px solid #dce8f5' }}>
+                  <p style={{ fontSize: '11px', fontWeight: '600', color: '#4a6d8c', textTransform: 'uppercase', letterSpacing: '.06em', margin: '0 0 10px' }}>Calendar events (optional)</p>
+                  {[
+                    { key: 'cal_calibration', label: 'Next calibration date' },
+                    { key: 'cal_qa', label: 'Next QA due date' },
+                    { key: 'cal_renewal', label: 'Registration renewal date' },
+                  ].map(field => (
+                    <div key={field.key} style={{ marginBottom: '8px' }}>
+                      <label style={{ fontSize: '11px', color: '#4a6d8c', display: 'block', marginBottom: '3px' }}>{field.label}</label>
+                      <input
+                        type="date"
+                        value={(instForm as any)[field.key]}
+                        onChange={e => setInstForm(p => ({ ...p, [field.key]: e.target.value }))}
+                        style={{ width: '100%', padding: '6px 10px', border: '1px solid #c2ddf0', borderRadius: '7px', fontSize: '13px', fontFamily: 'Inter, system-ui, sans-serif', boxSizing: 'border-box' }}
+                      />
                     </div>
-                    {(['manufacturer', 'model', 'serial_number', 'room_location'] as const).map((key: string) => (
-                      <input key={key} placeholder={key === 'manufacturer' ? 'Manufacturer *' : key === 'model' ? 'Model *' : key === 'serial_number' ? 'Serial number' : 'Room location'}
-                        value={(m as any)[key]}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMachines((prev: any[]) => prev.map((v, idx) => idx === i ? { ...v, [key]: e.target.value } : v))}
-                        style={{ width: '100%', padding: '7px 10px', border: '1px solid #c2ddf0', borderRadius: '7px', fontSize: '13px', fontFamily: 'Inter, system-ui, sans-serif', marginBottom: '6px', boxSizing: 'border-box' as const }} />
-                    ))}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
-                      <div>
-                        <label style={{ fontSize: '11px', color: '#4a6d8c', display: 'block', marginBottom: '3px' }}>Purchase date</label>
-                        <input type="date" value={m.purchase_date}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMachines((prev: any[]) => prev.map((v, idx) => idx === i ? { ...v, purchase_date: e.target.value } : v))}
-                          style={{ width: '100%', padding: '7px 10px', border: '1px solid #c2ddf0', borderRadius: '7px', fontSize: '13px', fontFamily: 'Inter, system-ui, sans-serif', boxSizing: 'border-box' as const }} />
-                      </div>
-                      <div>
-                        <label style={{ fontSize: '11px', color: '#4a6d8c', display: 'block', marginBottom: '3px' }}>Warranty expiry</label>
-                        <input type="date" value={m.warranty_expiry_date}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMachines((prev: any[]) => prev.map((v, idx) => idx === i ? { ...v, warranty_expiry_date: e.target.value } : v))}
-                          style={{ width: '100%', padding: '7px 10px', border: '1px solid #c2ddf0', borderRadius: '7px', fontSize: '13px', fontFamily: 'Inter, system-ui, sans-serif', boxSizing: 'border-box' as const }} />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                <button onClick={() => setMachines((prev: any[]) => [...prev, { manufacturer: '', model: '', serial_number: '', type: 'General Radiography', purchase_date: '', warranty_expiry_date: '', room_location: '' }])}
-                  style={{ fontSize: '12px', color: '#1a5fa8', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '4px 12px', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif', marginBottom: '16px' }}>
-                  + Add another machine
-                </button>
-
-                {/* Calendar events */}
-                <p style={{ fontSize: '11px', fontWeight: '600', color: '#4a6d8c', textTransform: 'uppercase', letterSpacing: '.06em', margin: '0 0 8px' }}>Calendar events</p>
-                {calEvents.map((ev: any, i: number) => (
-                  <div key={i} style={{ display: 'flex', gap: '6px', marginBottom: '8px', alignItems: 'center' }}>
-                    <select value={ev.type}
-                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCalEvents((prev: any[]) => prev.map((v, idx) => idx === i ? { ...v, type: e.target.value } : v))}
-                      style={{ padding: '7px 10px', border: '1px solid #c2ddf0', borderRadius: '7px', fontSize: '13px', fontFamily: 'Inter, system-ui, sans-serif' }}>
-                      <option value="calibration">Annual calibration</option>
-                      <option value="qa">Equipment QA</option>
-                      <option value="renewal">Registration renewal</option>
-                      <option value="dosimetry">Dosimetry reading</option>
-                      <option value="lead_apron">Lead apron check</option>
-                    </select>
-                    <input type="date" value={ev.date}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCalEvents((prev: any[]) => prev.map((v, idx) => idx === i ? { ...v, date: e.target.value } : v))}
-                      style={{ flex: 1, padding: '7px 10px', border: '1px solid #c2ddf0', borderRadius: '7px', fontSize: '13px', fontFamily: 'Inter, system-ui, sans-serif' }} />
-                    {calEvents.length > 1 && (
-                      <button onClick={() => setCalEvents((prev: any[]) => prev.filter((_, idx) => idx !== i))}
-                        style={{ padding: '7px 10px', background: '#fefafb', border: '1px solid #f5c6c9', borderRadius: '7px', color: '#931621', cursor: 'pointer', fontSize: '13px', fontFamily: 'Inter, system-ui, sans-serif' }}>✕</button>
-                    )}
-                  </div>
-                ))}
-                <button onClick={() => setCalEvents((prev: any[]) => [...prev, { type: 'qa', date: '' }])}
-                  style={{ fontSize: '12px', color: '#1a5fa8', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '4px 12px', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif', marginBottom: '16px' }}>
-                  + Add calendar event
-                </button>
-
+                  ))}
+                </div>
                 <button onClick={submitInstallation} disabled={instSending}
-                  style={{ width: '100%', padding: '10px', background: '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '500', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif' }}>
-                  {instSending ? 'Sending...' : `Send to ${siteEmails.filter((e: string) => e.trim()).length || 1} site${siteEmails.filter((e: string) => e.trim()).length > 1 ? 's' : ''} →`}
+                  style={{ width: '100%', padding: '10px', background: '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '500', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif', marginTop: '4px' }}>
+                  {instSending ? 'Sending...' : 'Send to clinic →'}
                 </button>
               </div>
             </div>
