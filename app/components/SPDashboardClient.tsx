@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import SPInstallationForm from './SPInstallationForm'
 
 const TEACHABLE_URL = 'https://g-turner-consultants.teachable.com/p/x-ray-positioning-and-techniques-for-the-basic-operator1?coupon_code=COMPHUB&product_id=6645011'
 
@@ -387,53 +388,7 @@ export default function SPDashboardClient({ forms, spRules, states, contacts, fe
                 <p style={{ fontSize: '11px', color: '#8bb4d4', margin: '2px 0 0' }}>Pre-fill a clinic's equipment and calendar data</p>
               </div>
               <div style={{ padding: '16px' }}>
-                {instSent && (
-                  <div style={{ padding: '10px 14px', background: '#edfaf3', border: '1px solid #b8e8cc', borderRadius: '8px', fontSize: '13px', color: '#2d6a4f', marginBottom: '12px' }}>
-                    ✓ Installation packet sent — clinic will see it when they log in
-                  </div>
-                )}
-                {[
-                  { key: 'clinic_email', label: 'Clinic email address *', placeholder: 'manager@clinic.com', type: 'email' },
-                  { key: 'manufacturer', label: 'Manufacturer *', placeholder: 'GE Healthcare', type: 'text' },
-                  { key: 'model', label: 'Model *', placeholder: 'Discovery XR656', type: 'text' },
-                  { key: 'serial_number', label: 'Serial number', placeholder: 'GE-2024-88321', type: 'text' },
-                  { key: 'room_location', label: 'Room location', placeholder: 'Room 1', type: 'text' },
-                  { key: 'purchase_date', label: 'Purchase date', placeholder: '', type: 'date' },
-                  { key: 'warranty_expiry_date', label: 'Warranty expiry', placeholder: '', type: 'date' },
-                ].map(field => (
-                  <div key={field.key} style={{ marginBottom: '10px' }}>
-                    <label style={{ fontSize: '11px', fontWeight: '600', color: '#4a6d8c', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: '4px' }}>{field.label}</label>
-                    <input
-                      type={field.type}
-                      placeholder={field.placeholder}
-                      value={(instForm as any)[field.key]}
-                      onChange={e => setInstForm(p => ({ ...p, [field.key]: e.target.value }))}
-                      style={{ width: '100%', padding: '7px 10px', border: '1px solid #c2ddf0', borderRadius: '7px', fontSize: '13px', fontFamily: 'Inter, system-ui, sans-serif', boxSizing: 'border-box' }}
-                    />
-                  </div>
-                ))}
-                <div style={{ marginTop: '14px', marginBottom: '10px', padding: '10px 12px', background: '#f8fbfe', borderRadius: '8px', border: '1px solid #dce8f5' }}>
-                  <p style={{ fontSize: '11px', fontWeight: '600', color: '#4a6d8c', textTransform: 'uppercase', letterSpacing: '.06em', margin: '0 0 10px' }}>Calendar events (optional)</p>
-                  {[
-                    { key: 'cal_calibration', label: 'Next calibration date' },
-                    { key: 'cal_qa', label: 'Next QA due date' },
-                    { key: 'cal_renewal', label: 'Registration renewal date' },
-                  ].map(field => (
-                    <div key={field.key} style={{ marginBottom: '8px' }}>
-                      <label style={{ fontSize: '11px', color: '#4a6d8c', display: 'block', marginBottom: '3px' }}>{field.label}</label>
-                      <input
-                        type="date"
-                        value={(instForm as any)[field.key]}
-                        onChange={e => setInstForm(p => ({ ...p, [field.key]: e.target.value }))}
-                        style={{ width: '100%', padding: '6px 10px', border: '1px solid #c2ddf0', borderRadius: '7px', fontSize: '13px', fontFamily: 'Inter, system-ui, sans-serif', boxSizing: 'border-box' }}
-                      />
-                    </div>
-                  ))}
-                </div>
-                <button onClick={submitInstallation} disabled={instSending}
-                  style={{ width: '100%', padding: '10px', background: '#0d2d5e', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '500', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif', marginTop: '4px' }}>
-                  {instSending ? 'Sending...' : 'Send to clinic →'}
-                </button>
+                <SPInstallationForm onSent={packet => setInstPackets((prev: any[]) => [packet, ...prev])} />
               </div>
             </div>
 
