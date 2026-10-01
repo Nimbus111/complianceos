@@ -4,6 +4,7 @@ import AdminEnterpriseForm from '../components/admin/AdminEnterpriseForm'
 import AdminClinicForm from '../components/admin/AdminClinicForm'
 import AdminUserForm from '../components/admin/AdminUserForm'
 import AdminAccessForm from '../components/admin/AdminAccessForm'
+import AdminPartnerForm from '../components/admin/AdminPartnerForm'
 
 export default async function AdminPage() {
   const supabase = await createClient()
@@ -66,6 +67,7 @@ export default async function AdminPage() {
           <AdminClinicForm enterprises={enterprises || []} />
           <AdminUserForm enterprises={enterprises || []} />
           <AdminAccessForm />
+          <AdminPartnerForm />
         </div>
 
         {/* Subscriber table */}
