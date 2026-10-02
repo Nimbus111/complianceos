@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import AdminEnterpriseForm from '../components/admin/AdminEnterpriseForm'
 import AdminClinicForm from '../components/admin/AdminClinicForm'
@@ -31,6 +32,17 @@ export default async function AdminPage() {
     .order('created_at', { ascending: false })
 
   const activeCount = (subscribers || []).filter(s => s.status === 'active' || s.status === 'trialing').length
+  const adminDb = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+  const { data: allProfiles } = await adminDb.from('profiles').select('org_id, id')
+  const { data: { users: allUsers } } = await adminDb.auth.admin.listUsers()
+  const emailMap: Record<string, string> = {}
+  ;(allUsers || []).forEach((u: any) => {
+    const prof = (allProfiles || []).find((p: any) => p.id === u.id)
+    if (prof?.org_id) emailMap[prof.org_id] = u.email || ''
+  })
   const enterpriseCount = (enterprises || []).length
 
   return (
@@ -79,7 +91,7 @@ export default async function AdminPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
               <thead>
                 <tr style={{ background: '#f0f4f8' }}>
-                  {['Organization', 'Type', 'Status', 'Expiry', 'Created'].map(h => (
+                  {['Organization', 'Email', 'Type', 'Status', 'Expiry', 'Created'].map(h => (
                     <th key={h} style={{ padding: '10px 16px', textAlign: 'left', color: '#4a6d8c', fontWeight: '500', borderBottom: '1px solid #dce8f5' }}>{h}</th>
                   ))}
                 </tr>
@@ -88,6 +100,7 @@ export default async function AdminPage() {
                 {(subscribers || []).map((s: any, i) => (
                   <tr key={i} style={{ borderBottom: '1px solid #f4f7fb' }}>
                     <td style={{ padding: '10px 16px', color: '#0d2d5e', fontWeight: '500' }}>{s.organizations?.name || '—'}</td>
+                    <td style={{ padding: '10px 16px', color: '#4a6d8c', fontSize: '12px' }}>{emailMap[s.org_id] || '—'}</td>
                     <td style={{ padding: '10px 16px', color: '#4a6d8c' }}>{s.organizations?.org_type || '—'}</td>
                     <td style={{ padding: '10px 16px' }}>
                       <span style={{ fontSize: '10px', fontWeight: '600', padding: '2px 8px', borderRadius: '20px', background: s.status === 'active' ? '#edfaf3' : '#fff6e8', color: s.status === 'active' ? '#2d6a4f' : '#9a3510' }}>
