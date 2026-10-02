@@ -16,7 +16,7 @@ export default async function EnterpriseReportPage() {
 
   const { data: siteLinks } = await supabase
     .from('enterprise_sites')
-    .select('site_org_id, organizations(id, name, facility_state, facility_type_name, modality_names)')
+    .select('site_org_id, organizations(id, name, facility_state, facility_type_name)')
     .eq('enterprise_org_id', profile.org_id)
 
   const siteIds = (siteLinks || []).map((s: any) => s.site_org_id)
