@@ -405,7 +405,7 @@ export default function SettingsPage() {
           )}
 
           <div style={{ background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '8px', padding: '10px 14px', marginBottom: '14px', fontSize: '12px', color: '#1a5fa8', lineHeight: '1.6' }}>
-            <strong>Note:</strong> Changing your service dealer updates your emergency contact only. Revenue share arrangements are maintained separately. To discontinue a revenue share, email <strong>hello@theradiologycoach.com</strong>.
+            <strong>Note:</strong> Changing your service dealer updates your emergency contact only. Revenue share arrangements are maintained separately. To discontinue a revenue share, email <strong>info@theradiologycoach.com</strong>.
           </div>
 
           {!dealerMode && (

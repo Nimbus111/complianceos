@@ -168,7 +168,7 @@ export default function SPSettingsPage() {
             ))}
           </div>
           <p style={{ fontSize: '11px', color: '#a8a39c', marginTop: '12px', fontStyle: 'italic' }}>
-            To update company information contact hello@theradiologycoach.com
+            To update company information contact info@theradiologycoach.com
           </p>
         </div>
       </div>

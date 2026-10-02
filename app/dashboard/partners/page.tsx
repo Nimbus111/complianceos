@@ -83,7 +83,7 @@ export default function PartnersPage() {
             <p style={{ color: '#fff', fontSize: '14px', fontWeight: '500', marginBottom: '4px' }}>Are you a vendor or service provider?</p>
             <p style={{ color: '#8bb4d4', fontSize: '12px', margin: 0 }}>If you offer a product or service relevant to x-ray compliance, contact us about becoming a preferred partner.</p>
           </div>
-          <a href="mailto:hello@theradiologycoach.com" style={{ height: '36px', padding: '0 18px', background: '#fff', color: '#0d2d5e', borderRadius: '8px', fontSize: '13px', fontWeight: '500', textDecoration: 'none', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+          <a href="mailto:info@theradiologycoach.com" style={{ height: '36px', padding: '0 18px', background: '#fff', color: '#0d2d5e', borderRadius: '8px', fontSize: '13px', fontWeight: '500', textDecoration: 'none', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
             Get in touch
           </a>
         </div>
