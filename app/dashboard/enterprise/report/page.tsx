@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import PrintButton from '../../../components/PrintButton'
 
 export default async function EnterpriseReportPage() {
   const supabase = await createClient()
@@ -55,9 +56,7 @@ export default async function EnterpriseReportPage() {
         </div>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
           <a href="/dashboard/enterprise" style={{ color: '#8bb4d4', fontSize: '13px', textDecoration: 'none' }}>← Portfolio</a>
-          <button onClick={() => window.print()} style={{ background: '#1a5fa8', color: '#fff', border: 'none', borderRadius: '7px', padding: '7px 16px', fontSize: '12px', fontWeight: '500', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif' }}>
-            Print / Save PDF
-          </button>
+          <PrintButton />
         </div>
       </div>
 
