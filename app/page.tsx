@@ -294,14 +294,31 @@ export default function HomePage() {
       <div style={{ background: '#f0f4f8', padding: '48px 24px 40px' }}>
         <div style={{ maxWidth: '860px', margin: '0 auto' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '20px', padding: '4px 12px', marginBottom: '20px' }}>
-            <span style={{ fontSize: '11px', fontWeight: '500', color: '#1a5fa8', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Free compliance search — all 50 states</span>
+            <span style={{ fontSize: '11px', fontWeight: '500', color: '#1a5fa8', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Preview your state's requirements — free
+ — all 50 states</span>
           </div>
           <h1 style={{ fontSize: '36px', fontWeight: '500', color: '#0d2d5e', lineHeight: '1.2', marginBottom: '12px', maxWidth: '640px' }}>
-            Find your X-ray compliance requirements — instantly
+            Your x-ray facility should be inspection-ready every day — not just when you expect an inspector.
           </h1>
           <p style={{ fontSize: '15px', color: '#4a6d8c', lineHeight: '1.65', maxWidth: '580px', marginBottom: '32px' }}>
-            Select your state, facility type, and imaging modality for a complete, field-level compliance overview drawn from official state radiation control regulations.
+            ComplianceOS is the all-in-one compliance management platform for medical facilities that operate x-ray equipment. Every requirement, deadline, document, and program — organized in one place so your facility is always ready, even when you're not in the room.
+
           </p>
+          {/* Pain section */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginTop: '28px', marginBottom: '32px', maxWidth: '860px' }}>
+            {[
+              { icon: '🔴', title: 'The unannounced inspection', body: 'State inspectors don\'t schedule visits. Your documentation needs to be ready every single day — not just when you\'re expecting them.' },
+              { icon: '🔴', title: 'Staff turnover takes compliance with it', body: 'When the person who manages compliance leaves, their knowledge goes with them. One platform keeps the entire team informed.' },
+              { icon: '🔴', title: 'Equipment shutdown is expensive', body: 'Inspection violations can seal your equipment on the spot. Every cancelled patient appointment is lost revenue and broken trust.' },
+            ].map((card, i) => (
+              <div key={i} style={{ background: '#fff', border: '1px solid #f5c6c9', borderRadius: '10px', padding: '16px 18px' }}>
+                <span style={{ fontSize: '18px', display: 'block', marginBottom: '8px' }}>{card.icon}</span>
+                <p style={{ fontSize: '13px', fontWeight: '600', color: '#0d2d5e', margin: '0 0 6px', lineHeight: '1.4' }}>{card.title}</p>
+                <p style={{ fontSize: '13px', color: '#4a6d8c', margin: 0, lineHeight: '1.6' }}>{card.body}</p>
+              </div>
+            ))}
+          </div>
+          <p style={{ fontSize: '14px', fontWeight: '500', color: '#0d2d5e', marginBottom: '16px' }}>See what ComplianceOS already knows about your state and facility:</p>
 
           <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: '160px' }}>
@@ -433,7 +450,7 @@ export default function HomePage() {
       )}
       <div>
         <p style={{ fontSize: '15px', fontWeight: '500', color: '#0d2d5e', marginBottom: '6px', lineHeight: '1.5' }}>
-          "X-ray compliance doesn't have to be confusing. I built ComplianceOS so that every facility — regardless of size — can know exactly what their state requires and prove it."
+          "I've watched facilities fail inspections not because they were unsafe — but because their documentation wasn't organized. I built ComplianceOS to solve that. It's the system that keeps every requirement, credential, and deadline in one place so that when an inspector walks in, your team is ready in seconds."
         </p>
         <p style={{ fontSize: '12px', color: '#4a6d8c', fontWeight: '500' }}>Gregory Turner · The Radiology Coach · X-ray Compliance Specialist</p>
       </div>
