@@ -33,7 +33,7 @@ export async function GET() {
     const f = r.fields
     return {
       airtable_id: r.id,
-      state_name: getStr(f['State Name']) || getLinked(f['State']),
+      state_name: Array.isArray(f['State Name']) ? (f['State Name'][0] || '') : getStr(f['State Name']),
       director: getStr(f['Director']),
       registration_email: getStr(f['Registration Email Address']),
       phone_number: getStr(f['Phone Number']),
