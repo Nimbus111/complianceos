@@ -1,11 +1,12 @@
 'use client'
 import { useState } from 'react'
 import SPInstallationForm from './SPInstallationForm'
+import SPRegistrationsTable from './SPRegistrationsTable'
 
 const TEACHABLE_URL = 'https://g-turner-consultants.teachable.com/p/x-ray-positioning-and-techniques-for-the-basic-operator1?coupon_code=COMPHUB&product_id=6645011'
 
 type Tab = 'forms' | 'sp-rules' | 'states' | 'contacts' | 'fees'
-type MainTab = 'resources' | 'tools' | 'installations' | 'revenue'
+type MainTab = 'overview' | 'resources' | 'tools' | 'installations' | 'revenue'
 
 interface Props {
   forms: any[]
@@ -26,7 +27,7 @@ function Badge({ value, trueLabel = 'Yes', falseLabel = 'No' }: { value: boolean
 }
 
 export default function SPDashboardClient({ forms, spRules, states, contacts, fees, revenue, org }: Props) {
-  const [mainTab, setMainTab] = useState<MainTab>('resources')
+  const [mainTab, setMainTab] = useState<MainTab>('overview')
   const [resourceTab, setResourceTab] = useState<Tab>('sp-rules')
   const [search, setSearch] = useState('')
   const [expandedRule, setExpandedRule] = useState<string | null>(null)
@@ -108,9 +109,22 @@ export default function SPDashboardClient({ forms, spRules, states, contacts, fe
   return (
     <div style={{ fontFamily: 'Inter, system-ui, sans-serif', maxWidth: '1100px', margin: '0 auto', padding: '28px 20px' }}>
 
-      {/* Main tabs */}
+      {/* Breadcrumb */}
+        {mainTab !== 'overview' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', padding: '8px 12px', background: '#f0f4f8', borderRadius: '8px' }}>
+            <button onClick={() => { setMainTab('overview'); setSearch('') }}
+              style={{ fontSize: '12px', color: '#1a5fa8', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif', fontWeight: '500' }}>
+              ← SP Dashboard
+            </button>
+            <span style={{ color: '#a8a39c', fontSize: '11px' }}>›</span>
+            <span style={{ fontSize: '12px', color: '#4a6d8c' }}>
+              {mainTab === 'resources' ? 'State Resources' : mainTab === 'tools' ? 'Customer Tools' : mainTab === 'installations' ? 'Installations' : 'Revenue'}
+            </span>
+          </div>
+        )}
+        {/* Main tabs */}
       <div style={{ display: 'flex', gap: '6px', marginBottom: '24px', borderBottom: '1px solid #dce8f5', paddingBottom: '0' }}>
-        {([['resources', 'State Resources'], ['tools', 'Customer Tools'],
+        {([['overview', '🏠 Overview'], ['resources', 'State Resources'], ['tools', 'Customer Tools'],
         ['installations', 'Installations'], ['revenue', 'Revenue']] as const).map(([t, label]) => (
           <button key={t} onClick={() => setMainTab(t as MainTab)}
             style={{ fontSize: '13px', fontWeight: '500', padding: '10px 18px', background: 'none', border: 'none', borderBottom: `2px solid ${mainTab === t ? '#0d2d5e' : 'transparent'}`, color: mainTab === t ? '#0d2d5e' : '#4a6d8c', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif', marginBottom: '-1px' }}>
@@ -118,6 +132,11 @@ export default function SPDashboardClient({ forms, spRules, states, contacts, fe
           </button>
         ))}
       </div>
+
+      {/* OVERVIEW */}
+      {mainTab === 'overview' && (
+        <SPRegistrationsTable />
+      )}
 
       {/* STATE RESOURCES */}
       {mainTab === 'resources' && (
