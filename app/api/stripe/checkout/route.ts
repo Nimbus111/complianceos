@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     const { data: org } = await supabase
       .from('organizations').select('name, org_type').eq('id', profile.org_id).single()
 
-    const { plan } = await request.json()
+    const { plan, ref_code } = await request.json()
 
     const priceId = plan === 'service_provider'
       ? process.env.STRIPE_SP_PRICE_ID!
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
         email: user.email,
         name: org?.name,
         metadata: {
-        ref_code: body.ref_code || null, org_id: profile.org_id, user_id: user.id }
+        org_id: profile.org_id, user_id: user.id }
       })
       customerId = customer.id
     }
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
       },
       success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.theradiologycoach.com'}/dashboard?subscribed=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.theradiologycoach.com'}/dashboard?cancelled=true`,
-      metadata: { org_id: profile.org_id, user_id: user.id, plan }
+      metadata: { org_id: profile.org_id, user_id: user.id, plan, ref_code: ref_code || null }
     })
 
     return NextResponse.json({ url: session.url })
