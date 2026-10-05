@@ -7,6 +7,7 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data: profile } = await supabase.from('profiles').select('org_id').eq('id', user.id).single()
+  const { data: org } = await supabase.from('organizations').select('referral_code').eq('id', profile?.org_id).single()
 
   const { data: registrations } = await supabase
     .from('sp_state_registrations')
@@ -27,7 +28,7 @@ export async function GET() {
     return { ...reg, renewal_frequency: rules?.renewal_frequency, annual_renewal_date: rules?.annual_renewal_date, reporting: rules?.reporting }
   })
 
-  return NextResponse.json({ registrations: merged, allStateRules: allStateRules || [] })
+  return NextResponse.json({ registrations: merged, allStateRules: allStateRules || [], referralCode: org?.referral_code || '' })
 }
 
 export async function POST(request: Request) {

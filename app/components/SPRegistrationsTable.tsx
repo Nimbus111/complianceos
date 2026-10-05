@@ -13,12 +13,14 @@ export default function SPRegistrationsTable() {
   const [newState, setNewState] = useState('')
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
+  const [referralCode, setReferralCode] = useState('')
 
   const load = async () => {
     const res = await fetch('/api/sp/registrations')
     const data = await res.json()
     setRegistrations(data.registrations || [])
     setAllStateRules(data.allStateRules || [])
+    setReferralCode(data.referralCode || '')
     setLoading(false)
   }
 
@@ -77,9 +79,9 @@ export default function SPRegistrationsTable() {
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
           <code style={{ fontSize: '12px', background: '#fff', border: '1px solid #c2ddf0', borderRadius: '6px', padding: '6px 12px', color: '#0d2d5e' }}>
-            app.theradiologycoach.com/signup?ref=YOUR-LINK
+            app.theradiologycoach.com/signup?ref={referralCode || '...'}
           </code>
-          <button onClick={() => { navigator.clipboard.writeText('https://app.theradiologycoach.com/signup?ref=YOUR-LINK'); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
+          <button onClick={() => { navigator.clipboard.writeText(`https://app.theradiologycoach.com/signup?ref=${referralCode}`); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
             style={{ fontSize: '12px', padding: '6px 14px', background: copied ? '#2d6a4f' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '7px', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif', whiteSpace: 'nowrap' }}>
             {copied ? '✓ Copied' : 'Copy link'}
           </button>
