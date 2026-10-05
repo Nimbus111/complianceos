@@ -298,7 +298,8 @@ export default function HomePage() {
  — all 50 states</span>
           </div>
           <h1 style={{ fontSize: '36px', fontWeight: '500', color: '#0d2d5e', lineHeight: '1.2', marginBottom: '12px', maxWidth: '640px' }}>
-            Your x-ray facility should be inspection-ready every day — not just when you expect an inspector.
+            The compliance system your x-ray facility has been missing...
+
           </h1>
           <p style={{ fontSize: '15px', color: '#4a6d8c', lineHeight: '1.65', maxWidth: '580px', marginBottom: '32px' }}>
             ComplianceOS is the all-in-one compliance management platform for medical facilities that operate x-ray equipment. Every requirement, deadline, document, and program — organized in one place so your facility is always ready, even when you're not in the room.
