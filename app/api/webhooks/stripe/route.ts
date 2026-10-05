@@ -60,6 +60,27 @@ if (upsertError) {
 await admin.from('organizations').update({
   subscription_tier: plan === 'service_provider' ? 'service_provider' : 'professional'
 }).eq('id', orgId)
+// Referral tracking
+        try {
+          const refCode = session.metadata?.ref_code
+          if (refCode) {
+            const { data: referringOrg } = await admin
+              .from('organizations')
+              .select('id')
+              .eq('referral_code', refCode)
+              .single()
+            if (referringOrg) {
+              await admin.from('referrals').insert({
+                referring_org_id: referringOrg.id,
+                referred_org_id: orgId,
+                referral_code: refCode,
+                status: 'active'
+              })
+            }
+          }
+        } catch (refErr: any) {
+          console.error('Referral tracking error (non-fatal):', refErr.message)
+        }
 // HubSpot sync — create contact and deal for new subscriber
         try {
           if (process.env.HUBSPOT_API_KEY) {

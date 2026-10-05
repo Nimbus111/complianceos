@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-export default function SubscribeButton({ plan }: { plan: string }) {
+export default function SubscribeButton({ plan, refCode }: { plan: string; refCode?: string | null }) {
   const [loading, setLoading] = useState(false)
 
   const handleSubscribe = async () => {
@@ -11,7 +11,7 @@ export default function SubscribeButton({ plan }: { plan: string }) {
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan })
+        body: JSON.stringify({ plan, ref_code: refCode || null })
       })
       const data = await res.json()
       if (data.url) window.location.href = data.url

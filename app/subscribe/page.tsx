@@ -2,11 +2,11 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import SubscribeButton from '../components/SubscribeButton'
 
-export default async function SubscribePage() {
+export default async function SubscribePage({ searchParams }: { searchParams: any }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
-
+const refCode = (await searchParams)?.ref || null
   const { data: profile } = await supabase
     .from('profiles').select('org_id').eq('id', user.id).single()
   if (!profile?.org_id) redirect('/onboarding')
@@ -76,7 +76,7 @@ export default async function SubscribePage() {
               ))}
             </div>
 
-            <SubscribeButton plan={plan} />
+            <SubscribeButton plan={plan} refCode={refCode} />
           </div>
 
           <p style={{ fontSize: '12px', color: '#a8a39c', textAlign: 'center', lineHeight: '1.6' }}>
