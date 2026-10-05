@@ -12,6 +12,7 @@ export default function SPRegistrationsTable() {
   const [adding, setAdding] = useState(false)
   const [newState, setNewState] = useState('')
   const [loading, setLoading] = useState(true)
+  const [copied, setCopied] = useState(false)
 
   const load = async () => {
     const res = await fetch('/api/sp/registrations')
@@ -68,6 +69,23 @@ export default function SPRegistrationsTable() {
 
   return (
     <div style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+      {/* Referral Link Card */}
+      <div style={{ background: '#e8f3fb', border: '1px solid #c2ddf0', borderRadius: '10px', padding: '16px 20px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+        <div>
+          <p style={{ fontSize: '13px', fontWeight: '600', color: '#0d2d5e', margin: '0 0 4px' }}>Your referral link</p>
+          <p style={{ fontSize: '12px', color: '#4a6d8c', margin: 0 }}>Share this with clinics — when they subscribe through your link, you earn revenue credit</p>
+        </div>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <code style={{ fontSize: '12px', background: '#fff', border: '1px solid #c2ddf0', borderRadius: '6px', padding: '6px 12px', color: '#0d2d5e' }}>
+            app.theradiologycoach.com/signup?ref=YOUR-LINK
+          </code>
+          <button onClick={() => { navigator.clipboard.writeText('https://app.theradiologycoach.com/signup?ref=YOUR-LINK'); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
+            style={{ fontSize: '12px', padding: '6px 14px', background: copied ? '#2d6a4f' : '#0d2d5e', color: '#fff', border: 'none', borderRadius: '7px', cursor: 'pointer', fontFamily: 'Inter, system-ui, sans-serif', whiteSpace: 'nowrap' }}>
+            {copied ? '✓ Copied' : 'Copy link'}
+          </button>
+        </div>
+      </div>
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <div>
           <p style={{ fontSize: '15px', fontWeight: '500', color: '#0d2d5e', margin: '0 0 2px' }}>My State Registrations</p>
