@@ -18,6 +18,9 @@ export async function GET() {
     .from('sp_state_rules')
     .select('state_name, renewal_frequency, annual_renewal_date, reporting, vendor_registration_required')
     .order('state_name')
+     .not('state_name', 'is', null)
+    .neq('state_name', '')
+    .limit(60)
 
   const merged = (registrations || []).map(reg => {
     const rules = (allStateRules || []).find(r => r.state_name === reg.state_name)
