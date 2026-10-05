@@ -7,6 +7,7 @@ import AdminUserForm from '../components/admin/AdminUserForm'
 import AdminAccessForm from '../components/admin/AdminAccessForm'
 import AdminPartnerForm from '../components/admin/AdminPartnerForm'
 import AdminReferralsTable from '../components/admin/AdminReferralsTable'
+import AdminReferralForm from '../components/admin/AdminReferralForm'
 
 export default async function AdminPage() {
   const supabase = await createClient()
