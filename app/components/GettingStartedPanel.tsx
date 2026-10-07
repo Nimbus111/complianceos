@@ -95,7 +95,11 @@ interface Props {
 
 export default function GettingStartedPanel({ dismissed }: Props) {
   const [expanded, setExpanded] = useState(() => {
-    try { return localStorage.getItem('gs_expanded') !== 'false' } catch { return true }
+    try {
+      const stored = localStorage.getItem('gs_expanded')
+      if (stored === null) return true
+      return stored !== 'false'
+    } catch { return true }
   })
   const [currentStep, setCurrentStep] = useState(() => {
     try { return parseInt(localStorage.getItem('gs_step') || '0') } catch { return 0 }
@@ -129,8 +133,9 @@ export default function GettingStartedPanel({ dismissed }: Props) {
 
   if (!expanded) return (
     <div style={{ position: 'fixed', left: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 50, fontFamily: 'Inter, system-ui, sans-serif' }}>
+      <style>{`@keyframes gs-pulse { 0%,100%{box-shadow:2px 0 8px rgba(0,0,0,.15),0 0 0 0 rgba(26,95,168,.5)} 50%{box-shadow:2px 0 8px rgba(0,0,0,.15),0 0 0 10px rgba(26,95,168,0)} }`}</style>
       <button onClick={toggleExpanded}
-        style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', background: '#0d2d5e', color: '#fff', border: 'none', padding: '16px 10px', cursor: 'pointer', borderRadius: '0 8px 8px 0', fontSize: '12px', fontWeight: '500', fontFamily: 'Inter, system-ui, sans-serif', boxShadow: '2px 0 8px rgba(0,0,0,.15)' }}>
+        style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', background: '#0d2d5e', color: '#fff', border: 'none', padding: '16px 10px', cursor: 'pointer', borderRadius: '0 8px 8px 0', fontSize: '12px', fontWeight: '500', fontFamily: 'Inter, system-ui, sans-serif', boxShadow: '2px 0 8px rgba(0,0,0,.15)', animation: currentStep < 3 ? 'gs-pulse 2s infinite' : 'none' }}>
         🚀 Getting Started · Step {currentStep + 1} of {STEPS.length}
       </button>
     </div>

@@ -5,6 +5,7 @@ import AcknowledgeButton from '../components/AcknowledgeButton'
 import GettingStartedPanel from '../components/GettingStartedPanel'
 import InstallationPacketBanner from '../components/InstallationPacketBanner'
 import DashboardMachineView from '../components/DashboardMachineView'
+import DashboardEmptyPrompts from '../components/DashboardEmptyPrompts'
 import ActivityLog from '../components/ActivityLog'
 import SPDashboardClient from '../components/SPDashboardClient'
 import UpgradeButton from '../components/UpgradeButton'
@@ -265,6 +266,11 @@ const isSP = org?.org_type === 'service_provider'
   ? Math.round((completedNonAdvisory / nonAdvisoryCount) * 100)  
     : 0
   const inspectionReady = taskPct === 100
+  const scoreLevel = taskPct >= 100 ? 5 : taskPct >= 75 ? 4 : taskPct >= 50 ? 3 : taskPct >= 25 ? 2 : 1
+  const levelBorder = scoreLevel === 5 ? '#2d6a4f' : scoreLevel === 4 ? '#c9a227' : scoreLevel === 3 ? '#0057e6' : scoreLevel === 2 ? '#3379eb' : '#c2ddf0'
+  const levelBg = scoreLevel === 5 ? '#edfaf3' : scoreLevel === 4 ? '#fffbf0' : scoreLevel === 3 ? '#eff5fd' : '#e8f3fb'
+  const levelTextColor = scoreLevel === 5 ? '#40916c' : scoreLevel === 4 ? '#8a6f1a' : scoreLevel === 3 ? '#0057e6' : '#1a5fa8'
+  const levelBorderWidth = scoreLevel >= 4 ? '4px' : '3px'
   const earnedBadgeIds = (userBadges || []).map((b: any) => b.badge_id)
 
       const activityMap: Record<string, boolean> = {
@@ -373,9 +379,13 @@ const isSP = org?.org_type === 'service_provider'
           </p>
         </div>
 
-        <div style={{ background: '#fff', border: '1px solid #c2ddf0', borderRadius: '12px', padding: '20px 24px', marginBottom: '28px', display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#e8f3fb', border: `3px solid ${inspectionReady ? '#b8e8cc' : '#c2ddf0'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <span style={{ fontSize: '15px', fontWeight: '500', color: inspectionReady ? '#40916c' : '#1a5fa8' }}>{taskPct}%</span>
+        <style>{`
+            @keyframes ring-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(201,162,39,.4)} 50%{box-shadow:0 0 0 12px rgba(201,162,39,0)} }
+            @keyframes ring-shimmer { 0%,100%{box-shadow:0 0 0 0 rgba(45,106,79,.35)} 50%{box-shadow:0 0 0 14px rgba(45,106,79,0)} }
+          `}</style>
+        <div style={{ background: '#fff', border: '1px solid #c2ddf0', borderRadius: '12px', padding: '20px 24px', marginBottom: '28px', display: 'flex', alignItems: 'center', gap: '24px', animation: scoreLevel === 5 ? 'ring-shimmer 2s infinite' : scoreLevel === 4 ? 'ring-pulse 2s infinite' : 'none' }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: levelBg, border: `${levelBorderWidth} solid ${levelBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: '15px', fontWeight: '500', color: levelTextColor }}>{taskPct}%</span>
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
@@ -391,7 +401,14 @@ const isSP = org?.org_type === 'service_provider'
           </div>
         </div>
 
-        <DashboardMachineView equipment={equipmentList || []} features={features} activityMap={activityMap} machineLimit={org?.machine_limit || 3} />
+        <DashboardEmptyPrompts
+              taskPct={taskPct}
+              equipmentCount={equipmentCount || 0}
+              docCount={docCount || 0}
+              operatorCount={operatorCount || 0}
+              rspCount={rspCount || 0}
+            />
+            <DashboardMachineView equipment={equipmentList || []} features={features} activityMap={activityMap} machineLimit={org?.machine_limit || 3} />
 
         <BadgesSection
               badges={badges || []}
